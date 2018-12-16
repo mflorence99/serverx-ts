@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "chalk": "2",
+    "injection-js": "2",
+    "reflect-metadata": "^0.1.12",
     "rxjs": "6"
   },
   "devDependencies": {
