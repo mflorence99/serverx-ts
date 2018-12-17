@@ -35,9 +35,8 @@ export class Router {
     const params = { };
     const paths = this.split(request.path);
     const route = this.match(paths, request.method, null, this.routes, params);
-    if (route) {
+    if (route) 
       request.params = params;
-    }
     return route;
   }
 
@@ -51,11 +50,11 @@ export class Router {
     let rpaths = [];
     // try to find matching route
     let route = routes.find((route: Route) => {
-      rpaths = this.split(route.path);
-      if (rpaths[0] === '**')
-        return true;
       if (route.methods && !route.methods.includes(method))
         return false;
+      rpaths = this.split(route.path);
+      if (rpaths.length === 0)
+        return true;
       if ((rpaths.length > paths.length)
        || ((route.pathMatch === 'full') && (rpaths.length !== paths.length)))
         return false;
@@ -86,7 +85,7 @@ export class Router {
 
   private split(path: string): string[] {
     // NOTE: trim out any leading or trailing /
-    return path.replace(/^\/|\/$/g, '').split('/');
+    return (path && (path !== '/'))? path.replace(/^\/|\/$/g, '').split('/') : [];
   }
 
 }

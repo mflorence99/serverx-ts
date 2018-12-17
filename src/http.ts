@@ -1,5 +1,3 @@
-import * as http from 'http';
-
 import { Map } from './utils';
 
 
@@ -38,8 +36,10 @@ export interface Request {
  * Response definition
  */
 
-export interface Response extends http.ServerResponse {
-  dummy: any;
+export interface Response {
+  body?: any;
+  headers?: Map<string>;
+  status?: Status;
 }
 
 /**

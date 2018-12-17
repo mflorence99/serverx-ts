@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 import { Request } from './http';
+import { Response } from './http';
 
 /**
  * Handler definition
@@ -8,6 +9,6 @@ import { Request } from './http';
 export abstract class Handler {
 
   /** Handle a request */
-  abstract handle(request$: Observable<Request>): void;
+  abstract handle(request$: Observable<Request>): Observable<Response>;
 
 }

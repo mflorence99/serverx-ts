@@ -2,8 +2,11 @@ import { Handler } from './handler';
 import { Injectable } from 'injection-js';
 import { Observable } from 'rxjs';
 import { Request } from './http';
+import { Response } from './http';
 import { Route } from './router';
 import { Router } from './router';
+
+import { mapTo } from 'rxjs/operators';
 
 @Injectable()
 class Service2 {
@@ -19,47 +22,81 @@ class Service1 {
 @Injectable()
 class Handler1 implements Handler {
   constructor(public service: Service1) { }
-  handle(request$: Observable<Request>): void { }
+  handle(request$: Observable<Request>): Observable<Response> { 
+    return request$.pipe(
+      mapTo({ body: 'Hello, world!' })
+    );
+  }
 }
 
 const routes: Route[] = [
 
   {
-    path: '/foo',
-    services: [Service1, Service2],
+    path: '',
+    data: '/',
+    services: [Service2],
     children: [
 
       {
-        methods: ['GET'],
-        path: '/bar',
-        data: '/foo/bar',
+        path: '/foo',
         children: [
 
           {
-            path: '/this/:id/:user',
-            handler: Handler1,
-            data: '/foo/bar/this/:id/:user'
+            methods: ['GET'],
+            path: '/bar',
+            data: '/foo/bar',
+            children: [
+
+              {
+                path: '/this/:id/:user',
+                services: [Service1],
+                handler: Handler1,
+                data: '/foo/bar/this/:id/:user'
+              },
+
+              {
+                path: '/that/:partner',
+                services: [Service1],
+                handler: Handler1,
+                data: '/foo/bar/that/:partner'
+              },
+
+            ]
           },
 
           {
-            path: '/that/:partner',
-            handler: Handler1,
-            data: '/foo/bar/that/:partner'
+            path: null,
+            methods: ['GET'],
+            children: [
+
+              {
+                path: '/fizz/baz',
+                data: '/foo/fizz/baz'
+              }
+
+            ]
           },
 
+          {
+            path: '/',
+            methods: ['POST'],
+            children: [
+
+              {
+                path: '/fizz/baz/buzz',
+                pathMatch: 'prefix',
+                data: '/foo/fizz/baz/buzz'
+              },
+
+              {
+                path: '/fizz/baz',
+                pathMatch: 'full'
+              },
+
+            ]
+          }
+
         ]
-      },
-
-      {
-        methods: ['GET'],
-        path: '/fizz/baz',
-        data: '/foo/fizz/baz'
-      },
-
-      {
-        methods: ['POST'],
-        path: '/fizz/baz',
-        pathMatch: 'full'
       }
 
     ]
@@ -69,9 +106,9 @@ const routes: Route[] = [
 
 const router = new Router(routes);
 
-test('GET / no match', () => {
+test('GET / matches', () => {
   const request: Request = { method: 'GET', path: '/' };
-  expect(router.route(request)).toBeUndefined();
+  expect(router.route(request).data).toEqual('/');
 });
 
 test('GET /foo/bar matches', () => {
@@ -109,4 +146,9 @@ test('GET /foo/fizz/baz/x matches', () => {
 test('POST /foo/fizz/baz/full no match', () => {
   const request: Request = { method: 'POST', path: '/foo/fizz/baz/full' };
   expect(router.route(request)).toBeUndefined();
+});
+
+test('POST /foo/fizz/baz/buzz matches', () => {
+  const request: Request = { method: 'POST', path: '/foo/fizz/baz/buzz' };
+  expect(router.route(request).data).toEqual('/foo/fizz/baz/buzz');
 });
