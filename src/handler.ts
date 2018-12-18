@@ -1,6 +1,6 @@
+import { Message } from './serverx';
 import { Observable } from 'rxjs';
-import { Request } from './serverx';
-import { Response } from './serverx';
+import { Route } from './router';
 
 /**
  * Handler definition
@@ -8,7 +8,12 @@ import { Response } from './serverx';
 
 export abstract class Handler {
 
-  /** Handle a request */
-  abstract handle(request$: Observable<Request>): Observable<Response>;
+  /** Instantiate a Handler from a Route */
+  static makeInstance<T = Handler>(route: Route): T {
+    return route.handler? route.injector.get(route.handler) : null;
+  }
+
+  /** Handle a message */
+  abstract handle(message$: Observable<Message>): Observable<Message>;
 
 }

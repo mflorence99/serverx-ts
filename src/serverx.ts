@@ -4,8 +4,8 @@ import { Route } from './router';
  * @see https://stackoverflow.com/questions/39392853
  */
 
-export interface Class {
-  new(...args: any[]): any;
+export interface Class<T = any> {
+  new(...args: any[]): T;
 }
 
 /**
@@ -24,6 +24,16 @@ export class Error {
 
 export interface Map<T> {
   [k: string]: T;
+}
+
+/**
+ * Unified message definition
+ */
+
+export interface Message<TRequest = Request,
+                         TResponse = Response> {
+  request: TRequest;
+  response: TResponse;
 }
 
 /**
@@ -48,13 +58,16 @@ export type Method = keyof typeof MethodType;
  * Request definition
  */
 
-export interface Request {
-  body?: any;
-  headers?: Map<string>;
+export interface Request<TBody = any,
+                         THeaders = Map<string>,
+                         TParams = Map<string>,
+                         TQuery = Map<string>> {
+  body?: TBody;
+  headers?: THeaders;
   method: Method;
-  params?: Map<string>;
+  params?: TParams;
   path: string;
-  query?: Map<string>;
+  query?: TQuery;
   route?: Route;
 }
 
@@ -62,9 +75,10 @@ export interface Request {
  * Response definition
  */
 
-export interface Response {
-  body?: any;
-  headers?: Map<string>;
+export interface Response<TBody = any,
+                          THeaders = Map<string>> {
+  body?: TBody;
+  headers?: THeaders;
   status?: Status;
 }
 

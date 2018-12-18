@@ -1,6 +1,8 @@
 import { Class } from './serverx';
+import { Handler } from './handler';
 import { Map } from './serverx';
 import { Method } from './serverx';
+import { Middleware } from './middleware';
 import { ReflectiveInjector } from 'injection-js';
 import { Request } from './serverx';
 
@@ -13,9 +15,10 @@ import 'reflect-metadata';
 export interface Route {
   children?: Route[];
   data?: any;
-  handler?: Class;
+  handler?: Class<Handler>;
   injector?: ReflectiveInjector;
   methods?: Method[];
+  middlewares?: Class<Middleware>[];
   path: string;
   pathMatch?: 'full' | 'prefix';
   services?: Class[];
@@ -62,9 +65,9 @@ export class Router {
     });
     // if we found a match, create an injector
     if (route && !route.injector) {
-      const providers = (route.services || []).slice();
-      if (route.handler)
-        providers.push(route.handler);
+      const providers = (route.services || [])
+        .concat(route.middlewares || [])
+        .concat(route.handler? [route.handler] : []);
       const resolved = ReflectiveInjector.resolve(providers);
       if (parent)
         route.injector = parent.injector.createChildFromResolved(resolved);
