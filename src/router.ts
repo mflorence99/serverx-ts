@@ -1,8 +1,8 @@
-import { Class } from './utils';
-import { Map } from './utils';
-import { Method } from './http';
+import { Class } from './serverx';
+import { Map } from './serverx';
+import { Method } from './serverx';
 import { ReflectiveInjector } from 'injection-js';
-import { Request } from './http';
+import { Request } from './serverx';
 
 import 'reflect-metadata';
 
@@ -52,6 +52,8 @@ export class Router {
     let route = routes.find((route: Route) => {
       if (route.methods && !route.methods.includes(method))
         return false;
+      if (route.path === '**')
+        return true;
       rpaths = this.split(route.path);
       if (rpaths.length === 0)
         return true;

@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import { Request } from './http';
-import { Response } from './http';
+import { Request } from './serverx';
+import { Response } from './serverx';
 
 /**
  * Handler definition

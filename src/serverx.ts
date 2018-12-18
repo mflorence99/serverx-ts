@@ -1,5 +1,28 @@
-import { Map } from './utils';
+/**
+ * @see https://stackoverflow.com/questions/39392853
+ */
 
+export interface Class {
+  new(...args: any[]): any;
+}
+
+/**
+ * Error definition
+ */
+
+export class Error {
+  constructor(public message: string,
+              public status: Status,
+              public data = { }) { }
+}
+
+/**
+ * KV pairs eg: request headers
+ */
+
+export interface Map<T> {
+  [k: string]: T;
+}
 
 /**
  * Method definition

@@ -1,12 +1,16 @@
+import { Error } from './serverx';
 import { Handler } from './handler';
 import { Injectable } from 'injection-js';
 import { Observable } from 'rxjs';
-import { Request } from './http';
-import { Response } from './http';
+import { Request } from './serverx';
+import { Response } from './serverx';
 import { Route } from './router';
 import { Router } from './router';
+import { Status } from './serverx';
 
 import { mapTo } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 @Injectable()
 class Service2 {
@@ -25,6 +29,17 @@ class Handler1 implements Handler {
   handle(request$: Observable<Request>): Observable<Response> { 
     return request$.pipe(
       mapTo({ body: 'Hello, world!' })
+    );
+  }
+}
+
+@Injectable()
+class NotFound implements Handler {
+  handle(request$: Observable<Request>): Observable<Response> {
+    return request$.pipe(
+      switchMap(() =>
+        throwError(new Error('Route not found', Status.NOT_FOUND))
+      )
     );
   }
 }
@@ -61,6 +76,12 @@ const routes: Route[] = [
                 data: '/foo/bar/that/:partner'
               },
 
+              {
+                path: '**',
+                handler: NotFound,
+                data: '/foo/bar/this no match'
+              }
+
             ]
           },
 
@@ -93,6 +114,12 @@ const routes: Route[] = [
                 pathMatch: 'full'
               },
 
+              {
+                path: '**',
+                handler: NotFound,
+                data: '/foo/fizz/baz/full no match'
+              }
+
             ]
           }
 
@@ -111,6 +138,11 @@ test('GET / matches', () => {
   expect(router.route(request).data).toEqual('/');
 });
 
+test('GET /fizz no match', () => {
+  const request: Request = { method: 'GET', path: '/fizz' };
+  expect(router.route(request)).toBeUndefined();
+});
+
 test('GET /foo/bar matches', () => {
   const request: Request = { method: 'GET', path: '/foo/bar' };
   expect(router.route(request).data).toEqual('/foo/bar');
@@ -118,7 +150,10 @@ test('GET /foo/bar matches', () => {
 
 test('GET /foo/bar/this no match', () => {
   const request: Request = { method: 'GET', path: '/foo/bar/this' };
-  expect(router.route(request)).toBeUndefined();
+  const route = router.route(request);
+  expect(route.data).toEqual('/foo/bar/this no match');
+  const handler = route.injector.get(route.handler);
+  expect(handler instanceof NotFound).toBeTruthy();
 });
 
 test('GET /foo/bar/this/10/mark matches', () => {
@@ -145,7 +180,10 @@ test('GET /foo/fizz/baz/x matches', () => {
 
 test('POST /foo/fizz/baz/full no match', () => {
   const request: Request = { method: 'POST', path: '/foo/fizz/baz/full' };
-  expect(router.route(request)).toBeUndefined();
+  const route = router.route(request);
+  expect(route.data).toEqual('/foo/fizz/baz/full no match');
+  const handler = route.injector.get(route.handler);
+  expect(handler instanceof NotFound).toBeTruthy();
 });
 
 test('POST /foo/fizz/baz/buzz matches', () => {
