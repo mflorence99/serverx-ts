@@ -1,3 +1,5 @@
+import { Route } from './router';
+
 /**
  * @see https://stackoverflow.com/questions/39392853
  */
@@ -53,6 +55,7 @@ export interface Request {
   params?: Map<string>;
   path: string;
   query?: Map<string>;
+  route?: Route;
 }
 
 /**

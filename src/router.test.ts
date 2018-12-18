@@ -135,32 +135,31 @@ const router = new Router(routes);
 
 test('GET / matches', () => {
   const request: Request = { method: 'GET', path: '/' };
-  expect(router.route(request).data).toEqual('/');
+  expect(router.route(request).route.data).toEqual('/');
 });
 
 test('GET /fizz no match', () => {
   const request: Request = { method: 'GET', path: '/fizz' };
-  expect(router.route(request)).toBeUndefined();
+  expect(router.route(request).route).toBeUndefined();
 });
 
 test('GET /foo/bar matches', () => {
   const request: Request = { method: 'GET', path: '/foo/bar' };
-  expect(router.route(request).data).toEqual('/foo/bar');
+  expect(router.route(request).route.data).toEqual('/foo/bar');
 });
 
 test('GET /foo/bar/this no match', () => {
   const request: Request = { method: 'GET', path: '/foo/bar/this' };
-  const route = router.route(request);
+  const route = router.route(request).route;
   expect(route.data).toEqual('/foo/bar/this no match');
   const handler = route.injector.get(route.handler);
   expect(handler instanceof NotFound).toBeTruthy();
 });
 
 test('GET /foo/bar/this/10/mark matches', () => {
-  const request: Request = { method: 'GET', path: '/foo/bar/this/10/mark' };
-  const route = router.route(request);
-  expect(route.data).toEqual('/foo/bar/this/:id/:user');
-  const handler = route.injector.get(route.handler);
+  const request = router.route({ method: 'GET', path: '/foo/bar/this/10/mark' });
+  expect(request.route.data).toEqual('/foo/bar/this/:id/:user');
+  const handler = request.route.injector.get(request.route.handler);
   expect(handler instanceof Handler1).toBeTruthy();
   expect(handler.service instanceof Service1).toBeTruthy();
   expect(handler.service.service instanceof Service2).toBeTruthy();
@@ -168,25 +167,24 @@ test('GET /foo/bar/this/10/mark matches', () => {
 });
 
 test('GET /foo/bar/that/10/company matches', () => {
-  const request: Request = { method: 'GET', path: '/foo/bar/that/company' };
-  expect(router.route(request).data).toEqual('/foo/bar/that/:partner');
+  const request = router.route({ method: 'GET', path: '/foo/bar/that/company' });
+  expect(request.route.data).toEqual('/foo/bar/that/:partner');
   expect(request.params).toEqual({ partner: 'company' });
 });
 
 test('GET /foo/fizz/baz/x matches', () => {
   const request: Request = { method: 'GET', path: '/foo/fizz/baz/' };
-  expect(router.route(request).data).toEqual('/foo/fizz/baz');
+  expect(router.route(request).route.data).toEqual('/foo/fizz/baz');
 });
 
 test('POST /foo/fizz/baz/full no match', () => {
-  const request: Request = { method: 'POST', path: '/foo/fizz/baz/full' };
-  const route = router.route(request);
-  expect(route.data).toEqual('/foo/fizz/baz/full no match');
-  const handler = route.injector.get(route.handler);
+  const request = router.route({ method: 'POST', path: '/foo/fizz/baz/full' });
+  expect(request.route.data).toEqual('/foo/fizz/baz/full no match');
+  const handler = request.route.injector.get(request.route.handler);
   expect(handler instanceof NotFound).toBeTruthy();
 });
 
 test('POST /foo/fizz/baz/buzz matches', () => {
   const request: Request = { method: 'POST', path: '/foo/fizz/baz/buzz' };
-  expect(router.route(request).data).toEqual('/foo/fizz/baz/buzz');
+  expect(router.route(request).route.data).toEqual('/foo/fizz/baz/buzz');
 });

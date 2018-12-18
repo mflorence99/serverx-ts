@@ -31,13 +31,11 @@ export class Router {
   constructor(private routes: Route[]) { }
 
   /** Route a request */
-  route(request: Request): Route | undefined {
+  route(request: Request): Request {
     const params = { };
     const paths = this.split(request.path);
     const route = this.match(paths, request.method, null, this.routes, params);
-    if (route) 
-      request.params = params;
-    return route;
+    return route? { ...request, params, route } : request;
   }
 
   // private methods
