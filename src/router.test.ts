@@ -42,7 +42,7 @@ class NotFound implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       switchMap(() =>
-        throwError(new Error('Route not found', Status.NOT_FOUND))
+        throwError(new Error({ body: 'Route not found', status: Status.NOT_FOUND } ))
       )
     );
   }

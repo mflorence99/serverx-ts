@@ -12,10 +12,8 @@ export interface Class<T = any> {
  * Error definition
  */
 
-export class Error {
-  constructor(public message: string,
-              public status: Status,
-              public data = { }) { }
+export class Error<T = Response> {
+  constructor(public error: T) { }
 }
 
 /**
