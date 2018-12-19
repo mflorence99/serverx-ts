@@ -32,7 +32,7 @@ class Handler1 implements Handler {
   constructor(public service: Service1) { }
   handle(message$: Observable<Handler1Msg>): Observable<Handler1Msg> {
     return message$.pipe(
-      mapTo({ request: null, response: {body: 42 } })
+      mapTo({ context: null, request: null, response: { body: 42 } })
     );
   }
 }

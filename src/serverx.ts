@@ -1,4 +1,7 @@
+import { IncomingHttpHeaders } from 'http';
+import { OutgoingHttpHeaders } from 'http';
 import { Route } from './router';
+import { URLSearchParams } from 'url';
 
 /**
  * @see https://stackoverflow.com/questions/39392853
@@ -6,6 +9,14 @@ import { Route } from './router';
 
 export interface Class<T = any> {
   new(...args: any[]): T;
+}
+
+/**
+ * Application context
+ */
+
+export interface Context {
+  routes: Route[];
 }
 
 /**
@@ -30,6 +41,7 @@ export interface Map<T> {
 
 export interface Message<TRequest = Request,
                          TResponse = Response> {
+  context: Context;
   request: TRequest;
   response: TResponse;
 }
@@ -57,9 +69,9 @@ export type Method = keyof typeof MethodType;
  */
 
 export interface Request<TBody = any,
-                         THeaders = Map<string>,
+                         THeaders = IncomingHttpHeaders,
                          TParams = Map<string>,
-                         TQuery = Map<string>> {
+                         TQuery = URLSearchParams> {
   body?: TBody;
   headers?: THeaders;
   method: Method;
@@ -74,7 +86,7 @@ export interface Request<TBody = any,
  */
 
 export interface Response<TBody = any,
-                          THeaders = Map<string>> {
+                          THeaders = OutgoingHttpHeaders> {
   body?: TBody;
   headers?: THeaders;
   status?: Status;

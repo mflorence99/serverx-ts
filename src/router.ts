@@ -1,10 +1,14 @@
 import { Class } from './serverx';
 import { Handler } from './handler';
 import { Map } from './serverx';
+import { Message } from './serverx';
 import { Method } from './serverx';
 import { Middleware } from './middleware';
+import { Observable } from 'rxjs';
 import { ReflectiveInjector } from 'injection-js';
 import { Request } from './serverx';
+
+import { of } from 'rxjs';
 
 import 'reflect-metadata';
 
@@ -19,6 +23,7 @@ export interface Route {
   injector?: ReflectiveInjector;
   methods?: Method[];
   middlewares?: Class<Middleware>[];
+  parent?: Route;
   path: string;
   pathMatch?: 'full' | 'prefix';
   services?: Class[];
@@ -31,7 +36,26 @@ export interface Route {
 export class Router {
 
   /** ctor */
-  constructor(private routes: Route[]) { }
+  constructor(public readonly routes: Route[]) { }
+
+  /** Instantiate the Handler for a Route */
+  makeHandler$(route: Route,
+               message: Message): Observable<Message> {
+    const handler = Handler.makeInstance(route);
+    return handler? handler.handle(of(message)) : of(message);
+  }
+
+  /** Instantiate the Middlewares for a Route */
+  makeMiddlewares$(route: Route,
+                   message: Message): Observable<Message>[] {
+    const middlewares = [];
+    while (route) {
+      middlewares.push(...Middleware.makeInstances(route));
+      route = route.parent;
+    }
+    return (middlewares.length === 0)? [of(message)] :
+      middlewares.map(middleware => middleware.handle(of(message)));
+  }
 
   /** Route a request */
   route(request: Request): Request {
@@ -51,6 +75,7 @@ export class Router {
     let rpaths = [];
     // try to find matching route
     let route = routes.find((route: Route) => {
+      route.parent = parent;
       if (route.methods && !route.methods.includes(method))
         return false;
       if (route.path === '**')
