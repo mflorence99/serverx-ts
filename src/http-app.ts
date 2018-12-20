@@ -5,12 +5,14 @@ import { IncomingMessage } from 'http';
 import { Message } from './serverx';
 import { Method } from './serverx';
 import { OutgoingMessage } from 'http';
+import { Response } from './serverx';
 import { Route } from './router';
 import { Router } from './router';
 import { Status } from './serverx';
 import { Subject } from 'rxjs';
 
 import { catchError } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -83,16 +85,23 @@ export class HttpApp {
               throw new Error({ status: Status.OK });
           }),
           // run any middleware
-          // TODO: not tight yet!
           mergeMap((message: Message) => {
-            return this.router.makeMiddlewares$(message.request.route, message)[0];
+            const middlewares$ = this.router.makeMiddlewares$(message.request.route, message);
+            return combineLatest(middlewares$);
           }),
+          map((messages: Message[]) => messages[messages.length - 1]),
           // run the handler
           mergeMap((message: Message) => {
             return this.router.makeHandler$(message.request.route, message);
           }),
           // turn any error into a response
-          catchError((error: Error) => of({ response: { ...error.error } })),
+          catchError(err => {
+            let response: Response;
+            if (err instanceof Error)
+              response = err.error;
+            else response = { body: err.toString(), status: Status.INTERNAL_SERVER_ERROR };
+            return of({ response });
+          }),
           // readsy to send!
           tap((message: Message) => {
             console.log('FINAL', message);

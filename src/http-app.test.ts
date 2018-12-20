@@ -38,6 +38,7 @@ class Middleware2 implements Middleware {
     return message$.pipe(
       tap(message => {
         console.log('Middleware2', message);
+        message['x']['y'] = 0;
       })
     );
   }

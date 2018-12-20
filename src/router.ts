@@ -38,14 +38,14 @@ export class Router {
   /** ctor */
   constructor(public readonly routes: Route[]) { }
 
-  /** Instantiate the Handler for a Route */
+  /** Instantiate the Handler Observables for a Route */
   makeHandler$(route: Route,
                message: Message): Observable<Message> {
     const handler = Handler.makeInstance(route);
     return handler? handler.handle(of(message)) : of(message);
   }
 
-  /** Instantiate the Middlewares for a Route */
+  /** Instantiate the Middleware Observables for a Route */
   makeMiddlewares$(route: Route,
                    message: Message): Observable<Message>[] {
     const middlewares = [];
