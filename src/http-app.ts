@@ -1,15 +1,14 @@
 import * as url from 'url';
 
-import { Error } from './serverx';
+import { App } from './app';
 import { IncomingMessage } from 'http';
 import { Message } from './serverx';
 import { Method } from './serverx';
 import { OutgoingMessage } from 'http';
-import { Response } from './serverx';
 import { Route } from './router';
-import { Router } from './router';
-import { Status } from './serverx';
 import { Subject } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { URLSearchParams } from 'url';
 
 import { catchError } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
@@ -23,19 +22,19 @@ import { tap } from 'rxjs/operators';
  * Http application
  */
 
-export class HttpApp {
+export class HttpApp extends App {
 
   private message$: Subject<Message>;
-  private router: Router;
+  private subToMessages: Subscription;
 
   /** ctor */
   constructor(routes: Route[]) {
+    super(routes);
     this.message$ = new Subject<Message>(); 
-    this.router = new Router(routes);
   }
 
   /** Create a listener */
-  listener(): (req: IncomingMessage, res: OutgoingMessage) => void {
+  listen(): (req: IncomingMessage, res: OutgoingMessage) => void {
     this.startListening();
     return (req: IncomingMessage, 
             res: OutgoingMessage): void => {
@@ -46,28 +45,35 @@ export class HttpApp {
           routes: this.router.routes,
         },
         request: {
+          // TODO: how to get body?
           body: null,
-          headers: req.headers,
+          headers: req.headers || { },
           method: <Method>req.method,
           params: { },
           path: parsed.pathname,
-          query: parsed.searchParams,
+          query: parsed.searchParams || new URLSearchParams(),
           route: null
         },
         response: {
           body: null,
           headers: { },
-          status: 200
+          statusCode: 200
         }
       };
       this.message$.next(message);
     };
   }
 
+  /** Create a listener */
+  unlisten(): void {
+    if (this.subToMessages)
+      this.subToMessages.unsubscribe();
+  }
+
   // private methods
 
   private startListening(): void {
-    this.message$.pipe(
+    this.subToMessages = this.message$.pipe(
       // switch map so we can keep going on error
       // @see https://iamturns.com/continue-rxjs-streams-when-errors-occur/
       switchMap((message: Message) => {
@@ -77,13 +83,7 @@ export class HttpApp {
             return { ...message, request: this.router.route(message.request) };
           }),
           // let's see if we found a route
-          tap((message: Message) => {
-            if (!message.request.route)
-              throw new Error({ status: Status.NOT_FOUND });
-              // NOTE: route but no handler just sends OK
-            if (!message.request.route.handler)
-              throw new Error({ status: Status.OK });
-          }),
+          tap((message: Message) => this.validateRoute(message)),
           // run any middleware
           mergeMap((message: Message) => {
             const middlewares$ = this.router.makeMiddlewares$(message.request.route, message);
@@ -95,17 +95,8 @@ export class HttpApp {
             return this.router.makeHandler$(message.request.route, message);
           }),
           // turn any error into a response
-          catchError(err => {
-            let response: Response;
-            if (err instanceof Error)
-              response = err.error;
-            else response = { body: err.toString(), status: Status.INTERNAL_SERVER_ERROR };
-            return of({ response });
-          }),
-          // readsy to send!
-          tap((message: Message) => {
-            console.log('FINAL', message);
-          })
+          catchError((error: any) => this.makeMessageFromError(error)),
+          // ready to send!
         );
       })
     ).subscribe();

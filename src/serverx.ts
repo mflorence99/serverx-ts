@@ -41,9 +41,9 @@ export interface Map<T> {
 
 export interface Message<TRequest = Request,
                          TResponse = Response> {
-  context: Context;
-  request: TRequest;
-  response: TResponse;
+  context?: Context;
+  request?: TRequest;
+  response?: TResponse;
 }
 
 /**
@@ -89,14 +89,14 @@ export interface Response<TBody = any,
                           THeaders = OutgoingHttpHeaders> {
   body?: TBody;
   headers?: THeaders;
-  status?: Status;
+  statusCode?: StatusCode;
 }
 
 /**
- * Status definition
+ * Status code definition
  */
 
-export enum Status {
+export enum StatusCode {
   OK = 200,
   CREATED = 201,
   ACCEPTED = 202,

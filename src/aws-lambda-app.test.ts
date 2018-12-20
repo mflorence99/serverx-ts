@@ -1,11 +1,11 @@
+import * as aws from 'aws-lambda';
+
+import { AWSLambdaApp } from './aws-lambda-app';
 import { Handler } from './handler';
-import { HttpApp } from './http-app';
-import { IncomingMessage } from 'http';
 import { Injectable } from 'injection-js';
 import { Message } from './serverx';
 import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
-import { OutgoingMessage } from 'http';
 import { Route } from './router';
 
 import { map } from 'rxjs/operators';
@@ -15,7 +15,7 @@ class Hello implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.body = 'Hello, http!';
+        message.response.body = 'Hello, lambda!';
         return message;
       })
     );
@@ -58,6 +58,30 @@ class Middleware2 implements Middleware {
   }
 }
 
+const event = <aws.APIGatewayProxyEvent>{
+  body: 'x=y',
+  headers: {
+    'this': 'that'
+  },
+  httpMethod: 'GET',
+  isBase64Encoded: false,
+  multiValueHeaders: null,
+  multiValueQueryStringParameters: null,
+  path: '/foo/bar',
+  pathParameters: null,
+  queryStringParameters: {
+    'bizz': 'bazz',
+    'buzz': 'bozz'
+  },
+  requestContext: null,
+  resource: null,
+  stageVariables: null,
+};
+
+const context = <aws.Context>{
+  awsRequestId: '0'
+};
+
 const routes: Route[] = [
 
   {
@@ -73,14 +97,23 @@ const routes: Route[] = [
     handler: Goodbye,
     middlewares: [Middleware1]
   }
-  
+
 ];
 
-const app = new HttpApp(routes);
+const app = new AWSLambdaApp(routes);
 
-test('listener under normal conditions', () => {
-  const listener = app.listen();
-  listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
-  expect(true).toBeTruthy();
-  app.unlisten();
+test('handler under normal conditions', async () => {
+  expect.assertions(9);
+  let response = await app.handle({ ...event, httpMethod: 'GET' }, context);
+  expect(response.body).toEqual('Hello, lambda!');
+  expect(response.headers['X-this']).toEqual('that');
+  expect(response.headers['X-that']).toEqual('this');
+  expect(response.statusCode).toEqual(200);
+  response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
+  expect(response.body).toEqual('Goodbye, lambda!');
+  expect(response.headers['X-this']).toEqual('that');
+  expect(response.headers['X-that']).toBeUndefined();
+  expect(response.statusCode).toEqual(200);
+  response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
+  expect(response.statusCode).toEqual(404);
 });

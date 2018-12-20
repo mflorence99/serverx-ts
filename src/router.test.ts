@@ -8,7 +8,7 @@ import { Request } from './serverx';
 import { Response } from './serverx';
 import { Route } from './router';
 import { Router } from './router';
-import { Status } from './serverx';
+import { StatusCode } from './serverx';
 
 import { mapTo } from 'rxjs/operators';
 import { switchMap } from 'rxjs/operators';
@@ -42,7 +42,7 @@ class NotFound implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       switchMap(() =>
-        throwError(new Error({ body: 'Route not found', status: Status.NOT_FOUND } ))
+        throwError(new Error({ body: 'Route not found', statusCode: StatusCode.NOT_FOUND } ))
       )
     );
   }

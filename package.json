@@ -26,9 +26,11 @@
     "rxjs": "6"
   },
   "devDependencies": {
+    "@types/aws-lambda": "8",
     "@types/jest": "23",
     "@types/node": "10",
     "jest": "23",
+    "lambda-local": "1",
     "make-coverage-badge": "1",
     "markdown-toc": "1",
     "rimraf": "2",
