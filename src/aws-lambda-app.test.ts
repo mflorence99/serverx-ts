@@ -15,7 +15,8 @@ class Hello implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.body = 'Hello, lambda!';
+        const { request, response } = message;
+        response.body = `Hello, ${request.query.get('bizz')}`;
         return message;
       })
     );
@@ -27,7 +28,8 @@ class Goodbye implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.body = 'Goodbye, lambda!';
+        const { request, response } = message;
+        response.body = `Goodbye, ${request.query.get('buzz')}`;
         return message;
       })
     );
@@ -102,15 +104,15 @@ const routes: Route[] = [
 
 const app = new AWSLambdaApp(routes);
 
-test('handler under normal conditions', async () => {
+test('handler smoke test', async () => {
   expect.assertions(9);
   let response = await app.handle({ ...event, httpMethod: 'GET' }, context);
-  expect(response.body).toEqual('Hello, lambda!');
+  expect(response.body).toEqual('Hello, bazz');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toEqual('this');
   expect(response.statusCode).toEqual(200);
   response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
-  expect(response.body).toEqual('Goodbye, lambda!');
+  expect(response.body).toEqual('Goodbye, bozz');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toBeUndefined();
   expect(response.statusCode).toEqual(200);

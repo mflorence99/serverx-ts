@@ -27,7 +27,7 @@ class Goodbye implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.body = 'Goodbye, lambda!';
+        message.response.body = 'Goodbye, http!';
         return message;
       })
     );
@@ -78,9 +78,37 @@ const routes: Route[] = [
 
 const app = new HttpApp(routes);
 
-test('listener under normal conditions', () => {
+// @see https://angularfirebase.com/snippets/testing-rxjs-observables-with-jest/
+
+test('listener smoke test #1', done => {
   const listener = app.listen();
-  listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
-  expect(true).toBeTruthy();
-  app.unlisten();
+  app.response$.subscribe(response => {
+    expect(response.body).toEqual('Hello, http!');
+    expect(response.headers['X-this']).toEqual('that');
+    expect(response.headers['X-that']).toEqual('this');
+    expect(response.statusCode).toEqual(200);
+    done();
+  });
+  listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, {} as OutgoingMessage);
+});
+
+test('listener smoke test #2', done => {
+  const listener = app.listen();
+  app.response$.subscribe(response => {
+    expect(response.body).toEqual('Goodbye, http!');
+    expect(response.headers['X-this']).toEqual('that');
+    expect(response.headers['X-that']).toBeUndefined();
+    expect(response.statusCode).toEqual(200);
+    done();
+  });
+  listener({ method: 'PUT', url: '/foo/bar' } as IncomingMessage, {} as OutgoingMessage);
+});
+
+test('listener smoke test #3', done => {
+  const listener = app.listen();
+  app.response$.subscribe(response => {
+    expect(response.statusCode).toEqual(404);
+    done();
+  });
+  listener({ method: 'PUT', url: '/xxx' } as IncomingMessage, {} as OutgoingMessage);
 });

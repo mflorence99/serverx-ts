@@ -5,6 +5,7 @@ import { IncomingMessage } from 'http';
 import { Message } from './serverx';
 import { Method } from './serverx';
 import { OutgoingMessage } from 'http';
+import { Response } from './serverx';
 import { Route } from './router';
 import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
@@ -24,13 +25,14 @@ import { tap } from 'rxjs/operators';
 
 export class HttpApp extends App {
 
-  private message$: Subject<Message>;
+  response$ = new Subject<Response>();
+
+  private message$ = new Subject<Message>(); 
   private subToMessages: Subscription;
 
   /** ctor */
   constructor(routes: Route[]) {
     super(routes);
-    this.message$ = new Subject<Message>(); 
   }
 
   /** Create a listener */
@@ -97,6 +99,7 @@ export class HttpApp extends App {
           // turn any error into a response
           catchError((error: any) => this.makeMessageFromError(error)),
           // ready to send!
+          tap((message: Message) => this.response$.next(message.response))
         );
       })
     ).subscribe();
