@@ -89,14 +89,14 @@ export class HttpApp extends App {
             return { ...message, request: this.router.route(request) };
           }),
           // let's see if we found a route
-          tap((message: Message) => this.validateRoute(message)),
+          tap((message: Message) => this.validateMessage(message)),
           // run any middleware
           mergeMap((message: Message) => {
             const { request } = message;
             const middlewares$ = this.router.makeMiddlewares$(request.route, message);
             return combineLatest(middlewares$);
           }),
-          map((messages: Message[]) => messages[messages.length - 1]),
+          map((messages: Message[]) => this.mergeMessages(messages)),
           // run the handler
           mergeMap((message: Message) => {
             const { request } = message;

@@ -24,8 +24,8 @@ class Hello implements Handler {
     return message$.pipe(
       map(message => {
         const { response } = message;
-        response.body = 'Hello, http!';
-        return message;
+        const body = 'Hello, http!';
+        return { ...message, response: { ...response, body } };
       })
     );
   }
@@ -37,8 +37,8 @@ class Goodbye implements Handler {
     return message$.pipe(
       map(message => {
         const { response } = message;
-        response.body = 'Goodbye, http!';
-        return message;
+        const body = 'Goodbye, http!';
+        return { ...message, response: { ...response, body } };
       })
     );
   }

@@ -16,7 +16,7 @@ export interface Class<T = any> {
  */
 
 export interface Context {
-  routes: Route[];
+  readonly routes: Route[];
 }
 
 /**
@@ -41,9 +41,9 @@ export interface Map<T> {
 
 export interface Message<TRequest = Request,
                          TResponse = Response> {
-  context?: Context;
-  request?: TRequest;
-  response?: TResponse;
+  readonly context?: Context;
+  readonly request?: TRequest;
+  readonly response?: TResponse;
 }
 
 /**
@@ -72,13 +72,13 @@ export interface Request<TBody = any,
                          THeaders = IncomingHttpHeaders,
                          TParams = Map<string>,
                          TQuery = URLSearchParams> {
-  body?: TBody;
-  headers?: THeaders;
-  method: Method;
-  params?: TParams;
-  path: string;
-  query?: TQuery;
-  route?: Route;
+  readonly body?: TBody;
+  readonly headers?: THeaders;
+  readonly method: Method;
+  readonly params?: TParams;
+  readonly path: string;
+  readonly query?: TQuery;
+  readonly route?: Route;
 }
 
 /**
@@ -87,9 +87,9 @@ export interface Request<TBody = any,
 
 export interface Response<TBody = any,
                           THeaders = OutgoingHttpHeaders> {
-  body?: TBody;
-  headers?: THeaders;
-  statusCode?: StatusCode;
+  readonly body?: TBody;
+  readonly headers?: THeaders;
+  readonly statusCode?: StatusCode;
 }
 
 /**

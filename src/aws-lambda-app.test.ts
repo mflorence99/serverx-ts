@@ -20,8 +20,8 @@ class Hello implements Handler {
     return message$.pipe(
       map(message => {
         const { request, response } = message;
-        response.body = `Hello, ${request.query.get('bizz')}`;
-        return message;
+        const body = `Hello, ${request.query.get('bizz')}`;
+        return { ...message, response: { ...response, body } };
       })
     );
   }
@@ -33,8 +33,8 @@ class Goodbye implements Handler {
     return message$.pipe(
       map(message => {
         const { request, response } = message;
-        response.body = `Goodbye, ${request.query.get('buzz')}`;
-        return message;
+        const body = `Goodbye, ${request.query.get('buzz')}`;
+        return { ...message, response: { ...response, body } };
       })
     );
   }

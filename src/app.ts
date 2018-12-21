@@ -35,13 +35,39 @@ export abstract class App {
     return of({ response });
   }
 
-  protected validateRoute(message: Message): void {
+  // NOTE: messages are processed serially by middlewares via combineLatest
+  // however that doesn't make the message output by one the input of the next
+  // as each receive the original -- so we merge them together here 
+
+  protected mergeMessages(messages: Message[]): Message {
+    return messages.reduce((acc, message) => {
+      const { context } = acc;
+      let { request, response } = acc;
+      if (message.request.body)
+        request = { ...request, body: message.request.body };
+      this.mergeHeaders(request, message.request);
+      if (message.response.body)
+        response = { ...response, body: message.response.body };
+      this.mergeHeaders(response, message.response);
+      if (message.response.statusCode)
+        response = { ...response, statusCode: message.response.statusCode };
+      return { context, request, response };
+    });
+  }
+
+  protected validateMessage(message: Message): void {
     const { request } = message;
     if (!request.route)
       throw new Error({ statusCode: StatusCode.NOT_FOUND });
     // NOTE: route but no handler just sends OK
     if (!request.route.handler)
       throw new Error({ statusCode: StatusCode.OK });
+  }
+
+  // private methods
+
+  private mergeHeaders(to, from): void {
+    Object.keys(from).forEach(k => to[k] = from[k]);
   }
 
 }
