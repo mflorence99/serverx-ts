@@ -108,32 +108,31 @@ const routes: Route[] = [
 
 const app = new AWSLambdaApp(routes);
 
-test('AWSLambdaApp smoke test #1', async () => {
-  expect.assertions(4);
+test('AWSLambdaApp smoke test #1', async done => {
   const response = await app.handle({ ...event, httpMethod: 'GET' }, context);
   expect(response.body).toEqual('Hello, bazz');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toEqual('this');
   expect(response.statusCode).toEqual(200);
+  done();
 });
 
-test('AWSLambdaApp smoke test #2', async () => {
-  expect.assertions(4);
+test('AWSLambdaApp smoke test #2', async done => {
   const response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
   expect(response.body).toEqual('Goodbye, bozz');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toBeUndefined();
   expect(response.statusCode).toEqual(200);
+  done();
 });
 
-test('AWSLambdaApp smoke test #3', async () => {
-  expect.assertions(1);
+test('AWSLambdaApp smoke test #3', async done => {
   const response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
   expect(response.statusCode).toEqual(404);
+  done();
 });
 
-test('AWSLambdaApp lambda local 200', async () => {
-  expect.assertions(2);
+test('AWSLambdaApp lambda local 200', async done => {
   const response = await lambdaLocal.execute({
     event: { ...apiGatewayEvent, path: '/foo/bar' },
     lambdaFunc: { handler: (event, context) => app.handle(event, context) },
@@ -144,10 +143,10 @@ test('AWSLambdaApp lambda local 200', async () => {
   });
   expect(response.body).toEqual('Hello, null');
   expect(response.statusCode).toEqual(200);
+  done();
 });
 
-test('AWSLambdaApp lambda local 404', async () => {
-  expect.assertions(1);
+test('AWSLambdaApp lambda local 404', async done => {
   const response = await lambdaLocal.execute({
     event: { ...apiGatewayEvent, path: '/xxx' },
     lambdaFunc: { handler: (event, context) => app.handle(event, context) },
@@ -157,4 +156,5 @@ test('AWSLambdaApp lambda local 404', async () => {
     verboseLevel: 0
   });
   expect(response.statusCode).toEqual(404);
+  done();
 });
