@@ -104,6 +104,12 @@ const routes: Route[] = [
     path: '/foo/bar',
     handler: Goodbye,
     middlewares: [Middleware1]
+  },
+
+  {
+    methods: ['GET'],
+    path: '/not-here',
+    redirectTo: 'http://over-there.com'
   }
 
 ];
@@ -131,6 +137,13 @@ test('AWSLambdaApp smoke test #2', async done => {
 test('AWSLambdaApp smoke test #3', async done => {
   const response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
   expect(response.statusCode).toEqual(404);
+  done();
+});
+
+test('AWSLambdaApp smoke test #4', async done => {
+  const response = await app.handle({ ...event, httpMethod: 'GET', path: '/not-here' }, context);
+  expect(response.headers['Location']).toEqual('http://over-there.com');
+  expect(response.statusCode).toEqual(301);
   done();
 });
 

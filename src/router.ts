@@ -17,16 +17,19 @@ import 'reflect-metadata';
  */
 
 export interface Route {
-  children?: Route[];
-  data?: any;
-  handler?: Class<Handler>;
+  readonly children?: Route[];
+  readonly data?: any;
+  readonly handler?: Class<Handler>;
+  readonly methods?: Method[];
+  readonly middlewares?: Class<Middleware>[];
+  readonly path: string;
+  readonly pathMatch?: 'full' | 'prefix';
+  readonly redirectAs?: number;
+  readonly redirectTo?: string;
+  readonly services?: Class[];
+  // NOTE: mutated by router
   injector?: ReflectiveInjector;
-  methods?: Method[];
-  middlewares?: Class<Middleware>[];
   parent?: Route;
-  path: string;
-  pathMatch?: 'full' | 'prefix';
-  services?: Class[];
 }
 
 /**

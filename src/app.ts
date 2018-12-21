@@ -14,7 +14,7 @@ import { of } from 'rxjs';
 
 export abstract class App {
 
-  protected router: Router;
+  protected readonly router: Router;
 
   /** ctor */
   constructor(routes: Route[]) {
@@ -59,6 +59,10 @@ export abstract class App {
     const { request } = message;
     if (!request.route)
       throw new Error({ statusCode: StatusCode.NOT_FOUND });
+    if (request.route.redirectTo) {
+      const headers = { Location: request.route.redirectTo };
+      throw new Error({ headers, statusCode: request.route.redirectAs || 301 });
+    }
     // NOTE: route but no handler just sends OK
     if (!request.route.handler)
       throw new Error({ statusCode: StatusCode.OK });
