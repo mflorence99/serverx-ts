@@ -85,30 +85,34 @@ export class HttpApp extends App {
         return of(message).pipe(
           // route the request
           map((message: Message) => {
-            return { ...message, request: this.router.route(message.request) };
+            const { request } = message;
+            return { ...message, request: this.router.route(request) };
           }),
           // let's see if we found a route
           tap((message: Message) => this.validateRoute(message)),
           // run any middleware
           mergeMap((message: Message) => {
-            const middlewares$ = this.router.makeMiddlewares$(message.request.route, message);
+            const { request } = message;
+            const middlewares$ = this.router.makeMiddlewares$(request.route, message);
             return combineLatest(middlewares$);
           }),
           map((messages: Message[]) => messages[messages.length - 1]),
           // run the handler
           mergeMap((message: Message) => {
-            return this.router.makeHandler$(message.request.route, message);
+            const { request } = message;
+            return this.router.makeHandler$(request.route, message);
           }),
           // turn any error into a response
           catchError((error: any) => this.makeMessageFromError(error)),
           // ready to send!
           tap((message: Message) => {
+            const { response } = message;
             // NOTE: plumbing for tests
             if (this.res.end) {
-              this.res.writeHead(message.response.statusCode, message.response.headers);
-              this.res.end(message.response.body);
+              this.res.writeHead(response.statusCode, response.headers);
+              this.res.end(response.body);
             }
-            else this.response$.next(message.response);
+            else this.response$.next(response);
           })
         );
       })

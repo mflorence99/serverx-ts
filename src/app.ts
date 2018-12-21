@@ -36,10 +36,11 @@ export abstract class App {
   }
 
   protected validateRoute(message: Message): void {
-    if (!message.request.route)
+    const { request } = message;
+    if (!request.route)
       throw new Error({ statusCode: StatusCode.NOT_FOUND });
     // NOTE: route but no handler just sends OK
-    if (!message.request.route.handler)
+    if (!request.route.handler)
       throw new Error({ statusCode: StatusCode.OK });
   }
 

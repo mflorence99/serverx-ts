@@ -23,7 +23,8 @@ class Hello implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.body = 'Hello, http!';
+        const { response } = message;
+        response.body = 'Hello, http!';
         return message;
       })
     );
@@ -35,7 +36,8 @@ class Goodbye implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.body = 'Goodbye, http!';
+        const { response } = message;
+        response.body = 'Goodbye, http!';
         return message;
       })
     );
@@ -47,8 +49,9 @@ class CORS implements Middleware {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.headers['Access-Control-Allow-Origin'] = '*';
-        message.response.headers['Access-Control-Allow-Methods'] = 'GET,PUT';
+        const { response } = message;
+        response.headers['Access-Control-Allow-Origin'] = '*';
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT';
         return message;
       })
     );
@@ -60,7 +63,8 @@ class Middleware1 implements Middleware {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.headers['X-this'] = 'that';
+        const { response } = message;
+        response.headers['X-this'] = 'that';
         return message;
       })
     );
@@ -72,7 +76,8 @@ class Middleware2 implements Middleware {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.headers['X-that'] = 'this';
+        const { response } = message;
+        response.headers['X-that'] = 'this';
         return message;
       })
     );
@@ -83,9 +88,10 @@ class Middleware2 implements Middleware {
 class NotFound implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap(message =>
-        throwError(new Error({ headers: message.response.headers, statusCode: StatusCode.NOT_FOUND }))
-      )
+      switchMap(message => {
+        const { response } = message;
+        return throwError(new Error({ headers: response.headers, statusCode: StatusCode.NOT_FOUND }));
+      })
     );
   }
 }

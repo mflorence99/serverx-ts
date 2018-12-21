@@ -45,7 +45,8 @@ class Middleware1 implements Middleware {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.headers['X-this'] = 'that';
+        const { response } = message;
+        response.headers['X-this'] = 'that';
         return message;
       })
     );
@@ -57,7 +58,8 @@ class Middleware2 implements Middleware {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
-        message.response.headers['X-that'] = 'this';
+        const { response } = message;
+        response.headers['X-that'] = 'this';
         return message;
       })
     );
