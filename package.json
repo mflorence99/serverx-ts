@@ -29,6 +29,7 @@
     "@types/aws-lambda": "8",
     "@types/jest": "23",
     "@types/node": "10",
+    "axios": "^0.18.0",
     "jest": "23",
     "lambda-local": "1",
     "make-coverage-badge": "1",

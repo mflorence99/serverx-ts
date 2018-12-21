@@ -7,6 +7,7 @@ import { Method } from './serverx';
 import { OutgoingMessage } from 'http';
 import { Response } from './serverx';
 import { Route } from './router';
+import { ServerResponse } from 'http';
 import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { URLSearchParams } from 'url';
@@ -25,10 +26,11 @@ import { tap } from 'rxjs/operators';
 
 export class HttpApp extends App {
 
-  response$ = new Subject<Response>();
-
   private message$ = new Subject<Message>(); 
+  private response$ = new Subject<Response>();
   private subToMessages: Subscription;
+
+  private res: ServerResponse;
 
   /** ctor */
   constructor(routes: Route[]) {
@@ -40,8 +42,9 @@ export class HttpApp extends App {
     this.startListening();
     return (req: IncomingMessage, 
             res: OutgoingMessage): void => {
-      const parsed = <any>url.parse(req.url, true); 
+      this.res = res as ServerResponse;
       // synthesize Message from Http req/res
+      const parsed = <any>url.parse(req.url, true); 
       const message: Message = {
         context: {
           routes: this.router.routes,
@@ -99,7 +102,14 @@ export class HttpApp extends App {
           // turn any error into a response
           catchError((error: any) => this.makeMessageFromError(error)),
           // ready to send!
-          tap((message: Message) => this.response$.next(message.response))
+          tap((message: Message) => {
+            // NOTE: plumbing for tests
+            if (this.res.end) {
+              this.res.writeHead(message.response.statusCode, message.response.headers);
+              this.res.end(message.response.body);
+            }
+            else this.response$.next(message.response);
+          })
         );
       })
     ).subscribe();
