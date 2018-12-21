@@ -80,7 +80,7 @@ const app = new HttpApp(routes);
 
 // @see https://angularfirebase.com/snippets/testing-rxjs-observables-with-jest/
 
-test('listener smoke test #1', done => {
+test('HttpApp smoke test #1', done => {
   const listener = app.listen();
   app.response$.subscribe(response => {
     expect(response.body).toEqual('Hello, http!');
@@ -92,7 +92,7 @@ test('listener smoke test #1', done => {
   listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, {} as OutgoingMessage);
 });
 
-test('listener smoke test #2', done => {
+test('HttpApp smoke test #2', done => {
   const listener = app.listen();
   app.response$.subscribe(response => {
     expect(response.body).toEqual('Goodbye, http!');
@@ -104,7 +104,7 @@ test('listener smoke test #2', done => {
   listener({ method: 'PUT', url: '/foo/bar' } as IncomingMessage, {} as OutgoingMessage);
 });
 
-test('listener smoke test #3', done => {
+test('HttpApp smoke test #3', done => {
   const listener = app.listen();
   app.response$.subscribe(response => {
     expect(response.statusCode).toEqual(404);

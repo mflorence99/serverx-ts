@@ -1,4 +1,5 @@
 import * as aws from 'aws-lambda';
+import * as path from 'path';
 
 import { AWSLambdaApp } from './aws-lambda-app';
 import { Handler } from './handler';
@@ -9,6 +10,9 @@ import { Observable } from 'rxjs';
 import { Route } from './router';
 
 import { map } from 'rxjs/operators';
+
+const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
+const lambdaLocal = require('lambda-local');
 
 @Injectable()
 class Hello implements Handler {
@@ -104,18 +108,53 @@ const routes: Route[] = [
 
 const app = new AWSLambdaApp(routes);
 
-test('handler smoke test', async () => {
-  expect.assertions(9);
-  let response = await app.handle({ ...event, httpMethod: 'GET' }, context);
+test('AWSLambdaApp smoke test #1', async () => {
+  expect.assertions(4);
+  const response = await app.handle({ ...event, httpMethod: 'GET' }, context);
   expect(response.body).toEqual('Hello, bazz');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toEqual('this');
   expect(response.statusCode).toEqual(200);
-  response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
+});
+
+test('AWSLambdaApp smoke test #2', async () => {
+  expect.assertions(4);
+  const response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
   expect(response.body).toEqual('Goodbye, bozz');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toBeUndefined();
   expect(response.statusCode).toEqual(200);
-  response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
+});
+
+test('AWSLambdaApp smoke test #3', async () => {
+  expect.assertions(1);
+  const response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
+  expect(response.statusCode).toEqual(404);
+});
+
+test('AWSLambdaApp lambda local 200', async () => {
+  expect.assertions(2);
+  const response = await lambdaLocal.execute({
+    event: { ...apiGatewayEvent, path: '/foo/bar' },
+    lambdaFunc: { handler: (event, context) => app.handle(event, context) },
+    lambdaHandler: 'handler',
+    profilePath: path.join(__dirname, '..', 'credentials'),
+    profileName: 'default',
+    verboseLevel: 0
+  });
+  expect(response.body).toEqual('Hello, null');
+  expect(response.statusCode).toEqual(200);
+});
+
+test('AWSLambdaApp lambda local 404', async () => {
+  expect.assertions(1);
+  const response = await lambdaLocal.execute({
+    event: { ...apiGatewayEvent, path: '/xxx' },
+    lambdaFunc: { handler: (event, context) => app.handle(event, context) },
+    lambdaHandler: 'handler',
+    profilePath: path.join(__dirname, '..', 'credentials'),
+    profileName: 'default',
+    verboseLevel: 0
+  });
   expect(response.statusCode).toEqual(404);
 });
