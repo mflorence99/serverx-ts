@@ -12,6 +12,30 @@ export interface Class<T = any> {
 }
 
 /**
+ * MIME type
+ */
+
+export enum ContentType {
+  APPLICATION = 'application/*',
+  APPLICATION_JSON = 'application/json',
+  APPLICATION_JAVASCRIPT = 'application/javascript',
+  APPLICATION_ECMASCRIPT = 'application/ecmascript',
+  APPLICATION_OCTET_STREAM = 'application/octet-stream',
+  APPLICATION_X_WWW_FORM_URLENCODED = 'x-www-form-urlencoded',
+  TEXT_PLAIN = 'text/plain',
+  TEXT_HTML = 'text/html',
+  TEXT_CSS = 'text/css',
+  IMAGE_JPEG = 'image/jpeg',
+  IMAGE_PNG = 'image/png',
+  IMAGE_GIF = 'image/gif',
+  IMAGE_SVG_XML = 'image/svg+xml',
+  AUDIO_MPEG = 'audio/mpeg',
+  AUDIO_OGG = 'audio/ogg',
+  AUDIO = 'audio/*',
+  VIDEO_MP4 = 'video/mp4',
+}
+
+/**
  * Application context
  */
 

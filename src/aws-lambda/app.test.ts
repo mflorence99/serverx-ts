@@ -117,7 +117,7 @@ const app = new AWSLambdaApp(routes);
 
 test('AWSLambdaApp smoke test #1', async done => {
   const response = await app.handle({ ...event, httpMethod: 'GET' }, context);
-  expect(response.body).toEqual('Hello, bazz');
+  expect(response.body).toEqual('"Hello, bazz"');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toEqual('this');
   expect(response.statusCode).toEqual(200);
@@ -126,7 +126,7 @@ test('AWSLambdaApp smoke test #1', async done => {
 
 test('AWSLambdaApp smoke test #2', async done => {
   const response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
-  expect(response.body).toEqual('Goodbye, bozz');
+  expect(response.body).toEqual('"Goodbye, bozz"');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toBeUndefined();
   expect(response.statusCode).toEqual(200);
@@ -156,7 +156,7 @@ test('AWSLambdaApp lambda local 200', async done => {
     profileName: 'default',
     verboseLevel: 0
   });
-  expect(response.body).toEqual('Hello, null');
+  expect(response.body).toEqual('"Hello, null"');
   expect(response.statusCode).toEqual(200);
   done();
 });

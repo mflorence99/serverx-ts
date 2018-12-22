@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "chalk": "2",
+    "file-type": "10",
     "injection-js": "2",
+    "mime": "2",
     "reflect-metadata": "^0.1.12",
     "rxjs": "6"
   },

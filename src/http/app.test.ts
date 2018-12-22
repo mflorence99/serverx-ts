@@ -112,7 +112,7 @@ test('HttpApp smoke test #1', done => {
   const app = new HttpApp(routes);
   const listener = app.listen();
   app['response$'].subscribe(response => {
-    expect(response.body).toEqual('Hello, http!');
+    expect(response.body).toEqual('"Hello, http!"');
     expect(response.headers['X-this']).toEqual('that');
     expect(response.headers['X-that']).toEqual('this');
     expect(response.statusCode).toEqual(200);
@@ -125,7 +125,7 @@ test('HttpApp smoke test #2', done => {
   const app = new HttpApp(routes);
   const listener = app.listen();
   app['response$'].subscribe(response => {
-    expect(response.body).toEqual('Goodbye, http!');
+    expect(response.body).toEqual('"Goodbye, http!"');
     expect(response.headers['X-this']).toEqual('that');
     expect(response.headers['X-that']).toBeUndefined();
     expect(response.statusCode).toEqual(200);
