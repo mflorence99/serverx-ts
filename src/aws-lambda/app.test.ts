@@ -1,3 +1,4 @@
+import * as lambdaLocal from 'lambda-local';
 import * as path from 'path';
 
 import { APIGatewayProxyEvent } from 'aws-lambda';
@@ -11,9 +12,6 @@ import { Observable } from 'rxjs';
 import { Route } from '../router';
 
 import { map } from 'rxjs/operators';
-
-const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
-const lambdaLocal = require('lambda-local');
 
 @Injectable()
 class Hello implements Handler {
@@ -149,6 +147,7 @@ test('AWSLambdaApp smoke test #4', async done => {
 });
 
 test('AWSLambdaApp lambda local 200', async done => {
+  const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
   const response = await lambdaLocal.execute({
     event: { ...apiGatewayEvent, path: '/foo/bar' },
     lambdaFunc: { handler: (event, context) => app.handle(event, context) },
@@ -163,6 +162,7 @@ test('AWSLambdaApp lambda local 200', async done => {
 });
 
 test('AWSLambdaApp lambda local 404', async done => {
+  const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
   const response = await lambdaLocal.execute({
     event: { ...apiGatewayEvent, path: '/xxx' },
     lambdaFunc: { handler: (event, context) => app.handle(event, context) },

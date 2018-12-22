@@ -11,7 +11,7 @@ import { Route } from '../router';
 import { createServer } from 'http';
 import { map } from 'rxjs/operators';
 
-const axios = require('axios');
+import axios from 'axios';
 
 @Injectable()
 class Hello implements Handler {
