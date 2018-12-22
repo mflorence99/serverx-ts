@@ -174,7 +174,7 @@ test('GET / matches', () => {
 
 test('GET /fizz no match', () => {
   const request: Request = { method: 'GET', path: '/fizz' };
-  expect(router.route(request).route).toBeUndefined();
+  expect(router.route(request).route.phantom).toBeTruthy();
 });
 
 test('GET /foo/bar matches', () => {

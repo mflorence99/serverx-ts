@@ -1,13 +1,14 @@
 import * as url from 'url';
 
-import { App } from './app';
+import { App } from '../app';
 import { IncomingMessage } from 'http';
-import { Message } from './serverx';
-import { Method } from './serverx';
+import { Message } from '../serverx';
+import { Method } from '../serverx';
 import { OutgoingMessage } from 'http';
-import { Response } from './serverx';
-import { Route } from './router';
+import { Response } from '../serverx';
+import { Route } from '../router';
 import { ServerResponse } from 'http';
+import { StatusCode } from '../serverx';
 import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { URLSearchParams } from 'url';
@@ -62,7 +63,7 @@ export class HttpApp extends App {
         response: {
           body: null,
           headers: { },
-          statusCode: 200
+          statusCode: null
         }
       };
       this.message$.next(message);
@@ -106,7 +107,9 @@ export class HttpApp extends App {
           catchError((error: any) => this.makeMessageFromError(error)),
           // ready to send!
           tap((message: Message) => {
-            const { response } = message;
+            // TODO: proper response mapping
+            let { response } = message;
+            response = { ...response, statusCode: response.statusCode || StatusCode.OK };
             // NOTE: plumbing for tests
             if (this.res.end) {
               this.res.writeHead(response.statusCode, response.headers);

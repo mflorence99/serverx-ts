@@ -1,13 +1,14 @@
-import * as aws from 'aws-lambda';
 import * as path from 'path';
 
-import { AWSLambdaApp } from './aws-lambda-app';
-import { Handler } from './handler';
+import { APIGatewayProxyEvent } from 'aws-lambda';
+import { AWSLambdaApp } from './app';
+import { Context } from 'aws-lambda';
+import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
-import { Message } from './serverx';
-import { Middleware } from './middleware';
+import { Message } from '../serverx';
+import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
-import { Route } from './router';
+import { Route } from '../router';
 
 import { map } from 'rxjs/operators';
 
@@ -66,7 +67,7 @@ class Middleware2 implements Middleware {
   }
 }
 
-const event = <aws.APIGatewayProxyEvent>{
+const event = <APIGatewayProxyEvent>{
   body: 'x=y',
   headers: {
     'this': 'that'
@@ -86,7 +87,7 @@ const event = <aws.APIGatewayProxyEvent>{
   stageVariables: null,
 };
 
-const context = <aws.Context>{
+const context = <Context>{
   awsRequestId: '0'
 };
 
@@ -152,7 +153,7 @@ test('AWSLambdaApp lambda local 200', async done => {
     event: { ...apiGatewayEvent, path: '/foo/bar' },
     lambdaFunc: { handler: (event, context) => app.handle(event, context) },
     lambdaHandler: 'handler',
-    profilePath: path.join(__dirname, '..', 'credentials'),
+    profilePath: path.join(__dirname, 'credentials'),
     profileName: 'default',
     verboseLevel: 0
   });
@@ -166,7 +167,7 @@ test('AWSLambdaApp lambda local 404', async done => {
     event: { ...apiGatewayEvent, path: '/xxx' },
     lambdaFunc: { handler: (event, context) => app.handle(event, context) },
     lambdaHandler: 'handler',
-    profilePath: path.join(__dirname, '..', 'credentials'),
+    profilePath: path.join(__dirname, 'credentials'),
     profileName: 'default',
     verboseLevel: 0
   });

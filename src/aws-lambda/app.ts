@@ -1,10 +1,11 @@
-import * as aws from 'aws-lambda';
-
-import { App } from './app';
-import { Message } from './serverx';
-import { Method } from './serverx';
-import { Response } from './serverx';
-import { Route } from './router';
+import { APIGatewayProxyEvent } from 'aws-lambda';
+import { App } from '../app';
+import { Context } from 'aws-lambda';
+import { Message } from '../serverx';
+import { Method } from '../serverx';
+import { Response } from '../serverx';
+import { Route } from '../router';
+import { StatusCode } from '../serverx';
 import { URLSearchParams } from 'url';
 
 import { catchError } from 'rxjs/operators';
@@ -26,8 +27,8 @@ export class AWSLambdaApp extends App {
   }
 
   /** AWS Lambda handler method */
-  handle(event: aws.APIGatewayProxyEvent,
-         context: aws.Context): Promise<Response> {
+  handle(event: APIGatewayProxyEvent,
+         context: Context): Promise<Response> {
     // synthesize Message from Lambda event and context
     const message: Message = {
       context: {
@@ -46,7 +47,7 @@ export class AWSLambdaApp extends App {
       response: {
         body: null,
         headers: { },
-        statusCode: 200
+        statusCode: null
       }
     };
     return of(message).pipe(
@@ -72,13 +73,17 @@ export class AWSLambdaApp extends App {
       // turn any error into a response
       catchError((error: any) => this.makeMessageFromError(error)),
       // ready to send!
-      map((message: Message) => message.response)
+      map((message: Message) => {
+        // TODO: proper response mapping
+        const { response } = message;
+        return { ...response, statusCode: response.statusCode || StatusCode.OK};
+      })
     ).toPromise();
   }
 
   // private methods
 
-  private makeSearchParamsFromEvent(event: aws.APIGatewayProxyEvent): URLSearchParams {
+  private makeSearchParamsFromEvent(event: APIGatewayProxyEvent): URLSearchParams {
     const params = new URLSearchParams();
     if (event.queryStringParameters) {
       Object.keys(event.queryStringParameters).forEach(k => {

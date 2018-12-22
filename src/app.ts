@@ -52,7 +52,7 @@ export abstract class App {
       if (message.response.statusCode)
         response = { ...response, statusCode: message.response.statusCode };
       return { context, request, response };
-    });
+    } /* first message is acc */ );
   }
 
   protected validateMessage(message: Message): void {
@@ -61,7 +61,7 @@ export abstract class App {
       throw new Error({ statusCode: StatusCode.NOT_FOUND });
     if (request.route.redirectTo) {
       const headers = { Location: request.route.redirectTo };
-      throw new Error({ headers, statusCode: request.route.redirectAs || 301 });
+      throw new Error({ headers, statusCode: request.route.redirectAs || StatusCode.REDIRECT });
     }
     // NOTE: route but no handler just sends OK
     if (!request.route.handler)

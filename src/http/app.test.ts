@@ -1,20 +1,15 @@
-import * as http from 'http';
-
-import { Error } from './serverx';
-import { Handler } from './handler';
-import { HttpApp } from './http-app';
+import { Handler } from '../handler';
+import { HttpApp } from './app';
 import { IncomingMessage } from 'http';
 import { Injectable } from 'injection-js';
-import { Message } from './serverx';
-import { Middleware } from './middleware';
+import { Message } from '../serverx';
+import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { OutgoingMessage } from 'http';
-import { Route } from './router';
-import { StatusCode } from './serverx';
+import { Route } from '../router';
 
+import { createServer } from 'http';
 import { map } from 'rxjs/operators';
-import { switchMap } from 'rxjs/operators';
-import { throwError } from 'rxjs';
 
 const axios = require('axios');
 
@@ -50,8 +45,8 @@ class CORS implements Middleware {
     return message$.pipe(
       map(message => {
         const { response } = message;
+        // NOTE: just the minimum CORS necessary for test case
         response.headers['Access-Control-Allow-Origin'] = '*';
-        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT';
         return message;
       })
     );
@@ -84,18 +79,6 @@ class Middleware2 implements Middleware {
   }
 }
 
-@Injectable()
-class NotFound implements Handler {
-  handle(message$: Observable<Message>): Observable<Message> {
-    return message$.pipe(
-      switchMap(message => {
-        const { response } = message;
-        return throwError(new Error({ headers: response.headers, statusCode: StatusCode.NOT_FOUND }));
-      })
-    );
-  }
-}
-
 const routes: Route[] = [
 
   {
@@ -115,11 +98,6 @@ const routes: Route[] = [
         path: '/foo/bar',
         handler: Goodbye,
         middlewares: [Middleware1]
-      },
-
-      {
-        path: '**',
-        handler: NotFound
       }
 
     ]
@@ -169,12 +147,9 @@ test('HttpApp smoke test #3', done => {
 test('HttpApp local 200/404', async done => {
   const app = new HttpApp(routes);
   const listener = app.listen();
-  const server = http.createServer(listener).listen(8080);
+  const server = createServer(listener).listen(8080);
   const response = await axios.get('http://localhost:8080/foo/bar');
   expect(response.data).toEqual('Hello, http!');
-  // TODO: headers lost??
-  // expect(response.headers['X-this']).toEqual('that');
-  // expect(response.headers['X-that']).toEqual('this');
   expect(response.status).toEqual(200);
   try {
     await axios.get('http://localhost:8080/xxx');

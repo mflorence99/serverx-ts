@@ -7,7 +7,9 @@ import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
 import { ReflectiveInjector } from 'injection-js';
 import { Request } from './serverx';
+import { StatusCode } from './serverx';
 
+import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import 'reflect-metadata';
@@ -30,6 +32,25 @@ export interface Route {
   // NOTE: mutated by router
   injector?: ReflectiveInjector;
   parent?: Route;
+  phantom?: boolean;
+}
+
+/**
+ * Catch all not found handler
+ */
+
+export class CatchAll implements Handler {
+
+  handle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe(
+      map(message => {
+        const { response } = message;
+        return { ...message, response: { ...response, statusCode: response.statusCode || StatusCode.NOT_FOUND } };
+      })
+    );
+
+  }
+
 }
 
 /**
@@ -65,7 +86,7 @@ export class Router {
     const params = { };
     const paths = this.split(request.path);
     const route = this.match(paths, request.method, null, this.routes, params);
-    return route? { ...request, params, route } : request;
+    return { ...request, params, route };
   }
 
   // private methods
@@ -91,8 +112,20 @@ export class Router {
         return false;
       return rpaths.every((rpath, ix) => rpath.startsWith(':') || (rpath === paths[ix]));
     });
-    // if we found a match, create an injector
-    if (route && !route.injector) {
+    // if we found a match, accumulate parameters
+    if (route) 
+      rpaths.forEach((rpath, ix) => {
+        if (rpath.startsWith(':'))
+          params[rpath.substring(1)] = paths[ix];
+      });
+    // if no route, fabricate a catch all
+    // NOTE: we only want to do this once per not found
+    else {
+      route = { handler: CatchAll, parent, path: '**', phantom: true };
+      routes.push(route);
+    }
+    // create an injector
+    if (!route.injector) {
       const providers = (route.services || [])
         .concat(route.middlewares || [])
         .concat(route.handler? [route.handler] : []);
@@ -101,16 +134,9 @@ export class Router {
         route.injector = parent.injector.createChildFromResolved(resolved);
       else route.injector = ReflectiveInjector.fromResolvedProviders(resolved);
     }
-    // if we found a match, look to the children
-    if (route && route.children && (paths.length > rpaths.length))
+    // look to the children
+    if (route.children && (paths.length > rpaths.length))
       route = this.match(paths.slice(rpaths.length), method, route, route.children, params);
-    // if we found a match, accumulate parameters
-    if (route) {
-      rpaths.forEach((rpath, ix) => {
-        if (rpath.startsWith(':'))
-          params[rpath.substring(1)] = paths[ix];
-      });
-    }
     return route;
   }
 
