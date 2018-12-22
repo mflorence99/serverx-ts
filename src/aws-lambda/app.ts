@@ -3,9 +3,9 @@ import { App } from '../app';
 import { Context } from 'aws-lambda';
 import { Message } from '../serverx';
 import { Method } from '../serverx';
+import { Observable } from 'rxjs';
 import { Response } from '../serverx';
 import { Route } from '../router';
-import { StatusCode } from '../serverx';
 import { URLSearchParams } from 'url';
 
 import { catchError } from 'rxjs/operators';
@@ -13,7 +13,6 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { tap } from 'rxjs/operators';
 
 /**
  * AWS Lambda application
@@ -42,7 +41,7 @@ export class AWSLambdaApp extends App {
         params: { },
         path: event.path,
         query: this.makeSearchParamsFromEvent(event),
-        route: null
+        route: null,
       },
       response: {
         body: null,
@@ -51,33 +50,24 @@ export class AWSLambdaApp extends App {
       }
     };
     return of(message).pipe(
-      // route the request
-      map((message: Message) => {
-        const { request } = message;
-        return { ...message, request: this.router.route(request) };
-      }),
-      // let's see if we found a route
-      tap((message: Message) => this.validateMessage(message)),
+      // route the message
+      map((message: Message): Message => this.router.route(message)),
       // run any middleware
-      mergeMap((message: Message) => {
+      mergeMap((message: Message): Observable<Message[]> => {
         const { request } = message;
         const middlewares$ = this.router.makeMiddlewares$(request.route, message);
         return combineLatest(middlewares$);
       }),
-      map((messages: Message[]) => this.mergeMessages(messages)),
+      map((messages: Message[]): Message => this.mergeMessages(messages)),
       // run the handler
-      mergeMap((message: Message) => {
+      mergeMap((message: Message): Observable<Message> => {
         const { request } = message;
         return this.router.makeHandler$(request.route, message);
       }),
       // turn any error into a response
-      catchError((error: any) => this.makeMessageFromError(error)),
+      catchError((error: any): Observable<Message> => this.makeMessageFromError(error)),
       // ready to send!
-      map((message: Message) => {
-        // TODO: proper response mapping
-        const { response } = message;
-        return { ...response, statusCode: response.statusCode || StatusCode.OK};
-      })
+      map((message: Message): Response => this.makeResponseFromMessage(message))
     ).toPromise();
   }
 

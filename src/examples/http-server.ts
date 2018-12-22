@@ -52,6 +52,10 @@ const routes: Route[] = [
       {
         path: '/goodbye',
         handler: Goodbye
+      },
+
+      {
+        path: '/isalive'
       }
 
     ]

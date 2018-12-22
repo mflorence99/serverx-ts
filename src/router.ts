@@ -6,7 +6,6 @@ import { Method } from './serverx';
 import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
 import { ReflectiveInjector } from 'injection-js';
-import { Request } from './serverx';
 import { StatusCode } from './serverx';
 
 import { map } from 'rxjs/operators';
@@ -21,7 +20,6 @@ import 'reflect-metadata';
 export interface Route {
   readonly children?: Route[];
   readonly data?: any;
-  readonly handler?: Class<Handler>;
   readonly methods?: Method[];
   readonly middlewares?: Class<Middleware>[];
   readonly path: string;
@@ -30,17 +28,17 @@ export interface Route {
   readonly redirectTo?: string;
   readonly services?: Class[];
   // NOTE: mutated by router
+  handler?: Class<Handler>;
   injector?: ReflectiveInjector;
   parent?: Route;
   phantom?: boolean;
 }
 
 /**
- * Catch all not found handler
+ * Catch all "not found" handler
  */
 
-export class CatchAll implements Handler {
-
+class CatchAllHandler implements Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
@@ -48,9 +46,39 @@ export class CatchAll implements Handler {
         return { ...message, response: { ...response, statusCode: response.statusCode || StatusCode.NOT_FOUND } };
       })
     );
-
   }
+}
 
+/**
+ * Noop handler
+ */
+
+class NoopHandler implements Handler {
+  handle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe(
+      map(message => {
+        const { response } = message;
+        return { ...message, response: { ...response, statusCode: StatusCode.OK } };
+      })
+    );
+  }
+}
+
+/**
+ * Redirect handler
+ */
+
+class RedirectHandler implements Handler {
+  handle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe(
+      map(message => {
+        const { request, response } = message;
+        const headers = { Location: request.route.redirectTo };
+        const statusCode = request.route.redirectAs || StatusCode.REDIRECT;
+        return { ...message, response: { ...response, headers, statusCode } };
+      })
+    );
+  }
 }
 
 /**
@@ -81,12 +109,13 @@ export class Router {
       middlewares.map(middleware => middleware.handle(of(message)));
   }
 
-  /** Route a request */
-  route(request: Request): Request {
+  /** Route a message */
+  route(message: Message): Message {
+    const { request } = message;
     const params = { };
     const paths = this.split(request.path);
     const route = this.match(paths, request.method, null, this.routes, params);
-    return { ...request, params, route };
+    return { ...message, request: { ...request, params, route } };
   }
 
   // private methods
@@ -96,39 +125,16 @@ export class Router {
                 parent: Route,
                 routes: Route[],
                 params: Map<string>): Route | undefined {
-    let rpaths = [];
-    // try to find matching route
-    let route = routes.find((route: Route) => {
-      route.parent = parent;
-      if (route.methods && !route.methods.includes(method))
-        return false;
-      if (route.path === '**')
-        return true;
-      rpaths = this.split(route.path);
-      if (rpaths.length === 0)
-        return true;
-      if ((rpaths.length > paths.length)
-       || ((route.pathMatch === 'full') && (rpaths.length !== paths.length)))
-        return false;
-      return rpaths.every((rpath, ix) => rpath.startsWith(':') || (rpath === paths[ix]));
-    });
-    // if we found a match, accumulate parameters
-    if (route) 
-      rpaths.forEach((rpath, ix) => {
-        if (rpath.startsWith(':'))
-          params[rpath.substring(1)] = paths[ix];
-      });
-    // if no route, fabricate a catch all
-    // NOTE: we only want to do this once per not found
-    else {
-      route = { handler: CatchAll, parent, path: '**', phantom: true };
-      routes.push(route);
-    }
+    const rpaths = [];
+    // find matching route, fabricating if necessary
+    let route = this.matchImpl(paths, rpaths, method, parent, routes, params);
+    // we always need a handler
+    if (!route.handler) 
+      route.handler = route.redirectTo? RedirectHandler : NoopHandler;
     // create an injector
     if (!route.injector) {
-      const providers = (route.services || [])
-        .concat(route.middlewares || [])
-        .concat(route.handler? [route.handler] : []);
+      const providers = (route.services || []).concat(route.middlewares || []);
+      providers.push(route.handler);
       const resolved = ReflectiveInjector.resolve(providers);
       if (parent)
         route.injector = parent.injector.createChildFromResolved(resolved);
@@ -137,6 +143,40 @@ export class Router {
     // look to the children
     if (route.children && (paths.length > rpaths.length))
       route = this.match(paths.slice(rpaths.length), method, route, route.children, params);
+    return route;
+  }
+
+  private matchImpl(paths: string[],
+                    rpaths: string[],
+                    method: Method,
+                    parent: Route,
+                    routes: Route[],
+                    params: Map<string>): Route {
+    let route = routes.find((route: Route) => {
+      route.parent = parent;
+      if (route.methods && !route.methods.includes(method))
+        return false;
+      if (route.path === '**')
+        return true;
+      rpaths.splice(0, rpaths.length, ...this.split(route.path));
+      if (rpaths.length === 0)
+        return true;
+      if ((rpaths.length > paths.length)
+        || ((route.pathMatch === 'full') && (rpaths.length !== paths.length)))
+        return false;
+      return rpaths.every((rpath, ix) => rpath.startsWith(':') || (rpath === paths[ix]));
+    });
+    // if no route, fabricate a catch all
+    // NOTE: we only want to do this once per not found
+    if (!route) {
+      route = { handler: CatchAllHandler, parent, path: '**', phantom: true };
+      routes.push(route);
+    }
+    // accumulate path parameters
+    rpaths.forEach((rpath, ix) => {
+      if (rpath.startsWith(':'))
+        params[rpath.substring(1)] = paths[ix];
+    });
     return route;
   }
 

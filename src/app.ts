@@ -35,6 +35,13 @@ export abstract class App {
     return of({ response });
   }
 
+  protected makeResponseFromMessage(message: Message): Response {
+    // TODO: proper response mapping
+    let { response } = message;
+    response = { ...response, statusCode: response.statusCode || StatusCode.OK };
+    return response;
+  }
+
   // NOTE: messages are processed serially by middlewares via combineLatest
   // however that doesn't make the message output by one the input of the next
   // as each receive the original -- so we merge them together here 
@@ -52,20 +59,7 @@ export abstract class App {
       if (message.response.statusCode)
         response = { ...response, statusCode: message.response.statusCode };
       return { context, request, response };
-    } /* first message is acc */ );
-  }
-
-  protected validateMessage(message: Message): void {
-    const { request } = message;
-    if (!request.route)
-      throw new Error({ statusCode: StatusCode.NOT_FOUND });
-    if (request.route.redirectTo) {
-      const headers = { Location: request.route.redirectTo };
-      throw new Error({ headers, statusCode: request.route.redirectAs || StatusCode.REDIRECT });
-    }
-    // NOTE: route but no handler just sends OK
-    if (!request.route.handler)
-      throw new Error({ statusCode: StatusCode.OK });
+    } /* first message seeds accumulator */ );
   }
 
   // private methods

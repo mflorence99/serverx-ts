@@ -4,11 +4,11 @@ import { App } from '../app';
 import { IncomingMessage } from 'http';
 import { Message } from '../serverx';
 import { Method } from '../serverx';
+import { Observable } from 'rxjs';
 import { OutgoingMessage } from 'http';
 import { Response } from '../serverx';
 import { Route } from '../router';
 import { ServerResponse } from 'http';
-import { StatusCode } from '../serverx';
 import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { URLSearchParams } from 'url';
@@ -82,44 +82,40 @@ export class HttpApp extends App {
     this.subToMessages = this.message$.pipe(
       // switch map so we can keep going on error
       // @see https://iamturns.com/continue-rxjs-streams-when-errors-occur/
-      switchMap((message: Message) => {
+      switchMap((message: Message): Observable<Message> => {
         return of(message).pipe(
-          // route the request
-          map((message: Message) => {
-            const { request } = message;
-            return { ...message, request: this.router.route(request) };
-          }),
-          // let's see if we found a route
-          tap((message: Message) => this.validateMessage(message)),
+          // route the message
+          map((message: Message): Message => this.router.route(message)),
           // run any middleware
-          mergeMap((message: Message) => {
+          mergeMap((message: Message): Observable<Message[]> => {
             const { request } = message;
             const middlewares$ = this.router.makeMiddlewares$(request.route, message);
             return combineLatest(middlewares$);
           }),
-          map((messages: Message[]) => this.mergeMessages(messages)),
+          map((messages: Message[]): Message => this.mergeMessages(messages)),
           // run the handler
-          mergeMap((message: Message) => {
+          mergeMap((message: Message): Observable<Message> => {
             const { request } = message;
             return this.router.makeHandler$(request.route, message);
           }),
           // turn any error into a response
-          catchError((error: any) => this.makeMessageFromError(error)),
+          catchError((error: any): Observable<Message> => this.makeMessageFromError(error)),
           // ready to send!
-          tap((message: Message) => {
-            // TODO: proper response mapping
-            let { response } = message;
-            response = { ...response, statusCode: response.statusCode || StatusCode.OK };
-            // NOTE: plumbing for tests
-            if (this.res.end) {
-              this.res.writeHead(response.statusCode, response.headers);
-              this.res.end(response.body);
-            }
-            else this.response$.next(response);
-          })
+          tap((message: Message) => this.handleResponse(this.makeResponseFromMessage(message)))
         );
       })
     ).subscribe();
+  }
+
+  // private methods
+
+  private handleResponse(response: Response): void {
+    // TODO: this isn't right yet
+    if (this.res.end) {
+      this.res.writeHead(response.statusCode, response.headers);
+      this.res.end(response.body);
+    }
+    else this.response$.next(response);
   }
 
 }
