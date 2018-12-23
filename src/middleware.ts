@@ -1,12 +1,12 @@
 import { Message } from './serverx';
 import { Observable } from 'rxjs';
-import { Route } from './router';
+import { Route } from './serverx';
 
 /**
  * Middleware definition
  */
 
-export abstract class Middleware {
+export class Middleware {
 
   /** Instantiate a set of Middlewares from a Route */
   static makeInstances(route: Route): Middleware[] {
@@ -14,7 +14,14 @@ export abstract class Middleware {
       .map(middleware => <Middleware>route.injector.get(middleware));
   }
 
-  /** Handle a message */
-  abstract handle(message$: Observable<Message>): Observable<Message>;
+  /** Pre-handle a message */
+  prehandle(message$: Observable<Message>): Observable<Message> {
+    return message$;
+  }
+
+  /** Post-handle a message */
+  posthandle(message$: Observable<Message>): Observable<Message> {
+    return message$;
+  }
 
 }

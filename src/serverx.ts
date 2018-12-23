@@ -1,6 +1,8 @@
+import { Handler } from './handler';
 import { IncomingHttpHeaders } from 'http';
+import { Middleware } from './middleware';
 import { OutgoingHttpHeaders } from 'http';
-import { Route } from './router';
+import { ReflectiveInjector } from 'injection-js';
 import { URLSearchParams } from 'url';
 
 /**
@@ -114,6 +116,27 @@ export interface Response<TBody = any,
   readonly body?: TBody;
   readonly headers?: THeaders;
   readonly statusCode?: StatusCode;
+}
+
+/**
+ * Route definition
+ */
+
+export interface Route {
+  readonly children?: Route[];
+  readonly data?: any;
+  readonly methods?: Method[];
+  readonly middlewares?: Class<Middleware>[];
+  readonly path: string;
+  readonly pathMatch?: 'full' | 'prefix';
+  readonly redirectAs?: number;
+  readonly redirectTo?: string;
+  readonly services?: Class[];
+  // NOTE: mutated by router
+  handler?: Class<Handler>;
+  injector?: ReflectiveInjector;
+  parent?: Route;
+  phantom?: boolean;
 }
 
 /**

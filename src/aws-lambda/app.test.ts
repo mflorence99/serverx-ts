@@ -9,12 +9,11 @@ import { Injectable } from 'injection-js';
 import { Message } from '../serverx';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
-import { Route } from '../router';
+import { Route } from '../serverx';
 
 import { map } from 'rxjs/operators';
 
-@Injectable()
-class Hello implements Handler {
+@Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
@@ -26,8 +25,7 @@ class Hello implements Handler {
   }
 }
 
-@Injectable()
-class Goodbye implements Handler {
+@Injectable() class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
@@ -39,9 +37,8 @@ class Goodbye implements Handler {
   }
 }
 
-@Injectable()
-class Middleware1 implements Middleware {
-  handle(message$: Observable<Message>): Observable<Message> {
+@Injectable() class Middleware1 extends Middleware {
+  prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
         const { response } = message;
@@ -52,9 +49,8 @@ class Middleware1 implements Middleware {
   }
 }
 
-@Injectable()
-class Middleware2 implements Middleware {
-  handle(message$: Observable<Message>): Observable<Message> {
+@Injectable() class Middleware2 extends Middleware {
+  prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
         const { response } = message;

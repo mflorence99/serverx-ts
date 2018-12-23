@@ -7,7 +7,7 @@ import { Method } from '../serverx';
 import { Observable } from 'rxjs';
 import { OutgoingMessage } from 'http';
 import { Response } from '../serverx';
-import { Route } from '../router';
+import { Route } from '../serverx';
 import { ServerResponse } from 'http';
 import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
@@ -86,18 +86,26 @@ export class HttpApp extends App {
         return of(message).pipe(
           // route the message
           map((message: Message): Message => this.router.route(message)),
-          // run any middleware
+          // run pre-handle middleware
           mergeMap((message: Message): Observable<Message[]> => {
             const { request } = message;
-            const middlewares$ = this.router.makeMiddlewares$(request.route, message);
+            const middlewares$ = this.makeMiddlewares$(request.route, message, 'prehandle');
             return combineLatest(middlewares$);
           }),
           map((messages: Message[]): Message => this.mergeMessages(messages)),
           // run the handler
           mergeMap((message: Message): Observable<Message> => {
             const { request } = message;
-            return this.router.makeHandler$(request.route, message);
+            return this.makeHandler$(request.route, message);
           }),
+          // run post-handle middleware
+          // NOTE: in reverse order
+          mergeMap((message: Message): Observable<Message[]> => {
+            const { request } = message;
+            const middlewares$ = this.makeMiddlewares$(request.route, message, 'posthandle');
+            return combineLatest(middlewares$.reverse());
+          }),
+          map((messages: Message[]): Message => this.mergeMessages(messages)),
           // turn any error into a response
           catchError((error: any): Observable<Message> => this.makeMessageFromError(error)),
           // ready to send!

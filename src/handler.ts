@@ -1,12 +1,12 @@
 import { Message } from './serverx';
 import { Observable } from 'rxjs';
-import { Route } from './router';
+import { Route } from './serverx';
 
 /**
  * Handler definition
  */
 
-export abstract class Handler {
+export class Handler {
 
   /** Instantiate a Handler from a Route */
   static makeInstance<T = Handler>(route: Route): T {
@@ -14,6 +14,8 @@ export abstract class Handler {
   }
 
   /** Handle a message */
-  abstract handle(message$: Observable<Message>): Observable<Message>;
+  handle(message$: Observable<Message>): Observable<Message> {
+    return message$;
+  }
 
 }

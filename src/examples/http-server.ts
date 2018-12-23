@@ -3,7 +3,7 @@ import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
 import { Message } from '../serverx';
 import { Observable } from 'rxjs';
-import { Route } from '../router';
+import { Route } from '../serverx';
 
 import { createServer } from 'http';
 import { map } from 'rxjs/operators';
@@ -11,8 +11,7 @@ import { map } from 'rxjs/operators';
 import chalk from 'chalk';
 
 
-@Injectable()
-class Hello implements Handler {
+@Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {
@@ -24,8 +23,7 @@ class Hello implements Handler {
   }
 }
 
-@Injectable()
-class Goodbye implements Handler {
+@Injectable() class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       map(message => {

@@ -4,38 +4,26 @@ import { Injectable } from 'injection-js';
 import { Message } from './serverx';
 import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
-import { Request } from './serverx';
-import { Response } from './serverx';
-import { Route } from './router';
+import { Route } from './serverx';
 import { Router } from './router';
 import { StatusCode } from './serverx';
 
 import { switchMap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
-@Injectable()
-class Service2 {
-  then = Date.now();
-}
+@Injectable() class Service2 { }
 
-@Injectable()
-class Service1 {
-  now = Date.now();
+@Injectable() class Service1 {
   constructor(public service: Service2) { }
 }
 
-type Handler1Msg = Message<Request, Response<number>>;
-
-@Injectable()
-class Handler1 implements Handler {
-  constructor(public service: Service1) { }
-  handle(message$: Observable<Handler1Msg>): Observable<Handler1Msg> {
-    return null;
+@Injectable() class Handler1 extends Handler {
+  constructor(public service: Service1) { 
+    super();
   }
 }
 
-@Injectable()
-class NotFound implements Handler {
+@Injectable() class NotFound extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       switchMap(() =>
@@ -45,25 +33,13 @@ class NotFound implements Handler {
   }
 }
 
-@Injectable()
-class Middleware1 implements Middleware {
-  handle(message$: Observable<Message>): Observable<Message> {
-    return null;
-  }
-}
+@Injectable() class Middleware1 extends Middleware { }
 
-@Injectable()
-class Middleware2 implements Middleware {
-  handle(message$: Observable<Message>): Observable<Message> {
-    return null;
-  }
-}
+@Injectable() class Middleware2 extends Middleware { }
 
-@Injectable()
-class Middleware3 implements Middleware {
-  constructor(public service: Service1) { }
-  handle(message$: Observable<Message>): Observable<Message> {
-    return null;
+@Injectable() class Middleware3 extends Middleware {
+  constructor(public service: Service1) { 
+    super();
   }
 }
 

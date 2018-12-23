@@ -1,85 +1,13 @@
-import { Class } from './serverx';
-import { Handler } from './handler';
+import { CatchAll } from './handlers/catch-all';
 import { Map } from './serverx';
 import { Message } from './serverx';
 import { Method } from './serverx';
-import { Middleware } from './middleware';
-import { Observable } from 'rxjs';
+import { RedirectTo } from './handlers/redirect-to';
 import { ReflectiveInjector } from 'injection-js';
-import { StatusCode } from './serverx';
-
-import { map } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { Route } from './serverx';
+import { StatusCode200 } from './handlers/statuscode-200';
 
 import 'reflect-metadata';
-
-/**
- * Route definition
- */
-
-export interface Route {
-  readonly children?: Route[];
-  readonly data?: any;
-  readonly methods?: Method[];
-  readonly middlewares?: Class<Middleware>[];
-  readonly path: string;
-  readonly pathMatch?: 'full' | 'prefix';
-  readonly redirectAs?: number;
-  readonly redirectTo?: string;
-  readonly services?: Class[];
-  // NOTE: mutated by router
-  handler?: Class<Handler>;
-  injector?: ReflectiveInjector;
-  parent?: Route;
-  phantom?: boolean;
-}
-
-/**
- * Catch all "not found" handler
- */
-
-class CatchAllHandler implements Handler {
-  handle(message$: Observable<Message>): Observable<Message> {
-    return message$.pipe(
-      map(message => {
-        const { response } = message;
-        return { ...message, response: { ...response, statusCode: response.statusCode || StatusCode.NOT_FOUND } };
-      })
-    );
-  }
-}
-
-/**
- * Noop handler
- */
-
-class NoopHandler implements Handler {
-  handle(message$: Observable<Message>): Observable<Message> {
-    return message$.pipe(
-      map(message => {
-        const { response } = message;
-        return { ...message, response: { ...response, statusCode: StatusCode.OK } };
-      })
-    );
-  }
-}
-
-/**
- * Redirect handler
- */
-
-class RedirectHandler implements Handler {
-  handle(message$: Observable<Message>): Observable<Message> {
-    return message$.pipe(
-      map(message => {
-        const { request, response } = message;
-        const headers = { Location: request.route.redirectTo };
-        const statusCode = request.route.redirectAs || StatusCode.REDIRECT;
-        return { ...message, response: { ...response, headers, statusCode } };
-      })
-    );
-  }
-}
 
 /**
  * Router implementation
@@ -89,25 +17,6 @@ export class Router {
 
   /** ctor */
   constructor(public readonly routes: Route[]) { }
-
-  /** Instantiate the Handler Observables for a Route */
-  makeHandler$(route: Route,
-               message: Message): Observable<Message> {
-    const handler = Handler.makeInstance(route);
-    return handler? handler.handle(of(message)) : of(message);
-  }
-
-  /** Instantiate the Middleware Observables for a Route */
-  makeMiddlewares$(route: Route,
-                   message: Message): Observable<Message>[] {
-    const middlewares = [];
-    while (route) {
-      middlewares.push(...Middleware.makeInstances(route));
-      route = route.parent;
-    }
-    return (middlewares.length === 0)? [of(message)] :
-      middlewares.map(middleware => middleware.handle(of(message)));
-  }
 
   /** Route a message */
   route(message: Message): Message {
@@ -130,7 +39,7 @@ export class Router {
     let route = this.matchImpl(paths, rpaths, method, parent, routes, params);
     // we always need a handler
     if (!route.handler) 
-      route.handler = route.redirectTo? RedirectHandler : NoopHandler;
+      route.handler = route.redirectTo? RedirectTo : StatusCode200;
     // create an injector
     if (!route.injector) {
       const providers = (route.services || []).concat(route.middlewares || []);
@@ -169,7 +78,7 @@ export class Router {
     // if no route, fabricate a catch all
     // NOTE: we only want to do this once per not found
     if (!route) {
-      route = { handler: CatchAllHandler, parent, path: '**', phantom: true };
+      route = { handler: CatchAll, parent, path: '**', phantom: true };
       routes.push(route);
     }
     // accumulate path parameters

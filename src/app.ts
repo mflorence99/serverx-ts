@@ -3,10 +3,12 @@ import * as mime from 'mime';
 
 import { ContentType } from './serverx';
 import { Error } from './serverx';
+import { Handler } from './handler';
 import { Message } from './serverx';
+import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
 import { Response } from './serverx';
-import { Route } from './router';
+import { Route } from './serverx';
 import { Router } from './router';
 import { StatusCode } from './serverx';
 
@@ -27,6 +29,12 @@ export abstract class App {
 
   // protected methods
 
+  protected makeHandler$(route: Route,
+                         message: Message): Observable<Message> {
+    const handler = Handler.makeInstance(route);
+    return handler ? handler.handle(of(message)) : of(message);
+  }
+
   protected makeMessageFromError(error: any): Observable<Message> {
     let response: Response;
     if (error instanceof Error)
@@ -37,6 +45,18 @@ export abstract class App {
       statusCode: StatusCode.INTERNAL_SERVER_ERROR
     };
     return of({ response });
+  }
+
+  protected makeMiddlewares$(route: Route,
+                             message: Message,
+                             method: string): Observable<Message>[] {
+    const middlewares = [];
+    while (route) {
+      middlewares.push(...Middleware.makeInstances(route));
+      route = route.parent;
+    }
+    return (middlewares.length === 0) ? [of(message)] :
+      middlewares.map(middleware => middleware[method](of(message)));
   }
 
   protected makeResponseFromMessage(message: Message): Response {
