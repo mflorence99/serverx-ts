@@ -3,15 +3,11 @@ import { App } from '../app';
 import { Context } from 'aws-lambda';
 import { Message } from '../serverx';
 import { Method } from '../serverx';
-import { Observable } from 'rxjs';
 import { Response } from '../serverx';
 import { Route } from '../serverx';
 import { URLSearchParams } from 'url';
 
-import { catchError } from 'rxjs/operators';
-import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 /**
@@ -49,34 +45,11 @@ export class AWSLambdaApp extends App {
         statusCode: null
       }
     };
-    return of(message).pipe(
-      // route the message
-      map((message: Message): Message => this.router.route(message)),
-      // run pre-handle middleware
-      mergeMap((message: Message): Observable<Message[]> => {
-        const { request } = message;
-        const middlewares$ = this.makeMiddlewares$(request.route, message, 'prehandle');
-        return combineLatest(middlewares$);
-      }),
-      map((messages: Message[]): Message => this.mergeMessages(messages)),
-      // run the handler
-      mergeMap((message: Message): Observable<Message> => {
-        const { request } = message;
-        return this.makeHandler$(request.route, message);
-      }),
-      // run post-handle middleware
-      // NOTE: in reverse order
-      mergeMap((message: Message): Observable<Message[]> => {
-        const { request } = message;
-        const middlewares$ = this.makeMiddlewares$(request.route, message, 'posthandle');
-        return combineLatest(middlewares$.reverse());
-      }),
-      map((messages: Message[]): Message => this.mergeMessages(messages)),
-      // turn any error into a response
-      catchError((error: any): Observable<Message> => this.makeMessageFromError(error)),
-      // ready to send!
-      map((message: Message): Response => this.makeResponseFromMessage(message))
-    ).toPromise();
+    return of(message)
+      .pipe(map((message: Message): Message => this.router.route(message)))
+      .pipe(this.makePipeline(message))
+      .pipe(map((message: Message): Response => message.response))
+      .toPromise();
   }
 
   // private methods

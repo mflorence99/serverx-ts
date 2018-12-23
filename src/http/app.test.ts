@@ -9,17 +9,16 @@ import { OutgoingMessage } from 'http';
 import { Route } from '../serverx';
 
 import { createServer } from 'http';
-import { map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 import axios from 'axios';
 
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
-        const body = 'Hello, http!';
-        return { ...message, response: { ...response, body } };
+        response.body = 'Hello, http!';
       })
     );
   }
@@ -28,10 +27,9 @@ import axios from 'axios';
 @Injectable() class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
-        const body = 'Goodbye, http!';
-        return { ...message, response: { ...response, body } };
+        response.body = 'Goodbye, http!';
       })
     );
   }
@@ -40,11 +38,10 @@ import axios from 'axios';
 @Injectable() class CORS extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
         // NOTE: just the minimum CORS necessary for test case
         response.headers['Access-Control-Allow-Origin'] = '*';
-        return message;
       })
     );
   }
@@ -53,10 +50,9 @@ import axios from 'axios';
 @Injectable() class Middleware1 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
         response.headers['X-this'] = 'that';
-        return message;
       })
     );
   }
@@ -65,10 +61,9 @@ import axios from 'axios';
 @Injectable() class Middleware2 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
         response.headers['X-that'] = 'this';
-        return message;
       })
     );
   }

@@ -11,15 +11,14 @@ import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { Route } from '../serverx';
 
-import { map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { request, response } = message;
-        const body = `Hello, ${request.query.get('bizz')}`;
-        return { ...message, response: { ...response, body } };
+        response.body = `Hello, ${request.query.get('bizz')}`;
       })
     );
   }
@@ -28,10 +27,9 @@ import { map } from 'rxjs/operators';
 @Injectable() class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { request, response } = message;
-        const body = `Goodbye, ${request.query.get('buzz')}`;
-        return { ...message, response: { ...response, body } };
+        response.body = `Goodbye, ${request.query.get('buzz')}`;
       })
     );
   }
@@ -40,10 +38,9 @@ import { map } from 'rxjs/operators';
 @Injectable() class Middleware1 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
         response.headers['X-this'] = 'that';
-        return message;
       })
     );
   }
@@ -52,10 +49,9 @@ import { map } from 'rxjs/operators';
 @Injectable() class Middleware2 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
         response.headers['X-that'] = 'this';
-        return message;
       })
     );
   }

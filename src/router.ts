@@ -16,7 +16,7 @@ import 'reflect-metadata';
 export class Router {
 
   /** ctor */
-  constructor(public readonly routes: Route[]) { }
+  constructor(public routes: Route[]) { }
 
   /** Route a message */
   route(message: Message): Message {
@@ -24,7 +24,9 @@ export class Router {
     const params = { };
     const paths = this.split(request.path);
     const route = this.match(paths, request.method, null, this.routes, params);
-    return { ...message, request: { ...request, params, route } };
+    request.params = params;
+    request.route = route;
+    return message;
   }
 
   // private methods

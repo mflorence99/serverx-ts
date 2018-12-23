@@ -42,7 +42,7 @@ export enum ContentType {
  */
 
 export interface Context {
-  readonly routes: Route[];
+  routes: Route[];
 }
 
 /**
@@ -67,9 +67,9 @@ export interface Map<T> {
 
 export interface Message<TRequest = Request,
                          TResponse = Response> {
-  readonly context?: Context;
-  readonly request?: TRequest;
-  readonly response?: TResponse;
+  context?: Context;
+  request?: TRequest;
+  response?: TResponse;
 }
 
 /**
@@ -98,13 +98,13 @@ export interface Request<TBody = any,
                          THeaders = IncomingHttpHeaders,
                          TParams = Map<string>,
                          TQuery = URLSearchParams> {
-  readonly body?: TBody;
-  readonly headers?: THeaders;
-  readonly method: Method;
-  readonly params?: TParams;
-  readonly path: string;
-  readonly query?: TQuery;
-  readonly route?: Route;
+  body?: TBody;
+  headers?: THeaders;
+  method: Method;
+  params?: TParams;
+  path: string;
+  query?: TQuery;
+  route?: Route;
 }
 
 /**
@@ -113,9 +113,9 @@ export interface Request<TBody = any,
 
 export interface Response<TBody = any,
                           THeaders = OutgoingHttpHeaders> {
-  readonly body?: TBody;
-  readonly headers?: THeaders;
-  readonly statusCode?: StatusCode;
+  body?: TBody;
+  headers?: THeaders;
+  statusCode?: StatusCode;
 }
 
 /**
@@ -123,20 +123,19 @@ export interface Response<TBody = any,
  */
 
 export interface Route {
-  readonly children?: Route[];
-  readonly data?: any;
-  readonly methods?: Method[];
-  readonly middlewares?: Class<Middleware>[];
-  readonly path: string;
-  readonly pathMatch?: 'full' | 'prefix';
-  readonly redirectAs?: number;
-  readonly redirectTo?: string;
-  readonly services?: Class[];
-  // NOTE: mutated by router
+  children?: Route[];
+  data?: any;
   handler?: Class<Handler>;
   injector?: ReflectiveInjector;
+  methods?: Method[];
+  middlewares?: Class<Middleware>[];
   parent?: Route;
+  path: string;
+  pathMatch?: 'full' | 'prefix';
   phantom?: boolean;
+  redirectAs?: number;
+  redirectTo?: string;
+  services?: Class[];
 }
 
 /**

@@ -8,7 +8,7 @@ import { Route } from './serverx';
 
 export class Middleware {
 
-  /** Instantiate a set of Middlewares from a Route */
+  /** Instantiate a set of Middlewares from a Route or Class[] */
   static makeInstances(route: Route): Middleware[] {
     return (route.middlewares || [])
       .map(middleware => <Middleware>route.injector.get(middleware));
