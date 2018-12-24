@@ -34,12 +34,16 @@ export abstract class App {
 
   protected makePipeline(message: Message) {
     const { request } = message;
+    // these are built-in middlewares
+    const PREHANDLERS = [];
+    const POSTHANDLERS = [Normalizer];
     return pipe(
       // run pre-handle middleware
       mergeMap((message: Message): Observable<Message[]> => {
-        const middlewares$ = this.makeMiddlewares$(request.route, message, 'prehandle');
+        const middlewares$ = this.makeMiddlewares$(request.route, message, 'prehandle', PREHANDLERS);
         return combineLatest(middlewares$);
       }),
+      // NOTE: because of muatability, they're all the same message
       map((messages: Message[]): Message => messages[0]),
       // run the handler
       mergeMap((message: Message): Observable<Message> => {
@@ -48,9 +52,10 @@ export abstract class App {
       // run post-handle middleware
       // NOTE: in reverse order
       mergeMap((message: Message): Observable<Message[]> => {
-        const middlewares$ = this.makeMiddlewares$(request.route, message, 'posthandle', [Normalizer]);
+        const middlewares$ = this.makeMiddlewares$(request.route, message, 'posthandle', POSTHANDLERS);
         return combineLatest(middlewares$.reverse());
       }),
+      // NOTE: because of muatability, they're all the same message
       map((messages: Message[]): Message => messages[0]),
       // turn any error into a message
       catchError((error: any): Observable<Message> => this.makeMessageFromError(error)),
@@ -79,7 +84,7 @@ export abstract class App {
 
   private makeMiddlewares$(route: Route,
                            message: Message,
-                           method: string,
+                           method: 'prehandle' | 'posthandle',
                            extras: Class[] = []): Observable<Message>[] {
     const middlewares = [];
     while (route) {
