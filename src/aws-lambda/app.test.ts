@@ -35,6 +35,17 @@ import { tap } from 'rxjs/operators';
   }
 }
 
+@Injectable() class Explode extends Handler {
+  handle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe(
+      tap((message: Message) => {
+        const { response } = message;
+        response['x']['y'] = 'z';
+      })
+    );
+  }
+}
+
 @Injectable() class Middleware1 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
@@ -100,6 +111,12 @@ const routes: Route[] = [
 
   {
     methods: ['GET'],
+    path: '/explode',
+    handler: Explode
+  },
+
+  {
+    methods: ['GET'],
     path: '/not-here',
     redirectTo: 'http://over-there.com'
   }
@@ -138,6 +155,13 @@ test('AWSLambdaApp smoke test #4', async done => {
   const response = await app.handle({ ...event, httpMethod: 'GET', path: '/not-here' }, context);
   expect(response.headers['Location']).toEqual('http://over-there.com');
   expect(response.statusCode).toEqual(301);
+  done();
+});
+
+test('AWSLambdaApp error 500', async done => {
+  const response = await app.handle({ ...event, httpMethod: 'GET', path: '/explode' }, context);
+  expect(response.body.error).toEqual(`TypeError: Cannot set property 'y' of undefined`);
+  expect(response.statusCode).toEqual(500);
   done();
 });
 

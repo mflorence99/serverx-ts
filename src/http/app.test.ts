@@ -85,7 +85,7 @@ const routes: Route[] = [
       },
 
       {
-        methods: ['PUT', 'OPTIONS'],
+        methods: ['PUT'],
         path: '/foo/bar',
         handler: Goodbye,
         middlewares: [Middleware1]

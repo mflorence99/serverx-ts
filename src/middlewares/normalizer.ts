@@ -2,6 +2,7 @@ import * as fileType from 'file-type';
 import * as mime from 'mime';
 
 import { ContentType } from '../serverx';
+import { Injectable } from 'injection-js';
 import { Message } from '../serverx';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
@@ -15,7 +16,7 @@ import { tap } from 'rxjs/operators';
  * NOTE: internal use only
  */
 
-export class Normalizer extends Middleware {
+@Injectable() export class Normalizer extends Middleware {
 
   posthandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(

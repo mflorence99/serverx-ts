@@ -1,3 +1,4 @@
+import { Catcher } from './catcher';
 import { Handler } from './handler';
 import { IncomingHttpHeaders } from 'http';
 import { Middleware } from './middleware';
@@ -77,19 +78,7 @@ export interface Message<TRequest = Request,
  * Method definition
  */
 
-export enum MethodType {
-  CONNECT,
-  DELETE,
-  GET,
-  HEAD,
-  OPTIONS,
-  PATCH,
-  POST,
-  PUT,
-  TRACE
-}
-
-export type Method = keyof typeof MethodType;
+export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE';
 
 /**
  * Request definition
@@ -125,6 +114,7 @@ export interface Response<TBody = any,
  */
 
 export interface Route {
+  catcher?: Class<Catcher>;
   children?: Route[];
   data?: any;
   handler?: Class<Handler>;

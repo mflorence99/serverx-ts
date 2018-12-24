@@ -1,8 +1,9 @@
-import { CatchAll } from './handlers/catch-all';
+import { CatchAll } from './catchers/catch-all';
 import { Class } from './serverx';
 import { Map } from './serverx';
 import { Message } from './serverx';
 import { Method } from './serverx';
+import { NotFound } from './handlers/not-found';
 import { RedirectTo } from './handlers/redirect-to';
 import { ReflectiveInjector } from 'injection-js';
 import { Route } from './serverx';
@@ -24,6 +25,7 @@ export class Router {
     this.routes = (required.length === 0)? routes : [{
       path: '',
       middlewares: required,
+      catcher: CatchAll,
       children: routes
     }];
   }
@@ -56,6 +58,8 @@ export class Router {
     if (!route.injector) {
       const providers = (route.services || []).concat(route.middlewares || []);
       providers.push(route.handler);
+      if (route.catcher)
+        providers.push(route.catcher);
       const resolved = ReflectiveInjector.resolve(providers);
       if (parent)
         route.injector = parent.injector.createChildFromResolved(resolved);
@@ -90,7 +94,7 @@ export class Router {
     // if no route, fabricate a catch all
     // NOTE: we only want to do this once per not found
     if (!route) {
-      route = { handler: CatchAll, parent, path: '**', phantom: true };
+      route = { handler: NotFound, parent, path: '**', phantom: true };
       routes.push(route);
     }
     // accumulate path parameters

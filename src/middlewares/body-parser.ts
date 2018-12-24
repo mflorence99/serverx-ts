@@ -1,5 +1,6 @@
 import { ContentType } from '../serverx';
 import { Error } from '../serverx';
+import { Injectable } from 'injection-js';
 import { Message } from '../serverx';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
@@ -20,7 +21,7 @@ import { toArray } from 'rxjs/operators';
  * @see https://github.com/marblejs/marble/blob/master/packages/middleware-body/src/index.ts
  */
 
-export class BodyParser extends Middleware {
+@Injectable() export class BodyParser extends Middleware {
 
   prehandle(message$: Observable<Message>): Observable<Message> {
     const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
