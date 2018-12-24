@@ -1,6 +1,7 @@
 import { Handler } from './handler';
 import { IncomingHttpHeaders } from 'http';
 import { Middleware } from './middleware';
+import { Observable } from 'rxjs';
 import { OutgoingHttpHeaders } from 'http';
 import { ReflectiveInjector } from 'injection-js';
 import { URLSearchParams } from 'url';
@@ -105,6 +106,7 @@ export interface Request<TBody = any,
   path: string;
   query?: TQuery;
   route?: Route;
+  stream$?: Observable<any>;
 }
 
 /**

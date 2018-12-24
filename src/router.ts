@@ -1,4 +1,5 @@
 import { CatchAll } from './handlers/catch-all';
+import { Class } from './serverx';
 import { Map } from './serverx';
 import { Message } from './serverx';
 import { Method } from './serverx';
@@ -15,8 +16,17 @@ import 'reflect-metadata';
 
 export class Router {
 
+  routes: Route[];
+
   /** ctor */
-  constructor(public routes: Route[]) { }
+  constructor(routes: Route[],
+              required: Class[] = []) { 
+    this.routes = (required.length === 0)? routes : [{
+      path: '',
+      middlewares: required,
+      children: routes
+    }];
+  }
 
   /** Route a message */
   route(message: Message): Message {

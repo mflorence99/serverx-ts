@@ -3,6 +3,7 @@ import { App } from '../app';
 import { Context } from 'aws-lambda';
 import { Message } from '../serverx';
 import { Method } from '../serverx';
+import { Normalizer } from '../middlewares/normalizer';
 import { Response } from '../serverx';
 import { Route } from '../serverx';
 import { URLSearchParams } from 'url';
@@ -10,34 +11,44 @@ import { URLSearchParams } from 'url';
 import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+// NOTE: this middleware is required
+const MIDDLEWARE = [Normalizer];
+
 /**
  * AWS Lambda application
  */
 
 export class AWSLambdaApp extends App {
 
+  private event: APIGatewayProxyEvent;
+  // @ts-ignore TODO: temporary
+  private context: Context;
+
   /** ctor */
   constructor(routes: Route[]) {
-    super(routes);
+    super(routes, MIDDLEWARE);
   }
 
   /** AWS Lambda handler method */
   handle(event: APIGatewayProxyEvent,
          context: Context): Promise<Response> {
+    this.event = event;
+    this.context = context;
     // synthesize Message from Lambda event and context
     const message: Message = {
       context: {
         routes: this.router.routes,
       },
       request: {
-        // TODO: how to get body?
-        body: null,
-        headers: event.headers || { },
-        method: <Method>event.httpMethod,
+        // @see https://stackoverflow.com/questions/41648467
+        body: (this.event.body != null) ? JSON.parse(this.event.body) : { },
+        headers: this.event.headers || { },
+        method: <Method>this.event.httpMethod,
         params: { },
-        path: event.path,
-        query: this.makeSearchParamsFromEvent(event),
+        path: this.event.path,
+        query: this.makeSearchParamsFromEvent(this.event),
         route: null,
+        stream$: null
       },
       response: {
         body: null,

@@ -1,9 +1,11 @@
 import * as url from 'url';
 
 import { App } from '../app';
+import { BodyParser } from '../middlewares/body-parser';
 import { IncomingMessage } from 'http';
 import { Message } from '../serverx';
 import { Method } from '../serverx';
+import { Normalizer } from '../middlewares/normalizer';
 import { Observable } from 'rxjs';
 import { OutgoingMessage } from 'http';
 import { Response } from '../serverx';
@@ -18,6 +20,9 @@ import { of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
+// NOTE: this middleware is required
+const MIDDLEWARE = [BodyParser, Normalizer];
+
 /**
  * Http application
  */
@@ -28,11 +33,12 @@ export class HttpApp extends App {
   private response$ = new Subject<Response>();
   private subToMessages: Subscription;
 
+  private req: IncomingMessage;
   private res: ServerResponse;
 
   /** ctor */
   constructor(routes: Route[]) {
-    super(routes);
+    super(routes, MIDDLEWARE);
   }
 
   /** Create a listener */
@@ -40,22 +46,23 @@ export class HttpApp extends App {
     this.startListening();
     return (req: IncomingMessage, 
             res: OutgoingMessage): void => {
+      this.req = req;
       this.res = res as ServerResponse;
       // synthesize Message from Http req/res
-      const parsed = <any>url.parse(req.url, true); 
+      const parsed = <any>url.parse(this.req.url, true); 
       const message: Message = {
         context: {
           routes: this.router.routes,
         },
         request: {
-          // TODO: how to get body?
-          body: null,
-          headers: req.headers || { },
-          method: <Method>req.method,
+          body: { },
+          headers: this.req.headers || { },
+          method: <Method>this.req.method,
           params: { },
           path: parsed.pathname,
           query: parsed.searchParams || new URLSearchParams(),
-          route: null
+          route: null,
+          stream$: this.req.on? this.fromReadableStream(this.req) : null
         },
         response: {
           body: null,

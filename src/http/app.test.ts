@@ -1,3 +1,4 @@
+import { ContentType } from '../serverx';
 import { Handler } from '../handler';
 import { HttpApp } from './app';
 import { IncomingMessage } from 'http';
@@ -28,8 +29,8 @@ import axios from 'axios';
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap((message: Message) => {
-        const { response } = message;
-        response.body = 'Goodbye, http!';
+        const { request, response } = message;
+        response.body = `Goodbye, ${request.body.name || 'http'}!`;
       })
     );
   }
@@ -84,7 +85,7 @@ const routes: Route[] = [
       },
 
       {
-        methods: ['PUT'],
+        methods: ['PUT', 'OPTIONS'],
         path: '/foo/bar',
         handler: Goodbye,
         middlewares: [Middleware1]
@@ -95,6 +96,9 @@ const routes: Route[] = [
   
 ];
 
+const ax = axios.create({
+  baseURL: 'http://localhost:8080'
+});
 
 // @see https://angularfirebase.com/snippets/testing-rxjs-observables-with-jest/
 
@@ -134,15 +138,17 @@ test('HttpApp smoke test #3', done => {
   listener({ method: 'PUT', url: '/xxx' } as IncomingMessage, { } as OutgoingMessage);
 });
 
-test('HttpApp local 200/404', async done => {
+test('HttpApp local 200/404 and body parse', async done => {
   const app = new HttpApp(routes);
   const listener = app.listen();
   const server = createServer(listener).listen(8080);
-  const response = await axios.get('http://localhost:8080/foo/bar');
+  let response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'GET' });
   expect(response.data).toEqual('Hello, http!');
   expect(response.status).toEqual(200);
+  response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': ContentType.APPLICATION_JSON } });
+  expect(response.data).toEqual('Goodbye, Marco!');
   try {
-    await axios.get('http://localhost:8080/xxx');
+    await ax.get('http://localhost:8080/xxx');
   }
   catch (error) {
     expect(error.response.status).toEqual(404);

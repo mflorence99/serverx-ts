@@ -50,15 +50,16 @@ import { tap } from 'rxjs/operators';
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap((message: Message) => {
-        const { response } = message;
+        const { request, response } = message;
         response.headers['X-that'] = 'this';
+        Object.keys(request.body).forEach(k => response.headers[k] = request.body[k]);
       })
     );
   }
 }
 
 const event = <APIGatewayProxyEvent>{
-  body: 'x=y',
+  body: JSON.stringify({a: 'b', c: 'd'}),
   headers: {
     'this': 'that'
   },
@@ -112,6 +113,8 @@ test('AWSLambdaApp smoke test #1', async done => {
   expect(response.body).toEqual('"Hello, bazz"');
   expect(response.headers['X-this']).toEqual('that');
   expect(response.headers['X-that']).toEqual('this');
+  expect(response.headers['a']).toEqual('b');
+  expect(response.headers['c']).toEqual('d');
   expect(response.statusCode).toEqual(200);
   done();
 });
