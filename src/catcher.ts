@@ -1,6 +1,9 @@
 import { Message } from './serverx';
 import { Observable } from 'rxjs';
 import { Route } from './serverx';
+import { StatusCode } from './serverx';
+
+import { of } from 'rxjs';
 
 /**
  * Catcher definition
@@ -14,8 +17,8 @@ export class Catcher {
   }
 
   /** Catch an error */
-  catch(error$: Observable<any>): Observable<Message> {
-    return error$;
+  catch(error$: Observable<Error>): Observable<Message> {
+    return of({ response: { statusCode: StatusCode.INTERNAL_SERVER_ERROR } });
   }
 
 }

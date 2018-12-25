@@ -1,5 +1,5 @@
 import { ContentType } from '../serverx';
-import { Error } from '../serverx';
+import { Exception } from '../serverx';
 import { Injectable } from 'injection-js';
 import { Message } from '../serverx';
 import { Middleware } from '../middleware';
@@ -59,7 +59,7 @@ import { toArray } from 'rxjs/operators';
           // map the encoded body object back to the original message
           tap((body: any) => request.body = body),
           mapTo(message),
-          catchError(() => throwError(new Error({ statusCode: StatusCode.BAD_REQUEST })))
+          catchError(() => throwError(new Exception({ statusCode: StatusCode.BAD_REQUEST })))
         );
       })
     );

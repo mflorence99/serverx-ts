@@ -1,5 +1,6 @@
 import { Catcher } from './catcher';
 import { Class } from './serverx';
+import { Exception } from './serverx';
 import { Handler } from './handler';
 import { Message } from './serverx';
 import { Middleware } from './middleware';
@@ -36,8 +37,8 @@ export abstract class App {
     stream.pause();
     return new Observable(observer => {
       const next = chunk => observer.next(chunk);
-      const complete = () => observer.complete();
       const error = err => observer.error(err);
+      const complete = () => observer.complete();
       stream
         .on('data', next)
         .on('error', error)
@@ -75,8 +76,10 @@ export abstract class App {
       map((messages: Message[]): Message => messages[0]),
       // turn any error into a message
       catchError((error: any): Observable<Message> => {
-        return of(error).pipe(
-          mergeMap((error: any): Observable<Message> => {
+        if (error instanceof Exception)
+          return of({ response: error.exception });
+        else return of(error).pipe(
+          mergeMap((error: Error): Observable<Message> => {
             return this.makeCatcher$(request.route, error);
           })
         );

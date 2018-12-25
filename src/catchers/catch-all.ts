@@ -1,5 +1,4 @@
 import { Catcher } from '../catcher';
-import { Error } from '../serverx';
 import { Injectable } from 'injection-js';
 import { Message } from '../serverx';
 import { Observable } from 'rxjs';
@@ -18,23 +17,18 @@ import chalk from 'chalk';
 
 @Injectable() export class CatchAll extends Catcher {
 
-  catch(error$: Observable<any>): Observable<Message> {
+  catch(error$: Observable<Error>): Observable<Message> {
     return error$.pipe(
-      map((error: any) => {
-        let response: Response;
-        if (error instanceof Error)
-          response = error.error;
-        else {
-          console.log(chalk.red(error.toString()));
-          console.log(error.stack);
-          response = {
-            body: {
-              error: error.toString(),
-              stack: error.stack
-            },
-            statusCode: StatusCode.INTERNAL_SERVER_ERROR
-          };
-        }
+      map((error: Error): Message => {
+        console.log(chalk.red(error.toString()));
+        console.log(error.stack);
+        const response: Response = {
+          body: {
+            error: error.toString(),
+            stack: error.stack
+          },
+          statusCode: StatusCode.INTERNAL_SERVER_ERROR
+        };
         return { response };
       })
     );

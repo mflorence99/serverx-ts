@@ -48,11 +48,11 @@ export interface Context {
 }
 
 /**
- * Error definition
+ * Exception definition
  */
 
-export class Error<T = Response> {
-  constructor(public error: T) { }
+export class Exception<T = Response> {
+  constructor(public exception: T) { }
 }
 
 /**

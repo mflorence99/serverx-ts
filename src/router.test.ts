@@ -1,4 +1,4 @@
-import { Error } from './serverx';
+import { Exception } from './serverx';
 import { Handler } from './handler';
 import { Injectable } from 'injection-js';
 import { Message } from './serverx';
@@ -27,7 +27,7 @@ import { throwError } from 'rxjs';
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       switchMap(() =>
-        throwError(new Error({ statusCode: StatusCode.NOT_FOUND } ))
+        throwError(new Exception({ statusCode: StatusCode.NOT_FOUND } ))
       )
     );
   }
