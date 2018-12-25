@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { CatchAll } from './catchers/catch-all';
 import { Class } from './serverx';
 import { Map } from './serverx';
@@ -8,8 +10,6 @@ import { RedirectTo } from './handlers/redirect-to';
 import { ReflectiveInjector } from 'injection-js';
 import { Route } from './serverx';
 import { StatusCode200 } from './handlers/statuscode-200';
-
-import 'reflect-metadata';
 
 /**
  * Router implementation
