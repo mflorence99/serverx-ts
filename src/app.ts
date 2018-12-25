@@ -4,6 +4,7 @@ import { Exception } from './serverx';
 import { Handler } from './handler';
 import { Message } from './serverx';
 import { Middleware } from './middleware';
+import { MiddlewareMethod } from './middleware';
 import { Observable } from 'rxjs';
 import { Readable } from 'stream';
 import { Route } from './serverx';
@@ -53,7 +54,7 @@ export abstract class App {
   }
 
   protected makePipeline(message: Message) {
-    const { request } = message;
+    const { context, request } = message;
     return pipe(
       // run pre-handle middleware
       mergeMap((message: Message): Observable<Message[]> => {
@@ -77,13 +78,26 @@ export abstract class App {
       // turn any error into a message
       catchError((error: any): Observable<Message> => {
         if (error instanceof Exception)
-          return of({ response: error.exception });
+          return of({ context, request, response: error.exception });
         else return of(error).pipe(
+          // the catcher can create the response only
           mergeMap((error: Error): Observable<Message> => {
             return this.makeCatcher$(request.route, error);
+          }),
+          // ... so we merge back in the original context, request
+          map((message: Message): Message => {
+            return { context, request, response: message.response };
           })
         );
       }),
+      // run post-catc h middleware
+      // NOTE: in reverse order
+      mergeMap((message: Message): Observable<Message[]> => {
+        const middlewares$ = this.makeMiddlewares$(request.route, message, 'postcatch');
+        return combineLatest(middlewares$.reverse());
+      }),
+      // NOTE: because of muatability, they're all the same message
+      map((messages: Message[]): Message => messages[0]),
     );
   }
 
@@ -106,7 +120,7 @@ export abstract class App {
 
   private makeMiddlewares$(route: Route,
                            message: Message,
-                           method: 'prehandle' | 'posthandle'): Observable<Message>[] {
+                           method: MiddlewareMethod): Observable<Message>[] {
     const middlewares = [];
     // we find all the middlewares up the route tree
     while (route) {

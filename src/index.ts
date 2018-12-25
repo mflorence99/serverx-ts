@@ -10,3 +10,4 @@ export * from './middlewares';
 export * from './router';
 export * from './serverx';
 export * from './service';
+export * from './services';

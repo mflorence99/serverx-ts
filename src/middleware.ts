@@ -6,6 +6,8 @@ import { Route } from './serverx';
  * Middleware definition
  */
 
+export type MiddlewareMethod = 'prehandle' | 'posthandle' | 'postcatch';
+
 export class Middleware {
 
   /** Instantiate a set of Middlewares from a Route or Class[] */
@@ -14,13 +16,18 @@ export class Middleware {
       .map(middleware => <Middleware>route.injector.get(middleware));
   }
 
-  /** Pre-handle a message */
+  /** Process a message BEFORE handler */
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$;
   }
 
-  /** Post-handle a message */
+  /** Process a message AFTER handler */
   posthandle(message$: Observable<Message>): Observable<Message> {
+    return message$;
+  }
+
+  /** Process a message AFTER catcher */
+  postcatch(message$: Observable<Message>): Observable<Message> {
     return message$;
   }
 

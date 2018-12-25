@@ -4,6 +4,7 @@ import { IncomingHttpHeaders } from 'http';
 import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
 import { OutgoingHttpHeaders } from 'http';
+import { Provider } from 'injection-js';
 import { ReflectiveInjector } from 'injection-js';
 import { URLSearchParams } from 'url';
 
@@ -79,12 +80,6 @@ export interface Message<TRequest = Request,
  */
 
 export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE';
-
-/**
- * Provider definition
- */
-
-export type Provider = Class | { provide: Class, useClass: Class };
 
 /**
  * Request definition

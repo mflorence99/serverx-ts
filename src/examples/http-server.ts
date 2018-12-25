@@ -1,6 +1,7 @@
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
+import { Logger } from '../middlewares/logger';
 import { Message } from '../serverx';
 import { Observable } from 'rxjs';
 import { Route } from '../serverx';
@@ -40,6 +41,7 @@ const routes: Route[] = [
   {
     path: '',
     methods: ['GET'],
+    middlewares: [Logger],
     children: [
 
       {

@@ -13,7 +13,9 @@ import chalk from 'chalk';
 
   /** Log message */
   logMessage(message: Message): void {
-
+    const { request, response } = message;
+    // TODO: temporary
+    console.log(`${request.method} ${request.path} ${response.statusCode}`);
   }
 
 }

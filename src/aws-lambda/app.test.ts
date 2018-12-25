@@ -7,6 +7,7 @@ import { CatchAll } from '../catchers/catch-all';
 import { Context } from 'aws-lambda';
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
+import { Logger } from '../middlewares/logger';
 import { LogProvider } from '../services/log-provider';
 import { LogProviderAlt } from '../services/log-provider-alt';
 import { Message } from '../serverx';
@@ -99,33 +100,41 @@ const context = <Context>{
 const routes: Route[] = [
 
   {
-    methods: ['GET'],
-    path: '/foo/bar',
-    handler: Hello,
-    middlewares: [Middleware1, Middleware2]
-  },
+    path: '',
+    middlewares: [Logger],
+    children: [
 
-  {
-    methods: ['PUT'],
-    path: '/foo/bar',
-    handler: Goodbye,
-    middlewares: [Middleware1]
-  },
+      {
+        methods: ['GET'],
+        path: '/foo/bar',
+        handler: Hello,
+        middlewares: [Middleware1, Middleware2]
+      },
 
-  {
-    methods: ['GET'],
-    path: '/explode',
-    catcher: CatchAll,
-    services: [{ provide: LogProvider, useClass: LogProviderAlt }],
-    handler: Explode
-  },
+      {
+        methods: ['PUT'],
+        path: '/foo/bar',
+        handler: Goodbye,
+        middlewares: [Middleware1]
+      },
 
-  {
-    methods: ['GET'],
-    path: '/not-here',
-    redirectTo: 'http://over-there.com'
+      {
+        methods: ['GET'],
+        path: '/explode',
+        catcher: CatchAll,
+        services: [{ provide: LogProvider, useClass: LogProviderAlt }],
+        handler: Explode
+      },
+
+      {
+        methods: ['GET'],
+        path: '/not-here',
+        redirectTo: 'http://over-there.com'
+      }
+
+    ]
+
   }
-
 ];
 
 const app = new AWSLambdaApp(routes);
