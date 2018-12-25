@@ -2,6 +2,7 @@ import 'reflect-metadata';
 
 import { CatchAll } from './catchers/catch-all';
 import { Class } from './serverx';
+import { LogProvider } from './services/log-provider';
 import { Map } from './serverx';
 import { Message } from './serverx';
 import { Method } from './serverx';
@@ -22,11 +23,13 @@ export class Router {
   /** ctor */
   constructor(routes: Route[],
               required: Class[] = []) { 
-    this.routes = (required.length === 0)? routes : [{
+    this.routes = [{
       path: '',
       middlewares: required,
       catcher: CatchAll,
-      children: routes
+      services: [LogProvider],
+      children: routes,
+      phantom: true
     }];
   }
 

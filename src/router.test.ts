@@ -47,7 +47,6 @@ const routes: Route[] = [
 
   {
     path: '',
-    data: '/',
     middlewares: [Middleware1, Middleware2],
     services: [Service2],
     children: [
@@ -134,16 +133,6 @@ const routes: Route[] = [
 ];
 
 const router = new Router(routes);
-
-test('GET / matches', () => {
-  const message: Message = { request: { method: 'GET', path: '/' } };
-  const route = router.route(message).request.route;
-  expect(route.data).toEqual('/');
-  const middlewares = Middleware.makeInstances(route);
-  expect(middlewares.length).toEqual(2);
-  expect(middlewares[0] instanceof Middleware1).toBeTruthy();
-  expect(middlewares[1] instanceof Middleware2).toBeTruthy();
-});
 
 test('GET /fizz no match', () => {
   const message: Message = { request: { method: 'GET', path: '/fizz' } };

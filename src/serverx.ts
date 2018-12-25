@@ -81,6 +81,12 @@ export interface Message<TRequest = Request,
 export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE';
 
 /**
+ * Provider definition
+ */
+
+export type Provider = Class | { provide: Class, useClass: Class };
+
+/**
  * Request definition
  */
 
@@ -127,7 +133,7 @@ export interface Route {
   phantom?: boolean;
   redirectAs?: number;
   redirectTo?: string;
-  services?: Class[];
+  services?: Provider[];
 }
 
 /**

@@ -3,9 +3,12 @@ import * as path from 'path';
 
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { AWSLambdaApp } from './app';
+import { CatchAll } from '../catchers/catch-all';
 import { Context } from 'aws-lambda';
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
+import { LogProvider } from '../services/log-provider';
+import { LogProviderAlt } from '../services/log-provider-alt';
 import { Message } from '../serverx';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
@@ -112,6 +115,8 @@ const routes: Route[] = [
   {
     methods: ['GET'],
     path: '/explode',
+    catcher: CatchAll,
+    services: [{ provide: LogProvider, useClass: LogProviderAlt }],
     handler: Explode
   },
 
