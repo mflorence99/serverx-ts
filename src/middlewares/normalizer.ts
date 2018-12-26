@@ -26,18 +26,21 @@ import { tap } from 'rxjs/operators';
         const statusCode = response.statusCode || StatusCode.OK;
         // if not already set, try to deduce MIME type from content or path
         const headers = { ...response.headers };
-        if (response.body && !headers['Content-Type']) {
-          const fromBuffer = Buffer.isBuffer(response.body) && fileType(response.body);
-          const mimeType = fromBuffer ? fromBuffer.mime : (mime.getType(request.path) || ContentType.APPLICATION_JSON);
+        if (!headers['Content-Type']) {
+          const fromBuffer = response.body && Buffer.isBuffer(response.body) && fileType(response.body);
+          const mimeType = fromBuffer? fromBuffer.mime : (mime.getType(request.path) || ContentType.APPLICATION_JSON);
           headers['Content-Type'] = mimeType;
         }
-        // set Content-Length and stringify any JSON body
+        // stringify any JSON object
         let body = response.body;
-        if (body) {
-          if (headers['Content-Type'] === ContentType.APPLICATION_JSON)
-            body = JSON.stringify(response.body);
+        if (body 
+         && !(body instanceof Buffer) 
+         && (headers['Content-Type'] === ContentType.APPLICATION_JSON))
+          body = JSON.stringify(response.body);
+        // set Content-Length 
+        if (body) 
           headers['Content-Length'] = Buffer.byteLength(body);
-        }
+          // now we have a normalized messsage
         message.response = { body, headers, statusCode };
       })
     );

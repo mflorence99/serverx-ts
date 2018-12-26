@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { URLSearchParams } from 'url';
 
+import { fromReadableStream } from '../utils';
 import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -64,7 +65,7 @@ export class HttpApp extends App {
           query: parsed.searchParams || new URLSearchParams(),
           remoteAddr: this.req.connection? this.req.connection.remoteAddress : null,
           route: null,
-          stream$: this.req.on ? this.fromReadableStream(this.req) : null,
+          stream$: this.req.on ? fromReadableStream(this.req) : null,
           timestamp: Date.now()
         },
         response: {

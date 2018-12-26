@@ -6,7 +6,6 @@ import { Message } from './serverx';
 import { Middleware } from './middleware';
 import { MiddlewareMethod } from './middleware';
 import { Observable } from 'rxjs';
-import { Readable } from 'stream';
 import { Route } from './serverx';
 import { Router } from './router';
 
@@ -32,26 +31,6 @@ export abstract class App {
   }
 
   // protected methods
-
-  // @see https://github.com/marblejs/marble/blob/master/packages/middleware-body/src/index.ts
-  protected fromReadableStream(stream: Readable): Observable<any> {
-    stream.pause();
-    return new Observable(observer => {
-      const next = chunk => observer.next(chunk);
-      const error = err => observer.error(err);
-      const complete = () => observer.complete();
-      stream
-        .on('data', next)
-        .on('error', error)
-        .on('end', complete)
-        .resume();
-      return () => {
-        stream.removeListener('data', next);
-        stream.removeListener('error', error);
-        stream.removeListener('end', complete);
-      };
-    });
-  }
 
   protected makePipeline(message: Message) {
     const { context, request } = message;

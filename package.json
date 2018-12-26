@@ -39,6 +39,7 @@
     "make-coverage-badge": "1",
     "markdown-toc": "1",
     "rimraf": "2",
+    "string-to-stream": "^1.1.1",
     "ts-jest": "23",
     "ts-node": "7",
     "tslint": "5",
