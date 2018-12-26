@@ -7,6 +7,7 @@ import { CatchAll } from '../catchers/catch-all';
 import { Context } from 'aws-lambda';
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
+import { LOG_PROVIDER_OPTS } from '../services/log-provider';
 import { Logger } from '../middlewares/logger';
 import { LogProvider } from '../services/log-provider';
 import { Message } from '../serverx';
@@ -15,8 +16,6 @@ import { Observable } from 'rxjs';
 import { Route } from '../serverx';
 
 import { tap } from 'rxjs/operators';
-
-import chalk from 'chalk';
 
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
@@ -74,13 +73,6 @@ import chalk from 'chalk';
   }
 }
 
-@Injectable() export class YellowLog extends LogProvider {
-  logError(error: Error): void {
-    console.log(chalk.yellowBright(error.toString()));
-    console.log(error.stack);
-  }
-}
-
 const event = <APIGatewayProxyEvent>{
   body: JSON.stringify({a: 'b', c: 'd'}),
   headers: {
@@ -110,6 +102,8 @@ const routes: Route[] = [
   {
     path: '',
     middlewares: [Logger],
+    catcher: CatchAll,
+    services: [LogProvider, { provide: LOG_PROVIDER_OPTS, useValue: { silent: true } }],
     children: [
 
       {
@@ -129,8 +123,6 @@ const routes: Route[] = [
       {
         methods: ['GET'],
         path: '/explode',
-        catcher: CatchAll,
-        services: [{ provide: LogProvider, useClass: YellowLog }],
         handler: Explode
       },
 

@@ -1,3 +1,4 @@
+import { CatchAll } from '../catchers/catch-all';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
@@ -53,6 +54,7 @@ const routes: Route[] = [
     methods: ['GET'],
     middlewares: [Logger],
     services: [LogProvider, { provide: LOG_PROVIDER_OPTS, useValue: { colorize: true, format: 'dev' } }],
+    catcher: CatchAll,
     children: [
 
       {

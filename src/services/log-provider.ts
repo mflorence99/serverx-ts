@@ -14,13 +14,15 @@ export interface LogProviderOpts {
   colorize?: boolean;
   // @see https://github.com/expressjs/morgan
   format?: 'common' | 'dev' | 'short' | 'tiny';
+  silent?: boolean;
 }
 
 export const LOG_PROVIDER_OPTS = new InjectionToken<LogProviderOpts>('LOG_PROVIDER_OPTS');
 
 export const LOG_PROVIDER_DEFAULT_OPTS: LogProviderOpts = {
   colorize: true,
-  format: 'common'
+  format: 'common',
+  silent: false
 };
 
 /**
@@ -40,12 +42,17 @@ export const LOG_PROVIDER_DEFAULT_OPTS: LogProviderOpts = {
 
   /** Log error */
   logError(error: Error): void {
-    console.log(this.get(error.toString(), 'redBright'));
-    console.log(error.stack);
+    if (!this.opts.silent) {
+      console.log(this.get(error.toString(), 'redBright'));
+      console.log(error.stack);
+    }
   }
 
   /** Log message */
   logMessage(message: Message): void {
+    // quick exit if silent
+    if (this.opts.silent) 
+      return;
     const { request, response } = message;
     // response time
     const ms = `${Date.now() - request.timestamp}ms`;
