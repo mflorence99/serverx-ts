@@ -12,7 +12,7 @@ import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 // NOTE: this middleware is required
-const MIDDLEWARE = [Normalizer];
+const MIDDLEWARES = [Normalizer];
 
 /**
  * AWS Lambda application
@@ -26,7 +26,7 @@ export class AWSLambdaApp extends App {
 
   /** ctor */
   constructor(routes: Route[]) {
-    super(routes, MIDDLEWARE);
+    super(routes, MIDDLEWARES);
   }
 
   /** AWS Lambda handler method */
@@ -43,12 +43,15 @@ export class AWSLambdaApp extends App {
         // @see https://stackoverflow.com/questions/41648467
         body: (this.event.body != null) ? JSON.parse(this.event.body) : { },
         headers: this.event.headers || { },
+        httpVersion: '1.1',
         method: <Method>this.event.httpMethod,
         params: { },
         path: this.event.path,
         query: this.makeSearchParamsFromEvent(this.event),
+        remoteAddr: null,
         route: null,
-        stream$: null
+        stream$: null,
+        timestamp: Date.now()
       },
       response: {
         body: null,

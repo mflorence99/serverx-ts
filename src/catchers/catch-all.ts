@@ -1,4 +1,5 @@
 import { Catcher } from '../catcher';
+import { ContentType } from '../serverx';
 import { Injectable } from 'injection-js';
 import { LogProvider } from '../services/log-provider';
 import { Message } from '../serverx';
@@ -27,10 +28,11 @@ import { map } from 'rxjs/operators';
         this.log.logError(error);
         // turn it into a message
         const response: Response = {
-          body: {
+          body: JSON.stringify({
             error: error.toString(),
             stack: error.stack
-          },
+          }),
+          headers: { 'Content-Type': ContentType.APPLICATION_JSON },
           statusCode: StatusCode.INTERNAL_SERVER_ERROR
         };
         return { response };

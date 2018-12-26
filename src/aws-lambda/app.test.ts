@@ -9,13 +9,14 @@ import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
 import { Logger } from '../middlewares/logger';
 import { LogProvider } from '../services/log-provider';
-import { LogProviderAlt } from '../services/log-provider-alt';
 import { Message } from '../serverx';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { Route } from '../serverx';
 
 import { tap } from 'rxjs/operators';
+
+import chalk from 'chalk';
 
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
@@ -73,6 +74,13 @@ import { tap } from 'rxjs/operators';
   }
 }
 
+@Injectable() export class YellowLog extends LogProvider {
+  logError(error: Error): void {
+    console.log(chalk.yellowBright(error.toString()));
+    console.log(error.stack);
+  }
+}
+
 const event = <APIGatewayProxyEvent>{
   body: JSON.stringify({a: 'b', c: 'd'}),
   headers: {
@@ -122,7 +130,7 @@ const routes: Route[] = [
         methods: ['GET'],
         path: '/explode',
         catcher: CatchAll,
-        services: [{ provide: LogProvider, useClass: LogProviderAlt }],
+        services: [{ provide: LogProvider, useClass: YellowLog }],
         handler: Explode
       },
 
@@ -174,7 +182,7 @@ test('AWSLambdaApp smoke test #4', async done => {
 
 test('AWSLambdaApp error 500', async done => {
   const response = await app.handle({ ...event, httpMethod: 'GET', path: '/explode' }, context);
-  expect(response.body.error).toEqual(`TypeError: Cannot set property 'y' of undefined`);
+  expect(response.body).toContain(`TypeError: Cannot set property 'y' of undefined`);
   expect(response.statusCode).toEqual(500);
   done();
 });

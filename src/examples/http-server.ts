@@ -1,24 +1,35 @@
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
+import { LOG_PROVIDER_OPTS } from '../services/log-provider';
 import { Logger } from '../middlewares/logger';
+import { LogProvider } from '../services/log-provider';
 import { Message } from '../serverx';
 import { Observable } from 'rxjs';
 import { Route } from '../serverx';
 
 import { createServer } from 'http';
-import { map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 import chalk from 'chalk';
 
+@Injectable() class Explode extends Handler {
+  handle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe(
+      tap((message: Message) => {
+        const { response } = message;
+        response['x']['y'] = 'z';
+      })
+    );
+  }
+}
 
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
-        const body = 'Hello, http!';
-        return { ...message, response: { ...response, body } };
+        response.body = 'Hello, http!';
       })
     );
   }
@@ -27,10 +38,9 @@ import chalk from 'chalk';
 @Injectable() class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      map(message => {
+      tap((message: Message) => {
         const { response } = message;
-        const body = 'Goodbye, http!';
-        return { ...message, response: { ...response, body } };
+        response.body = 'Goodbye, http!';
       })
     );
   }
@@ -42,6 +52,7 @@ const routes: Route[] = [
     path: '',
     methods: ['GET'],
     middlewares: [Logger],
+    services: [LogProvider, { provide: LOG_PROVIDER_OPTS, useValue: { colorize: true, format: 'dev' } }],
     children: [
 
       {
@@ -56,6 +67,18 @@ const routes: Route[] = [
 
       {
         path: '/isalive'
+      },
+
+      {
+        methods: ['GET'],
+        path: '/explode',
+        handler: Explode
+      },
+
+      {
+        methods: ['GET'],
+        path: '/not-here',
+        redirectTo: 'http://over-there.com'
       }
 
     ]
@@ -67,6 +90,6 @@ const app = new HttpApp(routes);
 const listener = app.listen();
 const server = createServer(listener)
   .on('listening', () => {
-    console.log(chalk.cyan('Examples: http-server listening on port 4200'));
+    console.log(chalk.cyanBright('Examples: http-server listening on port 4200'));
   });
 server.listen(4200);

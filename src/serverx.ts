@@ -91,12 +91,15 @@ export interface Request<TBody = any,
                          TQuery = URLSearchParams> {
   body?: TBody;
   headers?: THeaders;
+  httpVersion?: string;
   method: Method;
   params?: TParams;
   path: string;
   query?: TQuery;
+  remoteAddr?: string;
   route?: Route;
   stream$?: Observable<any>;
+  timestamp?: number;
 }
 
 /**

@@ -90,7 +90,7 @@ export abstract class App {
           })
         );
       }),
-      // run post-catc h middleware
+      // run post-catch middleware
       // NOTE: in reverse order
       mergeMap((message: Message): Observable<Message[]> => {
         const middlewares$ = this.makeMiddlewares$(request.route, message, 'postcatch');

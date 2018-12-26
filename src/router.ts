@@ -22,10 +22,10 @@ export class Router {
 
   /** ctor */
   constructor(routes: Route[],
-              required: Class[] = []) { 
+              middlewares: Class[] = []) { 
     this.routes = [{
       path: '',
-      middlewares: required,
+      middlewares: middlewares,
       catcher: CatchAll,
       services: [LogProvider],
       children: routes,

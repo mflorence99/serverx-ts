@@ -21,7 +21,7 @@ import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
 // NOTE: this middleware is required
-const MIDDLEWARE = [BodyParser, Normalizer];
+const MIDDLEWARES = [BodyParser, Normalizer];
 
 /**
  * Http application
@@ -38,7 +38,7 @@ export class HttpApp extends App {
 
   /** ctor */
   constructor(routes: Route[]) {
-    super(routes, MIDDLEWARE);
+    super(routes, MIDDLEWARES);
   }
 
   /** Create a listener */
@@ -57,12 +57,15 @@ export class HttpApp extends App {
         request: {
           body: { },
           headers: this.req.headers || { },
+          httpVersion: this.req.httpVersion,
           method: <Method>this.req.method,
           params: { },
           path: parsed.pathname,
           query: parsed.searchParams || new URLSearchParams(),
+          remoteAddr: this.req.connection? this.req.connection.remoteAddress : null,
           route: null,
-          stream$: this.req.on? this.fromReadableStream(this.req) : null
+          stream$: this.req.on ? this.fromReadableStream(this.req) : null,
+          timestamp: Date.now()
         },
         response: {
           body: null,
