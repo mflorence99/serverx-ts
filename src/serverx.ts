@@ -1,4 +1,3 @@
-import { Catcher } from './catcher';
 import { Handler } from './handler';
 import { IncomingHttpHeaders } from 'http';
 import { Middleware } from './middleware';
@@ -118,7 +117,6 @@ export interface Response<TBody = any,
  */
 
 export interface Route {
-  catcher?: Class<Catcher>;
   children?: Route[];
   data?: any;
   handler?: Class<Handler>;

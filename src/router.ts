@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 
-import { CatchAll } from './catchers/catch-all';
 import { Class } from './serverx';
 import { LogProvider } from './services/log-provider';
 import { Map } from './serverx';
@@ -26,7 +25,6 @@ export class Router {
     this.routes = [{
       path: '',
       middlewares: middlewares,
-      catcher: CatchAll,
       services: [LogProvider],
       children: routes,
       phantom: true
@@ -61,8 +59,6 @@ export class Router {
     if (!route.injector) {
       const providers = (route.services || []).concat(route.middlewares || []);
       providers.push(route.handler);
-      if (route.catcher)
-        providers.push(route.catcher);
       const resolved = ReflectiveInjector.resolve(providers);
       if (parent)
         route.injector = parent.injector.createChildFromResolved(resolved);

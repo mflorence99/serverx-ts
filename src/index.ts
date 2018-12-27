@@ -1,6 +1,4 @@
 export * from './aws-lambda';
-export * from './catcher';
-export * from './catchers';
 export * from './examples';
 export * from './handler';
 export * from './handlers';

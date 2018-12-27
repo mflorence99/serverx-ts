@@ -1,13 +1,15 @@
-import { Catcher } from './catcher';
 import { Class } from './serverx';
+import { ContentType } from './serverx';
 import { Exception } from './serverx';
 import { Handler } from './handler';
 import { Message } from './serverx';
 import { Middleware } from './middleware';
 import { MiddlewareMethod } from './middleware';
 import { Observable } from 'rxjs';
+import { Response } from './serverx';
 import { Route } from './serverx';
 import { Router } from './router';
+import { StatusCode } from './serverx';
 
 import { catchError } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
@@ -33,7 +35,7 @@ export abstract class App {
   // protected methods
 
   protected makePipeline(message: Message) {
-    const { context, request } = message;
+    const { request } = message;
     return pipe(
       // run pre-handle middleware
       mergeMap((message: Message): Observable<Message[]> => {
@@ -56,18 +58,7 @@ export abstract class App {
       map((messages: Message[]): Message => messages[0]),
       // turn any error into a message
       catchError((error: any): Observable<Message> => {
-        if (error instanceof Exception)
-          return of({ context, request, response: error.exception });
-        else return of(error).pipe(
-          // the catcher can create the response only
-          mergeMap((error: Error): Observable<Message> => {
-            return this.makeCatcher$(request.route, error);
-          }),
-          // ... so we merge back in the original context, request
-          map((message: Message): Message => {
-            return { context, request, response: message.response };
-          })
-        );
+        return this.catchError$(error, message);
       }),
       // run post-catch middleware
       // NOTE: in reverse order
@@ -82,13 +73,23 @@ export abstract class App {
 
   // private methods
 
-  private makeCatcher$(route: Route,
-                       error: any): Observable<Message> {
-    // we find the first available catcher up the route tree
-    while (route && !route.catcher) 
-      route = route.parent;
-    const catcher = Catcher.makeInstance(route);
-    return catcher? catcher.catch(of(error)) : of(/* should never happen! */);
+  private catchError$(error: any,
+                      message: Message): Observable<Message> {
+    const { context, request } = message;
+    if (error instanceof Exception)
+      return of({ context, request, response: error.exception });
+    else {
+      const response: Response = {
+        // NOTE: we have to stringify manually because we are now past the Normalizer
+        body: JSON.stringify({
+          error: error.toString(),
+          stack: error.stack
+        }),
+        headers: { 'Content-Type': ContentType.APPLICATION_JSON },
+        statusCode: StatusCode.INTERNAL_SERVER_ERROR
+      };
+      return of({ context, request, response });
+    }
   }
 
   private makeHandler$(route: Route,

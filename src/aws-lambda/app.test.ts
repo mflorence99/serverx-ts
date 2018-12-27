@@ -3,13 +3,9 @@ import * as path from 'path';
 
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { AWSLambdaApp } from './app';
-import { CatchAll } from '../catchers/catch-all';
 import { Context } from 'aws-lambda';
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
-import { LOG_PROVIDER_OPTS } from '../services/log-provider';
-import { Logger } from '../middlewares/logger';
-import { LogProvider } from '../services/log-provider';
 import { Message } from '../serverx';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
@@ -101,9 +97,6 @@ const routes: Route[] = [
 
   {
     path: '',
-    middlewares: [Logger],
-    catcher: CatchAll,
-    services: [LogProvider, { provide: LOG_PROVIDER_OPTS, useValue: { silent: true } }],
     children: [
 
       {

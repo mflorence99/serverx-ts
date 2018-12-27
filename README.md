@@ -1,4 +1,4 @@
-# serverx-ts
+# ServeRX-ts
 
 [![Build Status](https://travis-ci.org/mflorence99/serverx-ts.svg?branch=master)](https://travis-ci.org/mflorence99/serverx-ts) 
 [![Jest Coverage](./coverage.svg)]()

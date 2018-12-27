@@ -1,12 +1,10 @@
-import { CatchAll } from '../catchers/catch-all';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
-import { LOG_PROVIDER_OPTS } from '../services/log-provider';
-import { Logger } from '../middlewares/logger';
-import { LogProvider } from '../services/log-provider';
 import { Message } from '../serverx';
 import { Observable } from 'rxjs';
+import { REQUEST_LOGGER_OPTS } from '../middlewares/request-logger';
+import { RequestLogger } from '../middlewares/request-logger';
 import { Route } from '../serverx';
 
 import { createServer } from 'http';
@@ -52,9 +50,8 @@ const routes: Route[] = [
   {
     path: '',
     methods: ['GET'],
-    middlewares: [Logger],
-    services: [LogProvider, { provide: LOG_PROVIDER_OPTS, useValue: { colorize: true, format: 'dev' } }],
-    catcher: CatchAll,
+    middlewares: [RequestLogger],
+    services: [{ provide: REQUEST_LOGGER_OPTS, useValue: { colorize: true } }],
     children: [
 
       {
