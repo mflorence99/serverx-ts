@@ -17,8 +17,7 @@ import { tap } from 'rxjs/operators';
       tap((message: Message) => {
         const { request, response } = message;
         if (request.method === 'OPTIONS') {
-          const otherMethods = ['CONNECT', 'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'TRACE'];
-          response.headers['Allow'] = Object.keys(otherMethods).join(',');
+          response.headers['Allow'] = 'CONNECT,DELETE,GET,HEAD,PATCH,POST,PUT,TRACE';
           response.statusCode = StatusCode.OK;
         }
         else response.statusCode = response.statusCode || StatusCode.NOT_FOUND;

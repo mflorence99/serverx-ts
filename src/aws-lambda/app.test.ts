@@ -139,71 +139,75 @@ const routes: Route[] = [
 
 const app = new AWSLambdaApp(routes);
 
-test('AWSLambdaApp smoke test #1', async done => {
-  const response = await app.handle({ ...event, httpMethod: 'GET' }, context);
-  expect(response.body).toEqual('"Hello, bazz"');
-  expect(response.headers['X-this']).toEqual('that');
-  expect(response.headers['X-that']).toEqual('this');
-  expect(response.headers['a']).toEqual('b');
-  expect(response.headers['c']).toEqual('d');
-  expect(response.statusCode).toEqual(200);
-  done();
-});
+describe('AWSLambdaApp unit tests', () => {
 
-test('AWSLambdaApp smoke test #2', async done => {
-  const response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
-  expect(response.body).toEqual('"Goodbye, bozz"');
-  expect(response.headers['X-this']).toEqual('that');
-  expect(response.headers['X-that']).toBeUndefined();
-  expect(response.statusCode).toEqual(200);
-  done();
-});
-
-test('AWSLambdaApp smoke test #3', async done => {
-  const response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
-  expect(response.statusCode).toEqual(404);
-  done();
-});
-
-test('AWSLambdaApp smoke test #4', async done => {
-  const response = await app.handle({ ...event, httpMethod: 'GET', path: '/not-here' }, context);
-  expect(response.headers['Location']).toEqual('http://over-there.com');
-  expect(response.statusCode).toEqual(301);
-  done();
-});
-
-test('AWSLambdaApp error 500', async done => {
-  const response = await app.handle({ ...event, httpMethod: 'GET', path: '/explode' }, context);
-  expect(response.body).toContain(`TypeError: Cannot set property 'y' of undefined`);
-  expect(response.statusCode).toEqual(500);
-  done();
-});
-
-test('AWSLambdaApp lambda local 200', async done => {
-  const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
-  const response = await lambdaLocal.execute({
-    event: { ...apiGatewayEvent, path: '/foo/bar' },
-    lambdaFunc: { handler: (event, context) => app.handle(event, context) },
-    lambdaHandler: 'handler',
-    profilePath: path.join(__dirname, 'credentials'),
-    profileName: 'default',
-    verboseLevel: 0
+  test('smoke test #1', async done => {
+    const response = await app.handle({ ...event, httpMethod: 'GET' }, context);
+    expect(response.body).toEqual('"Hello, bazz"');
+    expect(response.headers['X-this']).toEqual('that');
+    expect(response.headers['X-that']).toEqual('this');
+    expect(response.headers['a']).toEqual('b');
+    expect(response.headers['c']).toEqual('d');
+    expect(response.statusCode).toEqual(200);
+    done();
   });
-  expect(response.body).toEqual('"Hello, null"');
-  expect(response.statusCode).toEqual(200);
-  done();
-});
 
-test('AWSLambdaApp lambda local 404', async done => {
-  const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
-  const response = await lambdaLocal.execute({
-    event: { ...apiGatewayEvent, path: '/xxx' },
-    lambdaFunc: { handler: (event, context) => app.handle(event, context) },
-    lambdaHandler: 'handler',
-    profilePath: path.join(__dirname, 'credentials'),
-    profileName: 'default',
-    verboseLevel: 0
+  test('smoke test #2', async done => {
+    const response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
+    expect(response.body).toEqual('"Goodbye, bozz"');
+    expect(response.headers['X-this']).toEqual('that');
+    expect(response.headers['X-that']).toBeUndefined();
+    expect(response.statusCode).toEqual(200);
+    done();
   });
-  expect(response.statusCode).toEqual(404);
-  done();
+
+  test('smoke test #3', async done => {
+    const response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
+    expect(response.statusCode).toEqual(404);
+    done();
+  });
+
+  test('smoke test #4', async done => {
+    const response = await app.handle({ ...event, httpMethod: 'GET', path: '/not-here' }, context);
+    expect(response.headers['Location']).toEqual('http://over-there.com');
+    expect(response.statusCode).toEqual(301);
+    done();
+  });
+
+  test('error 500', async done => {
+    const response = await app.handle({ ...event, httpMethod: 'GET', path: '/explode' }, context);
+    expect(response.body).toContain(`TypeError: Cannot set property 'y' of undefined`);
+    expect(response.statusCode).toEqual(500);
+    done();
+  });
+
+  test('lambda local 200', async done => {
+    const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
+    const response = await lambdaLocal.execute({
+      event: { ...apiGatewayEvent, path: '/foo/bar' },
+      lambdaFunc: { handler: (event, context) => app.handle(event, context) },
+      lambdaHandler: 'handler',
+      profilePath: path.join(__dirname, 'credentials'),
+      profileName: 'default',
+      verboseLevel: 0
+    });
+    expect(response.body).toEqual('"Hello, null"');
+    expect(response.statusCode).toEqual(200);
+    done();
+  });
+
+  test('lambda local 404', async done => {
+    const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
+    const response = await lambdaLocal.execute({
+      event: { ...apiGatewayEvent, path: '/xxx' },
+      lambdaFunc: { handler: (event, context) => app.handle(event, context) },
+      lambdaHandler: 'handler',
+      profilePath: path.join(__dirname, 'credentials'),
+      profileName: 'default',
+      verboseLevel: 0
+    });
+    expect(response.statusCode).toEqual(404);
+    done();
+  });
+
 });

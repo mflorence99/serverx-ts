@@ -102,57 +102,61 @@ const ax = axios.create({
 
 // @see https://angularfirebase.com/snippets/testing-rxjs-observables-with-jest/
 
-test('HttpApp smoke test #1', done => {
-  const app = new HttpApp(routes);
-  const listener = app.listen();
-  app['response$'].subscribe(response => {
-    expect(response.body).toEqual('"Hello, http!"');
-    expect(response.headers['X-this']).toEqual('that');
-    expect(response.headers['X-that']).toEqual('this');
-    expect(response.statusCode).toEqual(200);
+describe('HttpApp unit tests', () => {
+
+  test('smoke test #1', done => {
+    const app = new HttpApp(routes);
+    const listener = app.listen();
+    app['response$'].subscribe(response => {
+      expect(response.body).toEqual('"Hello, http!"');
+      expect(response.headers['X-this']).toEqual('that');
+      expect(response.headers['X-that']).toEqual('this');
+      expect(response.statusCode).toEqual(200);
+      done();
+    });
+    listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
+  });
+
+  test('smoke test #2', done => {
+    const app = new HttpApp(routes);
+    const listener = app.listen();
+    app['response$'].subscribe(response => {
+      expect(response.body).toEqual('"Goodbye, http!"');
+      expect(response.headers['X-this']).toEqual('that');
+      expect(response.headers['X-that']).toBeUndefined();
+      expect(response.statusCode).toEqual(200);
+      done();
+    });
+    listener({ method: 'PUT', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
+  });
+
+  test('smoke test #3', done => {
+    const app = new HttpApp(routes);
+    const listener = app.listen();
+    app['response$'].subscribe(response => {
+      expect(response.statusCode).toEqual(404);
+      done();
+    });
+    listener({ method: 'PUT', url: '/xxx' } as IncomingMessage, { } as OutgoingMessage);
+  });
+
+  test('local 200/404 and body parse', async done => {
+    const app = new HttpApp(routes);
+    const listener = app.listen();
+    const server = createServer(listener).listen(8080);
+    let response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'GET' });
+    expect(response.data).toEqual('Hello, http!');
+    expect(response.status).toEqual(200);
+    response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': ContentType.APPLICATION_JSON } });
+    expect(response.data).toEqual('Goodbye, Marco!');
+    try {
+      await ax.get('http://localhost:8080/xxx');
+    }
+    catch (error) {
+      expect(error.response.status).toEqual(404);
+    }
+    server.close();
     done();
   });
-  listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
-});
 
-test('HttpApp smoke test #2', done => {
-  const app = new HttpApp(routes);
-  const listener = app.listen();
-  app['response$'].subscribe(response => {
-    expect(response.body).toEqual('"Goodbye, http!"');
-    expect(response.headers['X-this']).toEqual('that');
-    expect(response.headers['X-that']).toBeUndefined();
-    expect(response.statusCode).toEqual(200);
-    done();
-  });
-  listener({ method: 'PUT', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
-});
-
-test('HttpApp smoke test #3', done => {
-  const app = new HttpApp(routes);
-  const listener = app.listen();
-  app['response$'].subscribe(response => {
-    expect(response.statusCode).toEqual(404);
-    done();
-  });
-  listener({ method: 'PUT', url: '/xxx' } as IncomingMessage, { } as OutgoingMessage);
-});
-
-test('HttpApp local 200/404 and body parse', async done => {
-  const app = new HttpApp(routes);
-  const listener = app.listen();
-  const server = createServer(listener).listen(8080);
-  let response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'GET' });
-  expect(response.data).toEqual('Hello, http!');
-  expect(response.status).toEqual(200);
-  response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': ContentType.APPLICATION_JSON } });
-  expect(response.data).toEqual('Goodbye, Marco!');
-  try {
-    await ax.get('http://localhost:8080/xxx');
-  }
-  catch (error) {
-    expect(error.response.status).toEqual(404);
-  }
-  server.close();
-  done();
 });

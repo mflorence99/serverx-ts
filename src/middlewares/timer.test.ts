@@ -21,16 +21,20 @@ const routes: Route[] = [
 
 ];
 
-test('Response timer middleware', done => {
-  const app = new HttpApp(routes);
-  const listener = app.listen();
-  const now = Date.now();
-  app['response$'].subscribe(response => {
-    expect(Number(response.headers['X-Request-Timein'])).toBeGreaterThan(now);
-    expect(Number(response.headers['X-Request-Timeout'])).toBeGreaterThan(now);
-    expect(Number(response.headers['X-Response-Time'])).toBeGreaterThan(0);
-    expect(response.statusCode).toEqual(200);
-    done();
+describe('Timer unit tests', () => {
+
+  test('sets appropriate headers', done => {
+    const app = new HttpApp(routes);
+    const listener = app.listen();
+    const now = Date.now();
+    app['response$'].subscribe(response => {
+      expect(Number(response.headers['X-Request-Timein'])).toBeGreaterThan(now);
+      expect(Number(response.headers['X-Request-Timeout'])).toBeGreaterThan(now);
+      expect(Number(response.headers['X-Response-Time'])).toBeGreaterThan(0);
+      expect(response.statusCode).toEqual(200);
+      done();
+    });
+    listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
   });
-  listener({ method: 'GET', url: '/foo/bar' } as IncomingMessage, { } as OutgoingMessage);
+
 });

@@ -1,59 +1,66 @@
 import 'reflect-metadata';
 
 import { LogProvider } from './log-provider';
+import { Request } from '../serverx';
+import { Response } from '../serverx';
 
-test('LogProvider logs errors to console', done => {
-  const logProvider = new LogProvider({  colorize: false, format: 'common' });
-  jest.spyOn(global.console, 'log').mockImplementation(() => { });
-  logProvider.logError(new Error('xxx'));
-  expect(console.log).toBeCalled();
-  done();
-});
+const request: Request = { 
+  path: '/foo/bar',
+  method: 'GET', 
+  remoteAddr: '::1', 
+  httpVersion: '1.2', 
+  timestamp: Date.now() 
+};
 
-test('LogProvider "common" format correctly logs messages', done => {
-  const logProvider = new LogProvider({ colorize: false, format: 'common' });
-  jest.spyOn(global.console, 'log').mockImplementation(logLine => {
-    expect(logLine).toMatch(/^::1 - - \[.*\] "GET \/foo\/bar HTTP\/1.2"/);
+const response: Response = { 
+  headers: { 'Content-Length': '20' }, 
+  statusCode: 500 
+};
+
+describe('LogProvider unit tests', () => {
+
+  test('logs errors to console', done => {
+    const logProvider = new LogProvider({ colorize: false, format: 'common' });
+    jest.spyOn(global.console, 'log').mockImplementation(() => { });
+    logProvider.logError(new Error('xxx'));
+    expect(console.log).toBeCalled();
     done();
   });
-  logProvider.logMessage({
-    request: { path: '/foo/bar', method: 'GET', remoteAddr: '::1', httpVersion: '1.2', timestamp: Date.now() },
-    response: { headers: {} }
-  });
-});
 
-test('LogProvider "dev" format correctly logs messages', done => {
-  const logProvider = new LogProvider({ colorize: false, format: 'dev' });
-  jest.spyOn(global.console, 'log').mockImplementation(logLine => { 
-    expect(logLine).toMatch(/^GET \/foo\/bar/);
-    done();
+  test('"common" format correctly logs messages', done => {
+    const logProvider = new LogProvider({ colorize: false, format: 'common' });
+    jest.spyOn(global.console, 'log').mockImplementation(logLine => {
+      expect(logLine).toMatch(/^::1 - - \[.*\] "GET \/foo\/bar HTTP\/1.2" 500 20$/);
+      done();
+    });
+    logProvider.logMessage({ request, response });
   });
-  logProvider.logMessage({
-    request: { path: '/foo/bar', method: 'GET' },
-    response: { headers: { } }
-  });
-});
 
-test('LogProvider "short" format correctly logs messages', done => {
-  const logProvider = new LogProvider({ colorize: false, format: 'short' });
-  jest.spyOn(global.console, 'log').mockImplementation(logLine => {
-    expect(logLine).toMatch(/^::1 - GET \/foo\/bar/);
-    done();
+  test('"dev" format correctly logs messages', done => {
+    const logProvider = new LogProvider({ colorize: false, format: 'dev' });
+    jest.spyOn(global.console, 'log').mockImplementation(logLine => {
+      expect(logLine).toMatch(/^GET \/foo\/bar 500 [0-9]+ms - 20$/);
+      done();
+    });
+    logProvider.logMessage({ request, response });
   });
-  logProvider.logMessage({
-    request: { path: '/foo/bar', method: 'GET', remoteAddr: '::1' },
-    response: { headers: { } }
-  });
-});
 
-test('LogProvider "tiny" format correctly logs messages', done => {
-  const logProvider = new LogProvider({ colorize: false, format: 'tiny' });
-  jest.spyOn(global.console, 'log').mockImplementation(logLine => {
-    expect(logLine).toMatch(/^GET \/foo\/bar 500 20/);
-    done();
+  test('"short" format correctly logs messages', done => {
+    const logProvider = new LogProvider({ colorize: false, format: 'short' });
+    jest.spyOn(global.console, 'log').mockImplementation(logLine => {
+      expect(logLine).toMatch(/^::1 - GET \/foo\/bar HTTP\/1.2 500 20 - [0-9]+ms$/);
+      done();
+    });
+    logProvider.logMessage({ request, response });
   });
-  logProvider.logMessage({
-    request: { path: '/foo/bar', method: 'GET' },
-    response: { headers: { 'Content-Length': '20' }, statusCode: 500}
+
+  test('"tiny" format correctly logs messages', done => {
+    const logProvider = new LogProvider({ colorize: false, format: 'tiny' });
+    jest.spyOn(global.console, 'log').mockImplementation(logLine => {
+      expect(logLine).toMatch(/^GET \/foo\/bar 500 20 - [0-9]+ms$/);
+      done();
+    });
+    logProvider.logMessage({ request, response });
   });
+
 });

@@ -134,63 +134,67 @@ const routes: Route[] = [
 
 const router = new Router(routes);
 
-test('GET /fizz no match', () => {
-  const message: Message = { request: { method: 'GET', path: '/fizz' } };
-  expect(router.route(message).request.route.phantom).toBeTruthy();
-});
+describe('Router unit tests', () => {
 
-test('GET /foo/bar matches', () => {
-  const message: Message = { request: { method: 'GET', path: '/foo/bar' } };
-  const route = router.route(message).request.route;
-  expect(route.data).toEqual('/foo/bar');
-  const middlewares = Middleware.makeInstances(route);
-  expect(middlewares.length).toEqual(0);
-});
+  test('GET /fizz no match', () => {
+    const message: Message = { request: { method: 'GET', path: '/fizz' } };
+    expect(router.route(message).request.route.phantom).toBeTruthy();
+  });
 
-test('GET /foo/bar/this no match', () => {
-  const message: Message = { request: { method: 'GET', path: '/foo/bar/this' } };
-  const route = router.route(message).request.route;
-  expect(route.data).toEqual('/foo/bar/this no match');
-  const handler = Handler.makeInstance(route);
-  expect(handler instanceof NotFound).toBeTruthy();
-});
+  test('GET /foo/bar matches', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo/bar' } };
+    const route = router.route(message).request.route;
+    expect(route.data).toEqual('/foo/bar');
+    const middlewares = Middleware.makeInstances(route);
+    expect(middlewares.length).toEqual(0);
+  });
 
-test('GET /foo/bar/this/10/mark matches', () => {
-  const message: Message = { request: { method: 'GET', path: '/foo/bar/this/10/mark' } };
-  const request = router.route(message).request;
-  expect(request.route.data).toEqual('/foo/bar/this/:id/:user');
-  const handler = Handler.makeInstance<Handler1>(request.route);
-  expect(handler instanceof Handler1).toBeTruthy();
-  expect(handler.service instanceof Service1).toBeTruthy();
-  expect(handler.service.service instanceof Service2).toBeTruthy();
-  expect(request.params).toEqual({ id: '10', user: 'mark' });
-});
+  test('GET /foo/bar/this no match', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo/bar/this' } };
+    const route = router.route(message).request.route;
+    expect(route.data).toEqual('/foo/bar/this no match');
+    const handler = Handler.makeInstance(route);
+    expect(handler instanceof NotFound).toBeTruthy();
+  });
 
-test('GET /foo/bar/that/company matches', () => {
-  const message: Message = { request: { method: 'GET', path: '/foo/bar/that/company' } };
-  const request = router.route(message).request;
-  expect(request.route.data).toEqual('/foo/bar/that/:partner');
-  expect(request.params).toEqual({ partner: 'company' });
-});
+  test('GET /foo/bar/this/10/mark matches', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo/bar/this/10/mark' } };
+    const request = router.route(message).request;
+    expect(request.route.data).toEqual('/foo/bar/this/:id/:user');
+    const handler = Handler.makeInstance<Handler1>(request.route);
+    expect(handler instanceof Handler1).toBeTruthy();
+    expect(handler.service instanceof Service1).toBeTruthy();
+    expect(handler.service.service instanceof Service2).toBeTruthy();
+    expect(request.params).toEqual({ id: '10', user: 'mark' });
+  });
 
-test('GET /foo/fizz/baz/x matches', () => {
-  const message: Message = { request: { method: 'GET', path: '/foo/fizz/baz/' } };
-  const route = router.route(message).request.route;
-  expect(route.data).toEqual('/foo/fizz/baz');
-  const middlewares = Middleware.makeInstances(route);
-  expect(middlewares.length).toEqual(1);
-  expect(middlewares[0] instanceof Middleware3).toBeTruthy();
-});
+  test('GET /foo/bar/that/company matches', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo/bar/that/company' } };
+    const request = router.route(message).request;
+    expect(request.route.data).toEqual('/foo/bar/that/:partner');
+    expect(request.params).toEqual({ partner: 'company' });
+  });
 
-test('POST /foo/fizz/baz/full no match', () => {
-  const message: Message = { request: { method: 'POST', path: '/foo/fizz/baz/full' } };
-  const request = router.route(message).request;
-  expect(request.route.data).toEqual('/foo/fizz/baz/full no match');
-  const handler = Handler.makeInstance(request.route);
-  expect(handler instanceof NotFound).toBeTruthy();
-});
+  test('GET /foo/fizz/baz/x matches', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo/fizz/baz/' } };
+    const route = router.route(message).request.route;
+    expect(route.data).toEqual('/foo/fizz/baz');
+    const middlewares = Middleware.makeInstances(route);
+    expect(middlewares.length).toEqual(1);
+    expect(middlewares[0] instanceof Middleware3).toBeTruthy();
+  });
 
-test('POST /foo/fizz/baz/buzz matches', () => {
-  const message: Message = { request: { method: 'POST', path: '/foo/fizz/baz/buzz' } };
-  expect(router.route(message).request.route.data).toEqual('/foo/fizz/baz/buzz');
+  test('POST /foo/fizz/baz/full no match', () => {
+    const message: Message = { request: { method: 'POST', path: '/foo/fizz/baz/full' } };
+    const request = router.route(message).request;
+    expect(request.route.data).toEqual('/foo/fizz/baz/full no match');
+    const handler = Handler.makeInstance(request.route);
+    expect(handler instanceof NotFound).toBeTruthy();
+  });
+
+  test('POST /foo/fizz/baz/buzz matches', () => {
+    const message: Message = { request: { method: 'POST', path: '/foo/fizz/baz/buzz' } };
+    expect(router.route(message).request.route.data).toEqual('/foo/fizz/baz/buzz');
+  });
+
 });
