@@ -2,6 +2,19 @@ import { Observable } from 'rxjs';
 import { Readable } from 'stream';
 
 /**
+ * Create a case-insensitive object
+ */
+
+export function caseInsensitiveObject(obj: any): any {
+  const proxy = { };
+  Object.keys(obj).forEach((k: string) => proxy[k.toLowerCase()] = obj[k]);
+  return new Proxy(proxy, {
+    get: (tgt: any, k: string) => tgt[k.toLowerCase()],
+    set: (tgt: any, k: string, v: any) => tgt[k.toLowerCase()] = v,
+  });
+}
+
+/**
  * Make an observer from a readable stream
  */
 

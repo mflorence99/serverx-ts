@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { URLSearchParams } from 'url';
 
+import { caseInsensitiveObject } from '../utils';
 import { fromReadableStream } from '../utils';
 import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -57,7 +58,7 @@ export class HttpApp extends App {
         },
         request: {
           body: { },
-          headers: this.req.headers || { },
+          headers: caseInsensitiveObject(this.req.headers || { }),
           httpVersion: this.req.httpVersion,
           method: <Method>this.req.method,
           params: { },

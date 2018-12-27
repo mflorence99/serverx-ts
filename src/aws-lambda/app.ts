@@ -8,6 +8,7 @@ import { Response } from '../serverx';
 import { Route } from '../serverx';
 import { URLSearchParams } from 'url';
 
+import { caseInsensitiveObject } from '../utils';
 import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -42,7 +43,7 @@ export class AWSLambdaApp extends App {
       request: {
         // @see https://stackoverflow.com/questions/41648467
         body: (this.event.body != null) ? JSON.parse(this.event.body) : { },
-        headers: this.event.headers || { },
+        headers: caseInsensitiveObject(this.event.headers || { }),
         httpVersion: '1.1',
         method: <Method>this.event.httpMethod,
         params: { },
