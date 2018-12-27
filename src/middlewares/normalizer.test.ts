@@ -11,7 +11,7 @@ describe('Normalizer unit tests', () => {
     const normalizer = new Normalizer();
     const message: Message = {
       request: { path: '/foo/bar', method: 'GET' },
-      response: { }
+      response: { headers: { } }
     };
     normalizer.posthandle(of(message))
     .subscribe(message => {
@@ -25,7 +25,7 @@ describe('Normalizer unit tests', () => {
     const normalizer = new Normalizer();
     const message: Message = {
       request: { path: '/foo/bar', method: 'GET' },
-      response: { statusCode: 500 }
+      response: { headers: { }, statusCode: 500 }
     };
     normalizer.posthandle(of(message))
       .subscribe(message => {
@@ -39,7 +39,7 @@ describe('Normalizer unit tests', () => {
     const normalizer = new Normalizer();
     const message: Message = {
       request: { path: '/foo/bar.html', method: 'GET' },
-      response: { }
+      response: { headers: { } }
     };
     normalizer.posthandle(of(message))
       .subscribe(message => {
@@ -53,7 +53,7 @@ describe('Normalizer unit tests', () => {
     const normalizer = new Normalizer();
     const message: Message = {
       request: { path: '/foo/bar', method: 'GET' },
-      response: { body: { x: 'y' } }
+      response: { body: { x: 'y' }, headers: { } }
     };
     normalizer.posthandle(of(message))
       .subscribe(message => {
@@ -68,7 +68,7 @@ describe('Normalizer unit tests', () => {
     const normalizer = new Normalizer();
     const message: Message = {
       request: { path: '/foo/bar', method: 'GET' },
-      response: { body: 'xyz' }
+      response: { body: 'xyz', headers: { } }
     };
     normalizer.posthandle(of(message))
       .subscribe(message => {

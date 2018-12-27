@@ -111,6 +111,9 @@ describe('HttpApp unit tests', () => {
       expect(response.body).toEqual('"Hello, http!"');
       expect(response.headers['X-this']).toEqual('that');
       expect(response.headers['X-that']).toEqual('this');
+      // NOTE: testing case-insensitivity of headers
+      expect(response.headers['X-THIS']).toEqual('that');
+      expect(response.headers['X-THAT']).toEqual('this');
       expect(response.statusCode).toEqual(200);
       done();
     });

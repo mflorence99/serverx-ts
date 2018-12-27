@@ -25,7 +25,7 @@ import { tap } from 'rxjs/operators';
         // status code is OK unless otherwise set
         const statusCode = response.statusCode || StatusCode.OK;
         // if not already set, try to deduce MIME type from content or path
-        const headers = { ...response.headers };
+        const headers = response.headers;
         if (!headers['Content-Type']) {
           const fromBuffer = response.body && Buffer.isBuffer(response.body) && fileType(response.body);
           const mimeType = fromBuffer? fromBuffer.mime : (mime.getType(request.path) || ContentType.APPLICATION_JSON);

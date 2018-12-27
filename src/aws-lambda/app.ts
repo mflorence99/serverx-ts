@@ -56,7 +56,7 @@ export class AWSLambdaApp extends App {
       },
       response: {
         body: null,
-        headers: { },
+        headers: caseInsensitiveObject({ }),
         statusCode: null
       }
     };
