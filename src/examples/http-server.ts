@@ -1,3 +1,7 @@
+import 'reflect-metadata';
+
+import { Compressor } from '../middlewares//compressor';
+import { COMPRESSOR_OPTS } from '../middlewares//compressor';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
@@ -50,8 +54,11 @@ const routes: Route[] = [
   {
     path: '',
     methods: ['GET'],
-    middlewares: [RequestLogger],
-    services: [{ provide: REQUEST_LOGGER_OPTS, useValue: { colorize: true } }],
+    middlewares: [RequestLogger, Compressor],
+    services: [
+      { provide: REQUEST_LOGGER_OPTS, useValue: { colorize: true } },
+      { provide: COMPRESSOR_OPTS, useValue: { threshold: 0 } } 
+    ],
     children: [
 
       {

@@ -9,6 +9,7 @@ export function caseInsensitiveObject(obj: any): any {
   const proxy = { };
   Object.keys(obj).forEach((k: string) => proxy[k.toLowerCase()] = obj[k]);
   return new Proxy(proxy, {
+    deleteProperty: (tgt: any, k: string) => delete tgt[k.toLowerCase()],
     get: (tgt: any, k: string) => tgt[k.toLowerCase()],
     set: (tgt: any, k: string, v: any) => tgt[k.toLowerCase()] = v,
   });
