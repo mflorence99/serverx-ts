@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 
+import * as zlib from 'zlib';
+
 import { Compressor } from './compressor';
 import { COMPRESSOR_OPTS } from './compressor';
 import { Handler } from '../handler';
@@ -43,15 +45,28 @@ const routes: Route[] = [
 
 describe('Compressor unit tests', () => {
 
-  test('sets appropriate headers', done => {
+  test('performs gzip compression', done => {
     const app = new HttpApp(routes);
     const listener = app.listen();
     app['response$'].subscribe(response => {
       expect(response.headers['Content-Encoding']).toEqual('gzip');
+      expect(zlib.unzipSync(response.body).toString()).toEqual('"Hello, http!"');
       expect(response.statusCode).toEqual(200);
       done();
     });
-    listener({ method: 'GET', url: '/foo/bar', headers: { 'Accept-Encoding': 'gzip' } } as any, { } as any);
+    listener({ method: 'GET', url: '/foo/bar', headers: { 'Accept-Encoding': 'gzip; deflate' } } as any, { } as any);
+  });
+
+  test('performs deflate compression', done => {
+    const app = new HttpApp(routes);
+    const listener = app.listen();
+    app['response$'].subscribe(response => {
+      expect(response.headers['Content-Encoding']).toEqual('deflate');
+      expect(zlib.inflateSync(response.body).toString()).toEqual('"Hello, http!"');
+      expect(response.statusCode).toEqual(200);
+      done();
+    });
+    listener({ method: 'GET', url: '/foo/bar', headers: { 'Accept-Encoding': 'deflate' } } as any, {} as any);
   });
 
 });

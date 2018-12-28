@@ -77,12 +77,16 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
           tap((message: Message) => {
             const alreadyEncoded = !!request.headers['Content-Encoding'];
             const accepts = request.headers['Accept-Encoding'] || '';
+            const willDeflate = accepts.includes('deflate');
+            const willGZIP = accepts.includes('gzip');
             const size = Number(response.headers['Content-Length'] || '0');
             if (!alreadyEncoded 
-             && accepts.includes('gzip') 
+             && (willDeflate || willGZIP) 
              && (size >= this.opts.threshold)) {
-              response.body = zlib.gzipSync(response.body, this.opts);
-              response.headers['Content-Encoding'] = 'gzip';
+              // NOTE: prefer gzip to deflate
+              const type = willGZIP? 'gzip' : 'deflate';
+              response.body = zlib[`${type}Sync`](response.body, this.opts);
+              response.headers['Content-Encoding'] = type;
               response.headers['Content-Length'] = Buffer.byteLength(response.body);
             }
           }),
