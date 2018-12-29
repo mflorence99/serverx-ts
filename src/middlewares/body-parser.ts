@@ -7,6 +7,8 @@ import { Observable } from 'rxjs';
 import { StatusCode } from '../interfaces';
 
 import { catchError } from 'rxjs/operators';
+import { defaultIfEmpty } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { mapTo } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -28,10 +30,8 @@ import { toArray } from 'rxjs/operators';
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
         const { request } = message;
-        // quick exit if nothing to stream
-        if (!(request.stream$ && PARSEABLE_METHODS.includes(request.method)))
-          return of(message);
-        else return of(message).pipe(
+        return of(message).pipe(
+          filter((message: Message) => !!request.stream$ && PARSEABLE_METHODS.includes(request.method)),
           // read the stream into a string, then into encoded form
           switchMap((message: Message): Observable<any> => {
             return request.stream$.pipe(
@@ -59,7 +59,8 @@ import { toArray } from 'rxjs/operators';
           // map the encoded body object back to the original message
           tap((body: any) => request.body = body),
           mapTo(message),
-          catchError(() => throwError(new Exception({ statusCode: StatusCode.BAD_REQUEST })))
+          catchError(() => throwError(new Exception({ statusCode: StatusCode.BAD_REQUEST }))),
+          defaultIfEmpty(message)
         );
       })
     );

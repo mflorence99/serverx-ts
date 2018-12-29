@@ -39,4 +39,17 @@ describe('BodyParser unit tests', () => {
       });
   });
 
+  test('nothing to parse', done => {
+    const bodyParser = new BodyParser();
+    const message: Message = {
+      request: { path: '/foo/bar', method: 'POST', headers: { 'content-type': 'x-www-form-urlencoded' }, stream$: null }
+    };
+    bodyParser.prehandle(of(message))
+      .subscribe(message => {
+        const { request } = message;
+        expect(request.body).toBeUndefined();
+        done();
+      });
+  });
+
 });

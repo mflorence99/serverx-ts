@@ -48,6 +48,23 @@ describe('RequestLogger unit tests', () => {
     logger.postcatch(of({ request, response: error })).subscribe();
   });
 
+  test('silent mode logs nothing', done => {
+    const log: LogProvider = {
+      canColorize: () => false,
+      log: stuff => { },
+      info: stuff => { },
+      warn: stuff => { },
+      error: logLine => { },
+    };
+    jest.spyOn(log, 'info');
+    const opts: RequestLoggerOpts = { silent: true };
+    const logger = new RequestLogger(log, opts);
+    logger.postcatch(of({ request, response })).subscribe(() => {
+      expect(log.info).not.toBeCalled();
+      done();
+    });
+  });
+
   test('"common" format correctly logs messages', done => {
     const log: LogProvider = {
       canColorize: () => false,

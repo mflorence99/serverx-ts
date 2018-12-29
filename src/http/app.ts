@@ -66,7 +66,7 @@ export class HttpApp extends App {
           query: parsed.searchParams || new URLSearchParams(),
           remoteAddr: this.req.connection? this.req.connection.remoteAddress : null,
           route: null,
-          stream$: this.req.on ? fromReadableStream(this.req) : null,
+          stream$: this.req.on? fromReadableStream(this.req) : null,
           timestamp: Date.now()
         },
         response: {

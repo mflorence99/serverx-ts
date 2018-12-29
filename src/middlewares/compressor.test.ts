@@ -69,4 +69,16 @@ describe('Compressor unit tests', () => {
     listener({ method: 'GET', url: '/foo/bar', headers: { 'Accept-Encoding': 'deflate' } } as any, {} as any);
   });
 
+  test('performs no compression', done => {
+    const app = new HttpApp(routes);
+    const listener = app.listen();
+    app['response$'].subscribe(response => {
+      expect(response.headers['Content-Encoding']).toBeUndefined();
+      expect(response.body).toEqual('"Hello, http!"');
+      expect(response.statusCode).toEqual(200);
+      done();
+    });
+    listener({ method: 'GET', url: '/foo/bar', headers: { } } as any, { } as any);
+  });
+
 });

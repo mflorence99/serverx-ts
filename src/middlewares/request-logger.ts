@@ -8,6 +8,10 @@ import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
 import { StatusCode } from '../interfaces';
 
+import { defaultIfEmpty } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
 import chalk from 'chalk';
@@ -47,13 +51,17 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
 
   postcatch(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        if (!this.opts.silent) {
-          const { response } = message;
-          if (response.statusCode === StatusCode.INTERNAL_SERVER_ERROR)
-            this.logError(message);
-          this.logMessage(message);
-        }
+      switchMap((message: Message): Observable<Message> => {
+        return of(message).pipe(
+          filter((message: Message) => !this.opts.silent),
+          tap((message: Message) => {
+            const { response } = message;
+            if (response.statusCode === StatusCode.INTERNAL_SERVER_ERROR)
+              this.logError(message);
+            this.logMessage(message);
+          }),
+          defaultIfEmpty(message)
+        );
       })
     );
   }
