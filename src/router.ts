@@ -31,6 +31,13 @@ export class Router {
     }];
   }
 
+  /** Flatten all handles routes */
+  flatten(): Route[] {
+    const flattened: Route[] = [];
+    this.flattenImpl(flattened, this.routes);
+    return flattened.sort((a: Route, b: Route) => a.path.localeCompare(b.path));
+  }
+
   /** Route a message */
   route(message: Message): Message {
     const { request } = message;
@@ -44,6 +51,32 @@ export class Router {
 
   // private methods
 
+  private flattenImpl(flattened: Route[],
+                      routes: Route[],
+                      parent: Route = null): void {
+    routes.forEach((route: Route) => {
+      route.parent = parent;
+      const matches = !route.phantom
+        && !['', '**'].includes(route.path)
+        && (route.handler || !route.children);
+      if (matches)
+        flattened.push(this.harmonize(route));
+      if (route.children)
+        this.flattenImpl(flattened, route.children, route);
+    });
+  }
+
+  private harmonize(route: Route): Route {
+    const methods: Method[] = [];
+    const paths: string[] = [];
+    while (route) {
+      paths.push(...this.split(route.path).reverse());
+      route = route.parent;
+    }
+    const path = '/' + paths.reverse().join('/');
+    return { methods, path };
+  }
+
   private match(paths: string[],
                 method: Method,
                 parent: Route,
@@ -53,8 +86,11 @@ export class Router {
     // find matching route, fabricating if necessary
     let route = this.matchImpl(paths, rpaths, method, parent, routes, params);
     // we always need a handler
-    if (!route.handler) 
-      route.handler = route.redirectTo? RedirectTo : StatusCode200;
+    if (!route.handler) {
+      if (route.children)
+        route.handler = NotFound;
+      else route.handler = route.redirectTo? RedirectTo : StatusCode200;
+    }
     // create an injector
     if (!route.injector) {
       const providers = (route.services || []).concat(route.middlewares || []);

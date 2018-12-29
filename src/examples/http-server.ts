@@ -62,6 +62,21 @@ const routes: Route[] = [
     children: [
 
       {
+        path: '/foo',
+        children: [
+
+          {
+            path: '/bar'
+          },
+
+          {
+            path: '/baz'
+          }
+          
+        ]
+      },
+
+      {
         path: '/hello',
         handler: Hello
       },

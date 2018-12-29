@@ -11,6 +11,7 @@ import { Route } from './serverx';
 import { Router } from './router';
 import { StatusCode } from './serverx';
 
+import { caseInsensitiveObject } from './utils';
 import { catchError } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -76,8 +77,12 @@ export abstract class App {
   private catchError$(error: any,
                       message: Message): Observable<Message> {
     const { context, request } = message;
-    if (error instanceof Exception)
-      return of({ context, request, response: error.exception });
+    if (error instanceof Exception) {
+      const response = error.exception;
+      if (!response.headers)
+        response.headers = caseInsensitiveObject({ });
+      return of({ context, request, response });
+    }
     else {
       const response: Response = {
         // NOTE: we have to stringify manually because we are now past the Normalizer
@@ -85,7 +90,7 @@ export abstract class App {
           error: error.toString(),
           stack: error.stack
         }),
-        headers: { 'Content-Type': ContentType.APPLICATION_JSON },
+        headers: caseInsensitiveObject({ 'Content-Type': ContentType.APPLICATION_JSON }),
         statusCode: StatusCode.INTERNAL_SERVER_ERROR
       };
       return of({ context, request, response });

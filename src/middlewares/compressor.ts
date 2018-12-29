@@ -70,17 +70,16 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
         const { request, response } = message;
-        // quick exit if nothing to compress
-        if (!COMPRESSABLE_METHODS.includes(request.method) || !response.body)
-          return of(message);
-        else return of(message).pipe(
+        return of(message).pipe(
           tap((message: Message) => {
             const alreadyEncoded = !!request.headers['Content-Encoding'];
             const accepts = request.headers['Accept-Encoding'] || '';
             const willDeflate = accepts.includes('deflate');
             const willGZIP = accepts.includes('gzip');
             const size = Number(response.headers['Content-Length'] || '0');
-            if (!alreadyEncoded 
+            if (COMPRESSABLE_METHODS.includes(request.method)
+             && response.body
+             && !alreadyEncoded 
              && (willDeflate || willGZIP) 
              && (size >= this.opts.threshold)) {
               // NOTE: prefer gzip to deflate

@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { ContentType } from '../serverx';
 import { Handler } from '../handler';
 import { HttpApp } from './app';
@@ -89,7 +91,22 @@ const routes: Route[] = [
         path: '/foo/bar',
         handler: Goodbye,
         middlewares: [Middleware1]
-      }
+      },
+
+      {
+        path: '/fizz',
+        children: [
+
+          {
+            path: '/bazz'
+          },
+
+          {
+            path: '/buzz'
+          }
+
+        ]
+      },
 
     ]
   }
@@ -149,6 +166,8 @@ describe('HttpApp unit tests', () => {
     const server = createServer(listener).listen(8080);
     let response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'GET' });
     expect(response.data).toEqual('Hello, http!');
+    expect(response.status).toEqual(200);
+    response = await ax.request({ url: 'http://localhost:8080/fizz/bazz', method: 'GET' });
     expect(response.status).toEqual(200);
     response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': ContentType.APPLICATION_JSON } });
     expect(response.data).toEqual('Goodbye, Marco!');

@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import * as lambdaLocal from 'lambda-local';
 import * as path from 'path';
 

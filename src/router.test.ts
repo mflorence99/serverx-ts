@@ -1,12 +1,16 @@
+import 'reflect-metadata';
+
 import { Exception } from './serverx';
 import { Handler } from './handler';
 import { Injectable } from 'injection-js';
 import { Message } from './serverx';
 import { Middleware } from './middleware';
+import { NotFound } from './handlers/not-found';
 import { Observable } from 'rxjs';
 import { Route } from './serverx';
 import { Router } from './router';
 import { StatusCode } from './serverx';
+import { StatusCode200 } from './handlers/statuscode-200';
 
 import { switchMap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
@@ -23,7 +27,7 @@ import { throwError } from 'rxjs';
   }
 }
 
-@Injectable() class NotFound extends Handler {
+@Injectable() class NoMatch extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       switchMap(() =>
@@ -77,7 +81,7 @@ const routes: Route[] = [
 
               {
                 path: '**',
-                handler: NotFound,
+                handler: NoMatch,
                 data: '/foo/bar/this no match'
               }
 
@@ -117,7 +121,7 @@ const routes: Route[] = [
 
               {
                 path: '**',
-                handler: NotFound,
+                handler: NoMatch,
                 data: '/foo/fizz/baz/full no match'
               }
 
@@ -136,6 +140,19 @@ const router = new Router(routes);
 
 describe('Router unit tests', () => {
 
+  test('routes can be flattened', () => {
+    const flattened = router.flatten();
+    console.log(flattened);
+    expect(flattened.length).toBeGreaterThan(1);
+  });
+
+  test('GET /foo no match', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo' } };
+    const route = router.route(message).request.route;
+    const handler = Handler.makeInstance(route);
+    expect(handler instanceof NotFound).toBeTruthy();
+  });
+
   test('GET /fizz no match', () => {
     const message: Message = { request: { method: 'GET', path: '/fizz' } };
     expect(router.route(message).request.route.phantom).toBeTruthy();
@@ -147,6 +164,8 @@ describe('Router unit tests', () => {
     expect(route.data).toEqual('/foo/bar');
     const middlewares = Middleware.makeInstances(route);
     expect(middlewares.length).toEqual(0);
+    const handler = Handler.makeInstance(route);
+    expect(handler instanceof NotFound).toBeTruthy();
   });
 
   test('GET /foo/bar/this no match', () => {
@@ -154,7 +173,7 @@ describe('Router unit tests', () => {
     const route = router.route(message).request.route;
     expect(route.data).toEqual('/foo/bar/this no match');
     const handler = Handler.makeInstance(route);
-    expect(handler instanceof NotFound).toBeTruthy();
+    expect(handler instanceof NoMatch).toBeTruthy();
   });
 
   test('GET /foo/bar/this/10/mark matches', () => {
@@ -175,13 +194,15 @@ describe('Router unit tests', () => {
     expect(request.params).toEqual({ partner: 'company' });
   });
 
-  test('GET /foo/fizz/baz/x matches', () => {
+  test('GET /foo/fizz/baz matches', () => {
     const message: Message = { request: { method: 'GET', path: '/foo/fizz/baz/' } };
     const route = router.route(message).request.route;
     expect(route.data).toEqual('/foo/fizz/baz');
     const middlewares = Middleware.makeInstances(route);
     expect(middlewares.length).toEqual(1);
     expect(middlewares[0] instanceof Middleware3).toBeTruthy();
+    const handler = Handler.makeInstance(route);
+    expect(handler instanceof StatusCode200).toBeTruthy();
   });
 
   test('POST /foo/fizz/baz/full no match', () => {
@@ -189,7 +210,7 @@ describe('Router unit tests', () => {
     const request = router.route(message).request;
     expect(request.route.data).toEqual('/foo/fizz/baz/full no match');
     const handler = Handler.makeInstance(request.route);
-    expect(handler instanceof NotFound).toBeTruthy();
+    expect(handler instanceof NoMatch).toBeTruthy();
   });
 
   test('POST /foo/fizz/baz/buzz matches', () => {
