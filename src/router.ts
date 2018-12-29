@@ -67,9 +67,10 @@ export class Router {
   }
 
   private harmonize(route: Route): Route {
-    const methods: Method[] = [];
+    let methods: Method[];
     const paths: string[] = [];
     while (route) {
+      methods = methods || route.methods;
       paths.push(...this.split(route.path).reverse());
       route = route.parent;
     }

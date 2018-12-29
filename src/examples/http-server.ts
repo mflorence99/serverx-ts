@@ -12,6 +12,7 @@ import { RequestLogger } from '../middlewares/request-logger';
 import { Route } from '../serverx';
 
 import { createServer } from 'http';
+import { table } from 'table';
 import { tap } from 'rxjs/operators';
 
 import chalk from 'chalk';
@@ -108,9 +109,15 @@ const routes: Route[] = [
 ];
 
 const app = new HttpApp(routes);
+
+const flattened = app.router.flatten()
+  .map((route: Route) => [route.methods.join(','), route.path]);
+console.log(table(flattened));
+
 const listener = app.listen();
 const server = createServer(listener)
   .on('listening', () => {
     console.log(chalk.cyanBright('Examples: http-server listening on port 4200'));
   });
+  
 server.listen(4200);

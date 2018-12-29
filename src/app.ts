@@ -25,7 +25,7 @@ import { pipe } from 'rxjs';
 
 export abstract class App {
 
-  protected router: Router;
+  router: Router;
 
   /** ctor */
   constructor(routes: Route[],
@@ -78,6 +78,7 @@ export abstract class App {
                       message: Message): Observable<Message> {
     const { context, request } = message;
     if (error instanceof Exception) {
+      // NOTE: make sure there are at least empty headers
       const response = error.exception;
       if (!response.headers)
         response.headers = caseInsensitiveObject({ });

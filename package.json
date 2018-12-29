@@ -27,7 +27,8 @@
     "injection-js": "2",
     "mime": "2",
     "reflect-metadata": "^0.1.12",
-    "rxjs": "6"
+    "rxjs": "6",
+    "table": "5"
   },
   "devDependencies": {
     "@types/aws-lambda": "8",

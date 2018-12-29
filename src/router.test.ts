@@ -142,8 +142,8 @@ describe('Router unit tests', () => {
 
   test('routes can be flattened', () => {
     const flattened = router.flatten();
-    console.log(flattened);
-    expect(flattened.length).toBeGreaterThan(1);
+    expect(flattened.length).toEqual(5);
+    expect(flattened[0].path).toEqual('/foo/bar/that/:partner');
   });
 
   test('GET /foo no match', () => {
