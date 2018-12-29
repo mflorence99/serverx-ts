@@ -2,11 +2,11 @@ import { Inject } from 'injection-js';
 import { Injectable } from 'injection-js';
 import { InjectionToken } from 'injection-js';
 import { LogProvider } from '../services/log-provider';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
-import { StatusCode } from '../serverx';
+import { StatusCode } from '../interfaces';
 
 import { tap } from 'rxjs/operators';
 

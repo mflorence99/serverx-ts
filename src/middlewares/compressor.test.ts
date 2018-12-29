@@ -7,9 +7,9 @@ import { COMPRESSOR_OPTS } from './compressor';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Observable } from 'rxjs';
-import { Route } from '../serverx';
+import { Route } from '../interfaces';
 
 import { tap } from 'rxjs/operators';
 

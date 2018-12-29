@@ -1,6 +1,6 @@
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Observable } from 'rxjs';
 
 import { tap } from 'rxjs/operators';

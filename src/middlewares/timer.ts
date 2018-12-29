@@ -1,5 +1,5 @@
 import { Injectable } from 'injection-js';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 

@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 
 import { LogProvider } from '../services/log-provider';
-import { Request } from '../serverx';
+import { Request } from '../interfaces';
 import { RequestLogger } from './request-logger';
 import { RequestLoggerOpts } from './request-logger';
-import { Response } from '../serverx';
+import { Response } from '../interfaces';
 
 import { of } from 'rxjs';
 

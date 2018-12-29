@@ -8,10 +8,10 @@ import { AWSLambdaApp } from './app';
 import { Context } from 'aws-lambda';
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
-import { Route } from '../serverx';
+import { Route } from '../interfaces';
 
 import { tap } from 'rxjs/operators';
 

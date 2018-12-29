@@ -1,6 +1,6 @@
-import { Message } from './serverx';
+import { Message } from './interfaces';
 import { Observable } from 'rxjs';
-import { Route } from './serverx';
+import { Route } from './interfaces';
 
 /**
  * Middleware definition

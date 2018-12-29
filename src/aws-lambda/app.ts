@@ -1,11 +1,11 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { App } from '../app';
 import { Context } from 'aws-lambda';
-import { Message } from '../serverx';
-import { Method } from '../serverx';
+import { Message } from '../interfaces';
+import { Method } from '../interfaces';
 import { Normalizer } from '../middlewares/normalizer';
-import { Response } from '../serverx';
-import { Route } from '../serverx';
+import { Response } from '../interfaces';
+import { Route } from '../interfaces';
 import { URLSearchParams } from 'url';
 
 import { caseInsensitiveObject } from '../utils';

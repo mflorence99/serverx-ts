@@ -1,14 +1,14 @@
 import 'reflect-metadata';
 
-import { Class } from './serverx';
+import { Class } from './interfaces';
 import { LogProvider } from './services/log-provider';
-import { Map } from './serverx';
-import { Message } from './serverx';
-import { Method } from './serverx';
+import { Map } from './interfaces';
+import { Message } from './interfaces';
+import { Method } from './interfaces';
 import { NotFound } from './handlers/not-found';
 import { RedirectTo } from './handlers/redirect-to';
 import { ReflectiveInjector } from 'injection-js';
-import { Route } from './serverx';
+import { Route } from './interfaces';
 import { StatusCode200 } from './handlers/statuscode-200';
 
 /**

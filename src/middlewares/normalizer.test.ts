@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Normalizer } from './normalizer';
 
 import { of } from 'rxjs';

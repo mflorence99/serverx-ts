@@ -1,7 +1,7 @@
 import { HttpApp } from '../http/app';
 import { IncomingMessage } from 'http';
 import { OutgoingMessage } from 'http';
-import { Route } from '../serverx';
+import { Route } from '../interfaces';
 import { Timer } from './timer';
 
 const routes: Route[] = [

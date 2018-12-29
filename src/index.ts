@@ -6,7 +6,7 @@ export * from './http';
 export * from './middleware';
 export * from './middlewares';
 export * from './router';
-export * from './serverx';
+export * from './interfaces';
 export * from './service';
 export * from './services';
 export * from './utils';

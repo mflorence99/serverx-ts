@@ -5,11 +5,11 @@ import { COMPRESSOR_OPTS } from '../middlewares//compressor';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Observable } from 'rxjs';
 import { REQUEST_LOGGER_OPTS } from '../middlewares/request-logger';
 import { RequestLogger } from '../middlewares/request-logger';
-import { Route } from '../serverx';
+import { Route } from '../interfaces';
 
 import { createServer } from 'http';
 import { table } from 'table';

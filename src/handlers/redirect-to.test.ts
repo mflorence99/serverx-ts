@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { RedirectTo } from './redirect-to';
 
 import { of } from 'rxjs';

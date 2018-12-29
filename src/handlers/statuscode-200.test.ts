@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { StatusCode200 } from './statuscode-200';
 
 import { of } from 'rxjs';

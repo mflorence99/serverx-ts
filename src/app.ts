@@ -1,15 +1,15 @@
-import { Class } from './serverx';
-import { ContentType } from './serverx';
-import { Exception } from './serverx';
+import { Class } from './interfaces';
+import { ContentType } from './interfaces';
+import { Exception } from './interfaces';
 import { Handler } from './handler';
-import { Message } from './serverx';
+import { Message } from './interfaces';
 import { Middleware } from './middleware';
 import { MiddlewareMethod } from './middleware';
 import { Observable } from 'rxjs';
-import { Response } from './serverx';
-import { Route } from './serverx';
+import { Response } from './interfaces';
+import { Route } from './interfaces';
 import { Router } from './router';
-import { StatusCode } from './serverx';
+import { StatusCode } from './interfaces';
 
 import { caseInsensitiveObject } from './utils';
 import { catchError } from 'rxjs/operators';

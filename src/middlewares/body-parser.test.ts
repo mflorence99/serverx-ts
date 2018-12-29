@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
 import { BodyParser } from './body-parser';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 
 import { fromReadableStream } from '../utils';
 import { of } from 'rxjs';

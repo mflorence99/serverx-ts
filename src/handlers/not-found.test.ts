@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { NotFound } from './not-found';
 
 import { of } from 'rxjs';

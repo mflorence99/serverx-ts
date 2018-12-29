@@ -1,15 +1,15 @@
 import 'reflect-metadata';
 
-import { Exception } from './serverx';
+import { Exception } from './interfaces';
 import { Handler } from './handler';
 import { Injectable } from 'injection-js';
-import { Message } from './serverx';
+import { Message } from './interfaces';
 import { Middleware } from './middleware';
 import { NotFound } from './handlers/not-found';
 import { Observable } from 'rxjs';
-import { Route } from './serverx';
+import { Route } from './interfaces';
 import { Router } from './router';
-import { StatusCode } from './serverx';
+import { StatusCode } from './interfaces';
 import { StatusCode200 } from './handlers/statuscode-200';
 
 import { switchMap } from 'rxjs/operators';

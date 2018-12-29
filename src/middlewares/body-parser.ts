@@ -1,10 +1,10 @@
-import { ContentType } from '../serverx';
-import { Exception } from '../serverx';
+import { ContentType } from '../interfaces';
+import { Exception } from '../interfaces';
 import { Injectable } from 'injection-js';
-import { Message } from '../serverx';
+import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
-import { StatusCode } from '../serverx';
+import { StatusCode } from '../interfaces';
 
 import { catchError } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
