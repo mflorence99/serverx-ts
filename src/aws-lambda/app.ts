@@ -38,7 +38,7 @@ export class AWSLambdaApp extends App {
     // synthesize Message from Lambda event and context
     const message: Message = {
       context: {
-        routes: this.router.routes,
+        router: this.router,
       },
       request: {
         // @see https://stackoverflow.com/questions/41648467
@@ -63,8 +63,19 @@ export class AWSLambdaApp extends App {
     return of(message)
       .pipe(map((message: Message): Message => this.router.route(message)))
       .pipe(this.makePipeline(message))
-      .pipe(map((message: Message): Response => message.response))
-      .toPromise();
+      .pipe(
+        map((message: Message): Response => message.response),
+        // NOTE: properly enc ode binary responses as base64
+        // @see https://techblog.commercetools.com/gzip-on-aws-lambda-and-api-gateway-5170bb02b543
+        map((response: Response): Response => {
+          // @see https://stackoverflow.com/questions/21858138
+          if (response.body instanceof Buffer) {
+            response.body = (<Buffer>response.body).toString('base64');
+            response.isBase64Encoded = true;
+          }
+          return response;
+        })
+      ).toPromise();
   }
 
   // private methods

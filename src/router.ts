@@ -74,6 +74,7 @@ export class Router {
       paths.push(...this.split(route.path).reverse());
       route = route.parent;
     }
+    methods = methods || ['*'];
     const path = '/' + paths.reverse().join('/');
     return { methods, path };
   }
@@ -115,7 +116,9 @@ export class Router {
                     params: Map<string>): Route {
     let route = routes.find((route: Route) => {
       route.parent = parent;
-      if (route.methods && !route.methods.includes(method))
+      if (route.methods 
+       && !route.methods.includes('*') 
+       && !route.methods.includes(method))
         return false;
       if (route.path === '**')
         return true;

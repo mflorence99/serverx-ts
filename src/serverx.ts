@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { OutgoingHttpHeaders } from 'http';
 import { Provider } from 'injection-js';
 import { ReflectiveInjector } from 'injection-js';
+import { Router } from './router';
 import { URLSearchParams } from 'url';
 
 /**
@@ -44,7 +45,7 @@ export enum ContentType {
  */
 
 export interface Context {
-  routes: Route[];
+  router: Router;
 }
 
 /**
@@ -78,7 +79,7 @@ export interface Message<TRequest = Request,
  * Method definition
  */
 
-export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE';
+export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE' | '*';
 
 /**
  * Request definition
@@ -109,6 +110,7 @@ export interface Response<TBody = any,
                           THeaders = OutgoingHttpHeaders> {
   body?: TBody;
   headers?: THeaders;
+  isBase64Encoded?: boolean;
   statusCode?: StatusCode;
 }
 

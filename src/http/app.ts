@@ -54,7 +54,7 @@ export class HttpApp extends App {
       const parsed = <any>url.parse(this.req.url, true); 
       const message: Message = {
         context: {
-          routes: this.router.routes,
+          router: this.router,
         },
         request: {
           body: { },
@@ -109,6 +109,7 @@ export class HttpApp extends App {
       this.res.writeHead(response.statusCode, response.headers);
       this.res.end(response.body);
     }
+    // NOTE: back-door for tests
     else this.response$.next(response);
   }
 
