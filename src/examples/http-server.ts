@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { REQUEST_LOGGER_OPTS } from '../middlewares/request-logger';
 import { RequestLogger } from '../middlewares/request-logger';
 import { Route } from '../interfaces';
+import { Swagger } from '../handlers/swagger';
 
 import { createServer } from 'http';
 import { table } from 'table';
@@ -61,6 +62,11 @@ const routes: Route[] = [
       { provide: COMPRESSOR_OPTS, useValue: { threshold: 0 } } 
     ],
     children: [
+
+      {
+        path: 'swagger.yml',
+        handler: Swagger
+      },
 
       {
         path: '/foo',

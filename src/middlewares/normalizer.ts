@@ -1,5 +1,6 @@
 import * as fileType from 'file-type';
 import * as mime from 'mime';
+import * as yaml from 'js-yaml';
 
 import { ContentType } from '../interfaces';
 import { Injectable } from 'injection-js';
@@ -27,16 +28,22 @@ import { tap } from 'rxjs/operators';
         // if not already set, try to deduce MIME type from content or path
         const headers = response.headers;
         if (!headers['Content-Type']) {
-          const fromBuffer = response.body && Buffer.isBuffer(response.body) && fileType(response.body);
+          const fromBuffer = (response.body instanceof Buffer) && fileType(response.body);
           const mimeType = fromBuffer? fromBuffer.mime : (mime.getType(request.path) || ContentType.APPLICATION_JSON);
           headers['Content-Type'] = mimeType;
         }
         // stringify any JSON object
         let body = response.body;
-        if (body 
-         && !(body instanceof Buffer) 
-         && (headers['Content-Type'] === ContentType.APPLICATION_JSON))
-          body = JSON.stringify(response.body);
+        if (body && !(body instanceof Buffer)) {
+          switch (headers['Content-Type']) {
+            case ContentType.APPLICATION_JSON:
+              body = JSON.stringify(response.body);
+              break;
+            case ContentType.TEXT_YAML:
+              body = yaml.safeDump(response.body);
+              break;
+          }
+        } 
         // set Content-Length 
         if (body) 
           headers['Content-Length'] = Buffer.byteLength(body);

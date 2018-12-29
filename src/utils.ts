@@ -3,15 +3,24 @@ import { Readable } from 'stream';
 
 /**
  * Create a case-insensitive object
+ * 
+ * NOTE: biassed to HTTP headers
  */
+
+function normalize(k: string): string {
+  const words = k
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+  return words.join('-');
+}
 
 export function caseInsensitiveObject(obj: any): any {
   const proxy = { };
-  Object.keys(obj).forEach((k: string) => proxy[k.toLowerCase()] = obj[k]);
+  Object.keys(obj).forEach((k: string) => proxy[normalize(k)] = obj[k]);
   return new Proxy(proxy, {
-    deleteProperty: (tgt: any, k: string) => delete tgt[k.toLowerCase()],
-    get: (tgt: any, k: string) => tgt[k.toLowerCase()],
-    set: (tgt: any, k: string, v: any) => tgt[k.toLowerCase()] = v,
+    deleteProperty: (tgt: any, k: string) => delete tgt[normalize(k)],
+    get: (tgt: any, k: string) => tgt[normalize(k)],
+    set: (tgt: any, k: string, v: any) => tgt[normalize(k)] = v,
   });
 }
 
