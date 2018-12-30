@@ -79,9 +79,9 @@ export class Router {
       paths.push(...this.split(route.path).reverse());
       if (route.request) {
         request.body = request.body || route.request.body;
-        request.cookies = request.cookies || route.request.cookies;
-        request.headers = request.headers || route.request.headers;
-        request.params = request.params || route.request.params;
+        request.cookie = request.cookie || route.request.cookie;
+        request.header = request.header || route.request.header;
+        request.path = request.path || route.request.path;
         request.query = request.query || route.request.query;
       }
       summary = summary || route.summary;
@@ -91,7 +91,7 @@ export class Router {
     // cleanup and return the business
     methods = methods || ALL_METHODS;
     const path = '/' + paths.reverse().join('/');
-    return { description, methods, path, summary };
+    return { description, methods, path, request, summary };
   }
 
   private match(paths: string[],

@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 
+import { Attr } from '../metadata';
 import { Compressor } from '../middlewares//compressor';
 import { COMPRESSOR_OPTS } from '../middlewares//compressor';
 import { Handler } from '../handler';
@@ -51,6 +52,10 @@ import chalk from 'chalk';
   }
 }
 
+class FooBarParams {
+  @Attr() id: string;
+}
+
 const routes: Route[] = [
 
   {
@@ -76,7 +81,10 @@ const routes: Route[] = [
         children: [
 
           {
-            path: '/bar'
+            path: '/bar/:id',
+            request: {
+              path: FooBarParams
+            }
           },
 
           {

@@ -80,6 +80,15 @@ export interface Message<TRequest = Request,
 }
 
 /**
+ * Metadata definition
+ */
+
+export interface Metadata {
+  name: string;
+  type: string;
+}
+
+/**
  * Method definition
  */
 
@@ -114,9 +123,9 @@ export interface Request<TBody = any,
 
 export interface RequestMetadata {
   body?: Class;
-  cookies?: Class;
-  headers?: Class;
-  params?: Class;
+  cookie?: Class;
+  header?: Class;
+  path?: Class;
   query?: Class;
 }
 
