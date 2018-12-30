@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { ContentType } from '../interfaces';
 import { Handler } from '../handler';
 import { HttpApp } from './app';

@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import * as zlib from 'zlib';
 
 import { Compressor } from './compressor';

@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { BodyParser } from './body-parser';
 import { Message } from '../interfaces';
 

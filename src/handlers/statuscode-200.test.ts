@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { Message } from '../interfaces';
 import { StatusCode200 } from './statuscode-200';
 

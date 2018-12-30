@@ -109,6 +109,18 @@ export interface Request<TBody = any,
 }
 
 /**
+ * Request definition
+ */
+
+export interface RequestMetadata {
+  body?: Class;
+  cookies?: Class;
+  headers?: Class;
+  params?: Class;
+  query?: Class;
+}
+
+/**
  * Response definition
  */
 
@@ -138,6 +150,7 @@ export interface Route {
   phantom?: boolean;
   redirectAs?: number;
   redirectTo?: string;
+  request?: RequestMetadata;
   services?: Provider[];
   summary?: string;
 }

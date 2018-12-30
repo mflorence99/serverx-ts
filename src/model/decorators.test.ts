@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { xxx } from './decorators';
 
 describe('Decorator unit tests', () => {
@@ -10,7 +8,7 @@ describe('Decorator unit tests', () => {
       @xxx() b: string;
     }   
     const columns: string[] = Reflect.getMetadata('xxx', Y);
-    expect(columns).toEqual(['a', 'b']);
+    expect(columns).toEqual([['a', 'Number'], ['b', 'String']]);
   });
 
 });

@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { ALL_METHODS } from './interfaces';
 import { Class } from './interfaces';
 import { LogProvider } from './services/log-provider';
@@ -9,6 +7,7 @@ import { Method } from './interfaces';
 import { NotFound } from './handlers/not-found';
 import { RedirectTo } from './handlers/redirect-to';
 import { ReflectiveInjector } from 'injection-js';
+import { RequestMetadata } from './interfaces';
 import { Route } from './interfaces';
 import { StatusCode200 } from './handlers/statuscode-200';
 
@@ -71,12 +70,20 @@ export class Router {
     let description: string;
     let methods: Method[];
     const paths: string[] = [];
+    const request: RequestMetadata = { };
     let summary: string;
     // accumulate route components
     while (route) {
       description = description || route.description;
       methods = methods || route.methods;
       paths.push(...this.split(route.path).reverse());
+      if (route.request) {
+        request.body = request.body || route.request.body;
+        request.cookies = request.cookies || route.request.cookies;
+        request.headers = request.headers || route.request.headers;
+        request.params = request.params || route.request.params;
+        request.query = request.query || route.request.query;
+      }
       summary = summary || route.summary;
       // now look at parent
       route = route.parent;

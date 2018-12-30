@@ -1,5 +1,4 @@
-import 'reflect-metadata';
-
+import { ALL_METHODS } from '../interfaces';
 import { Message } from '../interfaces';
 import { NotFound } from './not-found';
 
@@ -30,7 +29,7 @@ describe('NotFound unit tests', () => {
     notFound.handle(of(message))
       .subscribe(message => {
         const { response } = message;
-        expect(response.headers['Allow']).toEqual('CONNECT,DELETE,GET,HEAD,PATCH,POST,PUT,TRACE');
+        expect(response.headers['Allow']).toEqual(ALL_METHODS.join(','));
         expect(response.statusCode).toEqual(200);
         done();
       });

@@ -16,4 +16,8 @@ module.exports = {
     "json",
     "node"
   ],
+  "setupFiles": [
+    "./node_modules/reflect-metadata/Reflect.js"
+  ],
+  "testEnvironment": "node"
 }

@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { Message } from '../interfaces';
 import { RedirectTo } from './redirect-to';
 

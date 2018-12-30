@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { Exception } from './interfaces';
 import { Handler } from './handler';
 import { Injectable } from 'injection-js';

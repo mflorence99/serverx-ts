@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { LogProvider } from '../services/log-provider';
 import { Request } from '../interfaces';
 import { RequestLogger } from './request-logger';

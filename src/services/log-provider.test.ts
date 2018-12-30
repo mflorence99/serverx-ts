@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { LogProvider } from './log-provider';
 
 describe('LogProvider unit tests', () => {

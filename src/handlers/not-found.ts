@@ -1,3 +1,4 @@
+import { ALL_METHODS } from '../interfaces';
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
@@ -17,7 +18,7 @@ import { tap } from 'rxjs/operators';
       tap((message: Message) => {
         const { request, response } = message;
         if (request.method === 'OPTIONS') {
-          response.headers['Allow'] = 'CONNECT,DELETE,GET,HEAD,PATCH,POST,PUT,TRACE';
+          response.headers['Allow'] = ALL_METHODS.join(',');
           response.statusCode = StatusCode.OK;
         }
         else response.statusCode = response.statusCode || StatusCode.NOT_FOUND;
