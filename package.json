@@ -27,6 +27,7 @@
     "injection-js": "2",
     "js-yaml": "3",
     "mime": "2",
+    "openapi3-ts": "1",
     "reflect-metadata": "^0.1.12",
     "rxjs": "6",
     "table": "5"

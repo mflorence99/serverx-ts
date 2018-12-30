@@ -3,6 +3,7 @@ import * as url from 'url';
 import { App } from '../app';
 import { BodyParser } from '../middlewares/body-parser';
 import { IncomingMessage } from 'http';
+import { InfoObject } from 'openapi3-ts';
 import { Message } from '../interfaces';
 import { Method } from '../interfaces';
 import { Normalizer } from '../middlewares/normalizer';
@@ -39,8 +40,9 @@ export class HttpApp extends App {
   private res: ServerResponse;
 
   /** ctor */
-  constructor(routes: Route[]) {
-    super(routes, MIDDLEWARES);
+  constructor(routes: Route[],
+              info: InfoObject = null) {
+    super(routes, MIDDLEWARES, info);
   }
 
   /** Create a listener */
@@ -54,6 +56,7 @@ export class HttpApp extends App {
       const parsed = <any>url.parse(this.req.url, true); 
       const message: Message = {
         context: {
+          info: this.info,
           router: this.router,
         },
         request: {

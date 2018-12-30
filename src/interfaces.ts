@@ -1,5 +1,6 @@
 import { Handler } from './handler';
 import { IncomingHttpHeaders } from 'http';
+import { InfoObject } from 'openapi3-ts';
 import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
 import { OutgoingHttpHeaders } from 'http';
@@ -30,6 +31,7 @@ export enum ContentType {
   AUDIO = 'audio/*',
   AUDIO_MPEG = 'audio/mpeg',
   AUDIO_OGG = 'audio/ogg',
+  FONT_WOFF2 = 'font/woff2',
   IMAGE_GIF = 'image/gif',
   IMAGE_JPEG = 'image/jpeg',
   IMAGE_PNG = 'image/png',
@@ -46,6 +48,7 @@ export enum ContentType {
  */
 
 export interface Context {
+  info: InfoObject;
   router: Router;
 }
 
@@ -80,7 +83,9 @@ export interface Message<TRequest = Request,
  * Method definition
  */
 
-export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE' | '*';
+export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE';
+
+export const ALL_METHODS: Method[] = ['CONNECT', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE'];
 
 /**
  * Request definition
@@ -122,6 +127,7 @@ export interface Response<TBody = any,
 export interface Route {
   children?: Route[];
   data?: any;
+  description?: string;
   handler?: Class<Handler>;
   injector?: ReflectiveInjector;
   methods?: Method[];
@@ -133,6 +139,7 @@ export interface Route {
   redirectAs?: number;
   redirectTo?: string;
   services?: Provider[];
+  summary?: string;
 }
 
 /**

@@ -54,7 +54,7 @@ describe('Compressor unit tests', () => {
       expect(response.statusCode).toEqual(200);
       done();
     });
-    listener({ method: 'GET', url: '/foo/bar', headers: { 'Accept-Encoding': 'gzip; deflate' } } as any, { } as any);
+    listener({ method: 'GET', url: '/foo/bar', headers: { 'Accept-Encoding': 'gzip, deflate' } } as any, { } as any);
   });
 
   test('performs deflate compression', done => {

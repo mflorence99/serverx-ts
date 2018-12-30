@@ -2,6 +2,7 @@ import { Class } from './interfaces';
 import { ContentType } from './interfaces';
 import { Exception } from './interfaces';
 import { Handler } from './handler';
+import { InfoObject } from 'openapi3-ts';
 import { Message } from './interfaces';
 import { Middleware } from './middleware';
 import { MiddlewareMethod } from './middleware';
@@ -25,12 +26,15 @@ import { pipe } from 'rxjs';
 
 export abstract class App {
 
+  info: InfoObject;
   router: Router;
 
   /** ctor */
   constructor(routes: Route[],
-              required: Class[] = []) {
+              required: Class[] = [],
+              info: InfoObject = null) {
     this.router = new Router(routes, required);
+    this.info = info || { title: this.constructor.name, version: '0.0.0' };
   }
 
   // protected methods

@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 
+import { ALL_METHODS } from './interfaces';
 import { Class } from './interfaces';
 import { LogProvider } from './services/log-provider';
 import { Map } from './interfaces';
@@ -67,16 +68,23 @@ export class Router {
   }
 
   private harmonize(route: Route): Route {
+    let description: string;
     let methods: Method[];
     const paths: string[] = [];
+    let summary: string;
+    // accumulate route components
     while (route) {
+      description = description || route.description;
       methods = methods || route.methods;
       paths.push(...this.split(route.path).reverse());
+      summary = summary || route.summary;
+      // now look at parent
       route = route.parent;
     }
-    methods = methods || ['*'];
+    // cleanup and return the business
+    methods = methods || ALL_METHODS;
     const path = '/' + paths.reverse().join('/');
-    return { methods, path };
+    return { description, methods, path, summary };
   }
 
   private match(paths: string[],
@@ -117,7 +125,6 @@ export class Router {
     let route = routes.find((route: Route) => {
       route.parent = parent;
       if (route.methods 
-       && !route.methods.includes('*') 
        && !route.methods.includes(method))
         return false;
       if (route.path === '**')

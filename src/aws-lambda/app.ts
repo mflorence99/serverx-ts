@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { App } from '../app';
 import { Context } from 'aws-lambda';
+import { InfoObject } from 'openapi3-ts';
 import { Message } from '../interfaces';
 import { Method } from '../interfaces';
 import { Normalizer } from '../middlewares/normalizer';
@@ -26,8 +27,9 @@ export class AWSLambdaApp extends App {
   private context: Context;
 
   /** ctor */
-  constructor(routes: Route[]) {
-    super(routes, MIDDLEWARES);
+  constructor(routes: Route[],
+              info: InfoObject = null) {
+    super(routes, MIDDLEWARES, info);
   }
 
   /** AWS Lambda handler method */
@@ -38,6 +40,7 @@ export class AWSLambdaApp extends App {
     // synthesize Message from Lambda event and context
     const message: Message = {
       context: {
+        info: this.info,
         router: this.router,
       },
       request: {
@@ -65,7 +68,7 @@ export class AWSLambdaApp extends App {
       .pipe(this.makePipeline(message))
       .pipe(
         map((message: Message): Response => message.response),
-        // NOTE: properly enc ode binary responses as base64
+        // NOTE: properly encode binary responses as base64
         // @see https://techblog.commercetools.com/gzip-on-aws-lambda-and-api-gateway-5170bb02b543
         map((response: Response): Response => {
           // @see https://stackoverflow.com/questions/21858138

@@ -7,7 +7,7 @@ import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
 import { Observable } from 'rxjs';
-import { OpenAPI } from '../handlers/swagger';
+import { OpenAPI } from '../handlers/open-api';
 import { REQUEST_LOGGER_OPTS } from '../middlewares/request-logger';
 import { RequestLogger } from '../middlewares/request-logger';
 import { Route } from '../interfaces';
@@ -61,14 +61,17 @@ const routes: Route[] = [
       { provide: REQUEST_LOGGER_OPTS, useValue: { colorize: true } },
       { provide: COMPRESSOR_OPTS, useValue: { threshold: 0 } } 
     ],
+    summary: 'A family of test endpoints',
     children: [
 
       {
+        description: 'Develop OpenAPI representation of this server',
         path: 'openapi.yml',
         handler: OpenAPI
       },
 
       {
+        description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`,
         path: '/foo',
         children: [
 
@@ -89,6 +92,7 @@ const routes: Route[] = [
       },
 
       {
+        description: 'This one will blow your mind!',
         path: '/goodbye',
         handler: Goodbye
       },
@@ -114,10 +118,10 @@ const routes: Route[] = [
 
 ];
 
-const app = new HttpApp(routes);
+const app = new HttpApp(routes, { title: 'http-server', version: '1.0' });
 
 const flattened = app.router.flatten()
-  .map((route: Route) => [route.methods.join(','), route.path]);
+  .map((route: Route) => [route.methods.join(','), route.path, route.summary ]);
 console.log(table(flattened));
 
 const listener = app.listen();

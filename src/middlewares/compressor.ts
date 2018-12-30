@@ -13,6 +13,8 @@ import { StatusCode } from '../interfaces';
 import { catchError } from 'rxjs/operators';
 import { defaultIfEmpty } from 'rxjs/operators';
 import { filter } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { mapTo } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
@@ -20,6 +22,8 @@ import { throwError } from 'rxjs';
 
 /**
  * Compressor options
+ * 
+ * TODO: ignored for Brotli ??
  * 
  * @see https://nodejs.org/api/zlib.html#zlib_class_options
  * @see http://zlib.net/manual.html#Constants
@@ -73,11 +77,14 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
       switchMap((message: Message): Observable<Message> => {
         const { request, response } = message;
         return of(message).pipe(
-          filter((message: Message) => {
-            const alreadyEncoded = !!request.headers['Content-Encoding'];
-            const accepts = request.headers['Accept-Encoding'] || '';
+          map((message: Message) => {
+            const accepts = (String(request.headers['Accept-Encoding']) || '').split(/, /);
             const willDeflate = accepts.includes('deflate');
             const willGZIP = accepts.includes('gzip');
+            return { willDeflate, willGZIP };
+          }),
+          filter(({ willDeflate, willGZIP }) => {
+            const alreadyEncoded = !!request.headers['Content-Encoding'];
             const size = Number(response.headers['Content-Length'] || '0');
             return (COMPRESSABLE_METHODS.includes(request.method)
               && response.body
@@ -85,15 +92,14 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
               && (willDeflate || willGZIP)
               && (size >= this.opts.threshold)); 
           }),
-          tap((message: Message) => {
-            const accepts = request.headers['Accept-Encoding'] || '';
-            const willGZIP = accepts.includes('gzip');
+          tap(({ willDeflate, willGZIP }) => {
             // NOTE: prefer gzip to deflate
             const type = willGZIP? 'gzip' : 'deflate';
             response.body = zlib[`${type}Sync`](response.body, this.opts);
             response.headers['Content-Encoding'] = type;
             response.headers['Content-Length'] = Buffer.byteLength(response.body);
           }),
+          mapTo(message),
           catchError(() => throwError(new Exception({ statusCode: StatusCode.BAD_REQUEST }))),
           defaultIfEmpty(message)
         );
