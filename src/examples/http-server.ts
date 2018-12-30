@@ -7,10 +7,10 @@ import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
 import { Observable } from 'rxjs';
+import { OpenAPI } from '../handlers/swagger';
 import { REQUEST_LOGGER_OPTS } from '../middlewares/request-logger';
 import { RequestLogger } from '../middlewares/request-logger';
 import { Route } from '../interfaces';
-import { Swagger } from '../handlers/swagger';
 
 import { createServer } from 'http';
 import { table } from 'table';
@@ -64,8 +64,8 @@ const routes: Route[] = [
     children: [
 
       {
-        path: 'swagger.yml',
-        handler: Swagger
+        path: 'openapi.yml',
+        handler: OpenAPI
       },
 
       {

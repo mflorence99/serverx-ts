@@ -6,10 +6,10 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /**
- * Swagger YML generator
+ * OpenAPI YML generator
  */
 
-@Injectable() export class Swagger extends Handler {
+@Injectable() export class OpenAPI extends Handler {
 
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(

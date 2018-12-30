@@ -6,19 +6,15 @@
 [![node](https://img.shields.io/badge/node-8.10-blue.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[![NPM](https://nodei.co/npm/serverx-ts.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/serverx-ts/)
+
 Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](rxjs.dev), built with [TypeScript](https://www.typescriptlang.org/) and optimized for serverless deployments. Heavily inspired by [Marble.js](https://github.com/marblejs/marble) and [NestJS](https://nestjs.com/).
 
 <!-- toc -->
 
-- [Installation](#installation)
+- [Dummy](#dummy)
 
 <!-- tocstop -->
-
-## Installation
-
-```sh
-npm install ---save serverx-ts
-```
 
 ## Dummy
 
