@@ -29,11 +29,10 @@ import { toArray } from 'rxjs/operators';
     const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
-        const { request } = message;
         return of(message).pipe(
-          filter((message: Message) => !!request.stream$ && PARSEABLE_METHODS.includes(request.method)),
+          filter(({ request }) => !!request.stream$ && PARSEABLE_METHODS.includes(request.method)),
           // read the stream into a string, then into encoded form
-          switchMap((message: Message): Observable<any> => {
+          switchMap(({ request }): Observable<any> => {
             return request.stream$.pipe(
               toArray(),
               map((chunks: any[]): Buffer => Buffer.concat(chunks)),
@@ -57,7 +56,7 @@ import { toArray } from 'rxjs/operators';
             );
           }),
           // map the encoded body object back to the original message
-          tap((body: any) => request.body = body),
+          tap((body: any) => message.request.body = body),
           mapTo(message),
           catchError(() => throwError(new Exception({ statusCode: StatusCode.BAD_REQUEST }))),
           defaultIfEmpty(message)

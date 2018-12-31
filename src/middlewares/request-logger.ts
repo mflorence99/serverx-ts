@@ -54,8 +54,7 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
       switchMap((message: Message): Observable<Message> => {
         return of(message).pipe(
           filter((message: Message) => !this.opts.silent),
-          tap((message: Message) => {
-            const { response } = message;
+          tap(({ response }) => {
             if (response.statusCode === StatusCode.INTERNAL_SERVER_ERROR)
               this.logError(message);
             this.logMessage(message);

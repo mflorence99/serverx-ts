@@ -92,7 +92,7 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
               && (willDeflate || willGZIP)
               && (size >= this.opts.threshold)); 
           }),
-          tap(({ willDeflate, willGZIP }) => {
+          tap(({ willGZIP }) => {
             // NOTE: prefer gzip to deflate
             const type = willGZIP? 'gzip' : 'deflate';
             response.body = zlib[`${type}Sync`](response.body, this.opts);

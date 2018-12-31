@@ -14,8 +14,7 @@ import { tap } from 'rxjs/operators';
 
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response.statusCode = StatusCode.OK;
       })
     );

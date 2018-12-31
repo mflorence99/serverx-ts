@@ -13,8 +13,7 @@ describe('NotFound unit tests', () => {
       response: { }
     };
     notFound.handle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.statusCode).toEqual(404);
         done();
       });
@@ -27,8 +26,7 @@ describe('NotFound unit tests', () => {
       response: { headers: { } }
     };
     notFound.handle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.headers['Allow']).toEqual(ALL_METHODS.join(','));
         expect(response.statusCode).toEqual(200);
         done();

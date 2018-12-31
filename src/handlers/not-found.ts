@@ -15,8 +15,7 @@ import { tap } from 'rxjs/operators';
 
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { request, response } = message;
+      tap(({ request, response }) => {
         if (request.method === 'OPTIONS') {
           response.headers['Allow'] = ALL_METHODS.join(',');
           response.statusCode = StatusCode.OK;

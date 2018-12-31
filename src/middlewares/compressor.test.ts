@@ -14,8 +14,7 @@ import { tap } from 'rxjs/operators';
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response } ) => {
         response.body = 'Hello, http!';
       })
     );

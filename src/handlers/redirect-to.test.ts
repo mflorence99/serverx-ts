@@ -12,8 +12,7 @@ describe('RedirectTo unit tests', () => {
       response: { headers: { } }
     };
     redirectTo.handle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.headers['Location']).toEqual('y');
         expect(response.statusCode).toEqual(301);
         done();

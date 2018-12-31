@@ -16,8 +16,7 @@ import { tap } from 'rxjs/operators';
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { request, response } = message;
+      tap(({ request, response }) => {
         response.body = `Hello, ${request.query.get('bizz')}`;
       })
     );
@@ -27,8 +26,7 @@ import { tap } from 'rxjs/operators';
 @Injectable() class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { request, response } = message;
+      tap(({ request, response }) => {
         response.body = `Goodbye, ${request.query.get('buzz')}`;
       })
     );
@@ -38,8 +36,7 @@ import { tap } from 'rxjs/operators';
 @Injectable() class Explode extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response['x']['y'] = 'z';
       })
     );
@@ -49,8 +46,7 @@ import { tap } from 'rxjs/operators';
 @Injectable() class Middleware1 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response.headers['X-this'] = 'that';
       })
     );
@@ -60,8 +56,7 @@ import { tap } from 'rxjs/operators';
 @Injectable() class Middleware2 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { request, response } = message;
+      tap(({ request, response }) => {
         response.headers['X-that'] = 'this';
         Object.keys(request.body).forEach(k => response.headers[k] = request.body[k]);
       })

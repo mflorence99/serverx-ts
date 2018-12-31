@@ -12,8 +12,7 @@ describe('Normalizer unit tests', () => {
       response: { headers: { } }
     };
     normalizer.posthandle(of(message))
-    .subscribe(message => {
-      const { response } = message;
+    .subscribe(({ response }) => {
       expect(response.statusCode).toEqual(200);
       done();
     });
@@ -26,8 +25,7 @@ describe('Normalizer unit tests', () => {
       response: { headers: { }, statusCode: 500 }
     };
     normalizer.posthandle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.statusCode).toEqual(500);
         done();
       });
@@ -40,8 +38,7 @@ describe('Normalizer unit tests', () => {
       response: { headers: { } }
     };
     normalizer.posthandle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.headers['Content-Type']).toEqual('text/html');
         done();
       });
@@ -54,8 +51,7 @@ describe('Normalizer unit tests', () => {
       response: { body: { x: 'y' }, headers: { } }
     };
     normalizer.posthandle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.headers['Content-Type']).toEqual('application/json');
         expect(response.body).toEqual(JSON.stringify({ x: 'y' }));
         done();
@@ -69,8 +65,7 @@ describe('Normalizer unit tests', () => {
       response: { body: 'xyz', headers: { } }
     };
     normalizer.posthandle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.headers['Content-Length']).toEqual(5);
         done();
       });

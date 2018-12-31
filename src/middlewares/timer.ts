@@ -17,8 +17,7 @@ import { tap } from 'rxjs/operators';
 
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response.headers['X-Request-Timein'] = Date.now();
       })
     );
@@ -26,8 +25,7 @@ import { tap } from 'rxjs/operators';
 
   posthandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response.headers['X-Request-Timeout'] = Date.now();
         const timein = Number(response.headers['X-Request-Timein']);
         const timeout = Number(response.headers['X-Request-Timeout']);

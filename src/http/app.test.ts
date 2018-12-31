@@ -17,8 +17,7 @@ import axios from 'axios';
 @Injectable() class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response.body = 'Hello, http!';
       })
     );
@@ -28,8 +27,7 @@ import axios from 'axios';
 @Injectable() class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { request, response } = message;
+      tap(({ request, response }) => {
         response.body = `Goodbye, ${request.body.name || 'http'}!`;
       })
     );
@@ -39,8 +37,7 @@ import axios from 'axios';
 @Injectable() class CORS extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         // NOTE: just the minimum CORS necessary for test case
         response.headers['Access-Control-Allow-Origin'] = '*';
       })
@@ -51,8 +48,7 @@ import axios from 'axios';
 @Injectable() class Middleware1 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response.headers['X-this'] = 'that';
       })
     );
@@ -62,8 +58,7 @@ import axios from 'axios';
 @Injectable() class Middleware2 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { response } = message;
+      tap(({ response }) => {
         response.headers['X-that'] = 'this';
       })
     );

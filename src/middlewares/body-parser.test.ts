@@ -15,8 +15,7 @@ describe('BodyParser unit tests', () => {
       request: { path: '/foo/bar', method: 'POST', headers: { 'content-type': 'application/json' }, stream$: fromReadableStream(str(body)) }
     };
     bodyParser.prehandle(of(message))
-      .subscribe(message => {
-        const { request } = message;
+      .subscribe(({ request }) => {
         expect(request.body.x).toEqual('y');
         done();
       });
@@ -29,8 +28,7 @@ describe('BodyParser unit tests', () => {
       request: { path: '/foo/bar', method: 'POST', headers: { 'content-type': 'x-www-form-urlencoded' }, stream$: fromReadableStream(str(body)) }
     };
     bodyParser.prehandle(of(message))
-      .subscribe(message => {
-        const { request } = message;
+      .subscribe(({ request }) => {
         expect(request.body.a).toEqual('b');
         expect(request.body.x).toEqual('y');
         done();
@@ -43,8 +41,7 @@ describe('BodyParser unit tests', () => {
       request: { path: '/foo/bar', method: 'POST', headers: { 'content-type': 'x-www-form-urlencoded' }, stream$: null }
     };
     bodyParser.prehandle(of(message))
-      .subscribe(message => {
-        const { request } = message;
+      .subscribe(({ request }) => {
         expect(request.body).toBeUndefined();
         done();
       });

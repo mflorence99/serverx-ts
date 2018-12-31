@@ -12,8 +12,7 @@ describe('StatusCode200 unit tests', () => {
       response: { }
     };
     statusCode200.handle(of(message))
-      .subscribe(message => {
-        const { response } = message;
+      .subscribe(({ response }) => {
         expect(response.statusCode).toEqual(200);
         done();
       });

@@ -9,6 +9,10 @@ import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { StatusCode } from '../interfaces';
 
+import { map } from 'rxjs/operators';
+import { mapTo } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
 /**
@@ -21,35 +25,39 @@ import { tap } from 'rxjs/operators';
 
   posthandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      tap((message: Message) => {
-        const { request, response } = message;
-        // status code is OK unless otherwise set
-        const statusCode = response.statusCode || StatusCode.OK;
-        // if not already set, try to deduce MIME type from content or path
-        const headers = response.headers;
-        if (!headers['Content-Type']) {
-          const fromBuffer = (response.body instanceof Buffer) && fileType(response.body);
-          const mimeType = fromBuffer? fromBuffer.mime : (mime.getType(request.path) || ContentType.APPLICATION_JSON);
-          headers['Content-Type'] = mimeType;
-        }
-        // stringify any JSON object
-        let body = response.body;
-        if (body && !(body instanceof Buffer)) {
-          switch (headers['Content-Type']) {
-            case ContentType.APPLICATION_JSON:
-              body = JSON.stringify(response.body);
-              break;
-            case ContentType.TEXT_YAML:
-              body = yaml.safeDump(response.body);
-              break;
-          }
-        } 
-        // set Content-Length 
-        if (body) 
-          headers['Content-Length'] = Buffer.byteLength(body);
-          // now we have a normalized messsage
-        message.response = { body, headers, statusCode };
-      })
+      switchMap((message: Message): Observable<Message> => {
+        return of(message).pipe(
+          map(({ request, response } ) => ({ body: response.body, headers: response.headers, path: request.path, statusCode: response.statusCode })),
+          map(({ body, headers, path, statusCode }) => ({ body, headers, path, statusCode: statusCode || StatusCode.OK })),
+          tap(({ body, headers, path }) => {
+            if (!headers['Content-Type']) {
+              const fromBuffer = (body instanceof Buffer) && fileType(body);
+              const mimeType = fromBuffer? fromBuffer.mime : mime.getType(path);
+              // NOTE: JSON is the default
+              headers['Content-Type'] = mimeType || ContentType.APPLICATION_JSON;
+            }
+          }),
+          map(({ body, headers, statusCode }) => {
+            if (body && !(body instanceof Buffer)) {
+              switch (headers['Content-Type']) {
+                case ContentType.APPLICATION_JSON:
+                  body = JSON.stringify(body);
+                  break;
+                case ContentType.TEXT_YAML:
+                  body = yaml.safeDump(body);
+                  break;
+              }
+            }
+            return { body, headers, statusCode }; 
+          }),
+          tap(({ body, headers }) => {
+            if (body)
+              headers['Content-Length'] = Buffer.byteLength(body);
+          }),
+          tap(({ body, headers, statusCode }) => message.response = { body, headers, statusCode }),
+          mapTo(message)
+        );
+      }),
     );
   }
 
