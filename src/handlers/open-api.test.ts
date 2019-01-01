@@ -4,6 +4,7 @@ import { OpenAPI } from './open-api';
 import { OperationObject } from 'openapi3-ts';
 import { Route } from '../interfaces';
 import { Router } from '../router';
+import { SchemaObject } from 'openapi3-ts';
 
 const info: InfoObject = {
   title: 'open-api.test',
@@ -11,9 +12,22 @@ const info: InfoObject = {
 };
 
 class CommonHeader {
-  @Attr() x: string;
+  @Attr({ required: true }) x: string;
   @Attr() y: boolean;
   @Attr() z: number;
+}
+
+class FooBodyInner {
+  @Attr() a: number;
+  @Attr() b: string;
+  @Attr() c: boolean;
+}   
+
+class FooBody {
+  @Attr() p: string;
+  @Attr() q: boolean;
+  @Attr() r: number;
+  @Attr() t: FooBodyInner;
 }
 
 class FooPath {
@@ -21,7 +35,7 @@ class FooPath {
 }
 
 class FooQuery {
-  @Attr({ required: false }) k: number;
+  @Attr({ required: true }) k: number;
 }
 
 const routes: Route[] = [
@@ -47,7 +61,13 @@ const routes: Route[] = [
       {
         description: 'PUT /foo',
         methods: ['PUT'],
-        path: '/foo'
+        path: '/foo',
+        request: {
+          body: {
+            'application/x-www-form-urlencoded': FooBody,
+            'application/json': FooBody
+          }
+        }
       },
 
       {
@@ -98,15 +118,26 @@ describe('OpenAPI unit tests', () => {
   test('request parameter metadata is recorded', () => {
     const op: OperationObject = openAPI.paths['/foo'].get;
     expect(op.parameters).toContainEqual({ name: 'x', in: 'header', required: true,
-      schema: { type: 'String' } });
-    expect(op.parameters).toContainEqual({ name: 'y', in: 'header', required: true,
-      schema: { type: 'Boolean' } });
-    expect(op.parameters).toContainEqual({ name: 'z', in: 'header', required: true,
-      schema: { type: 'Number' } });
+      schema: { type: 'string' } });
+    expect(op.parameters).toContainEqual({ name: 'y', in: 'header', required: false,
+      schema: { type: 'boolean' } });
+    expect(op.parameters).toContainEqual({ name: 'z', in: 'header', required: false,
+      schema: { type: 'number' } });
     expect(op.parameters).toContainEqual({ name: 'k', in: 'path', required: true,
-      schema: { type: 'Boolean' } });
-    expect(op.parameters).toContainEqual({ name: 'k', in: 'query', required: false, 
-      schema: { type: 'Number' } });
+      schema: { type: 'boolean' } });
+    expect(op.parameters).toContainEqual({ name: 'k', in: 'query', required: true, 
+      schema: { type: 'number' } });
+  });
+
+  test('request body metadata is recorded', () => {
+    const schema: SchemaObject = openAPI.paths['/foo'].put.requestBody.content['application/json'].schema;
+    expect(schema.properties['p']['type']).toEqual('string');
+    expect(schema.properties['q']['type']).toEqual('boolean');
+    expect(schema.properties['r']['type']).toEqual('number');
+    expect(schema.properties['t']['type']).toEqual('object');
+    expect(schema.properties['t']['properties']['a']['type']).toEqual('number');
+    expect(schema.properties['t']['properties']['b']['type']).toEqual('string');
+    expect(schema.properties['t']['properties']['c']['type']).toEqual('boolean');
   });
 
 });

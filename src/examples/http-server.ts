@@ -49,6 +49,19 @@ import chalk from 'chalk';
   }
 }
 
+class FooBodyInner {
+  @Attr() a: number;
+  @Attr() b: string;
+  @Attr() c: boolean;
+}
+
+class FooBody {
+  @Attr() p: string;
+  @Attr() q: boolean;
+  @Attr() r: number;
+  @Attr() t: FooBodyInner;
+}
+
 class FooBarParams {
   @Attr() id: string;
 }
@@ -80,6 +93,10 @@ const routes: Route[] = [
           {
             path: '/bar/{id}',
             request: {
+              body: {
+                'application/x-www-form-urlencoded': FooBody,
+                'application/json': FooBody
+              },
               path: FooBarParams
             }
           },

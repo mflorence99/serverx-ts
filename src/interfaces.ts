@@ -84,6 +84,8 @@ export interface Message<TRequest = Request,
  */
 
 export interface Metadata {
+  _class: Class;
+  metadata: Metadata[];
   name: string;
   opts?: MetadataOpts;
   type: string;
@@ -127,7 +129,7 @@ export interface Request<TBody = any,
  */
 
 export interface RequestMetadata {
-  body?: Class;
+  body?: { [mimeType: string]: Class };
   header?: Class;
   path?: Class;
   query?: Class;

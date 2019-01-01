@@ -1,3 +1,4 @@
+import { ContentObject } from 'openapi3-ts';
 import { Handler } from '../handler';
 import { InfoObject } from 'openapi3-ts';
 import { Injectable } from 'injection-js';
@@ -11,6 +12,7 @@ import { PathsObject } from 'openapi3-ts';
 import { Route } from '../interfaces';
 
 import { getMetadata } from '../metadata';
+import { makeSchemaObject } from '../metadata';
 import { tap } from 'rxjs/operators';
 
 /**
@@ -31,13 +33,26 @@ import { tap } from 'rxjs/operators';
     // create each path from a corresponding route
     const paths = flattened.reduce((acc, route) => {
       const item: PathItemObject = acc[route.path] || { };
+
       // skeleton operation object
       const operation: OperationObject = {
         description: route.description || '',
-        responses: {},
+        responses: { },
         summary: route.summary || '',
         parameters: []
       };
+
+      // handle request body
+      if (route.request && route.request.body) {
+        const content: ContentObject = Object.entries(route.request.body)
+          .map(([mimeType, clazz]) => ({ mimeType, schema: makeSchemaObject(clazz) }))
+          .reduce((acc, { mimeType, schema }) => {
+            acc[mimeType] = { schema };
+            return acc;
+          }, { });
+        operation.requestBody = { content };
+      }
+
       // handle request parameters
       ['header', 'path', 'query']
         .map(type => ({ type, clazz: route.request? route.request[type] : null }))
@@ -48,16 +63,19 @@ import { tap } from 'rxjs/operators';
             operation.parameters.push({ 
               name: metadatum.name, 
               in: type as ParameterLocation, 
-              required: metadatum.opts.required,
-              schema: { type: metadatum.type } 
+              // NOTE: path params are always required
+              required: metadatum.opts.required || (type === 'path'),
+              schema: { type: metadatum.type.toLowerCase() } 
             });
           });
         });
+
       // NOTE: we allow multiple methods to alias to the same "operation"
       // while OpenAPI does not direcrly, so this look a little weird
       route.methods.forEach(method => item[method.toLowerCase()] = operation);
       acc[route.path] = item;
       return acc;
+
     }, { } as PathsObject);
     // add the paths back into the OpenAPI object
     Object.keys(paths).forEach(path => openAPI.addPath(path, paths[path]));
