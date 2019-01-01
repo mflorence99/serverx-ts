@@ -64,17 +64,17 @@ const routes: Route[] = [
             children: [
 
               {
-                path: '/this/:id/:user',
+                path: '/this/{id}/{user}',
                 services: [Service1],
                 handler: Handler1,
-                data: '/foo/bar/this/:id/:user'
+                data: '/foo/bar/this{id}/{user}'
               },
 
               {
-                path: '/that/:partner',
+                path: '/that/{partner}',
                 services: [Service1],
                 handler: Handler1,
-                data: '/foo/bar/that/:partner'
+                data: '/foo/bar/that/{partner}'
               },
 
               {
@@ -141,7 +141,7 @@ describe('Router unit tests', () => {
   test('routes can be flattened', () => {
     const flattened = router.flatten();
     expect(flattened.length).toEqual(5);
-    expect(flattened[0].path).toEqual('/foo/bar/that/:partner');
+    expect(flattened[0].path).toEqual('/foo/bar/that/{partner}');
   });
 
   test('GET /foo no match', () => {
@@ -177,7 +177,7 @@ describe('Router unit tests', () => {
   test('GET /foo/bar/this/10/mark matches', () => {
     const message: Message = { request: { method: 'GET', path: '/foo/bar/this/10/mark' } };
     const request = router.route(message).request;
-    expect(request.route.data).toEqual('/foo/bar/this/:id/:user');
+    expect(request.route.data).toEqual('/foo/bar/this{id}/{user}');
     const handler = Handler.makeInstance<Handler1>(request.route);
     expect(handler instanceof Handler1).toBeTruthy();
     expect(handler.service instanceof Service1).toBeTruthy();
@@ -188,7 +188,7 @@ describe('Router unit tests', () => {
   test('GET /foo/bar/that/company matches', () => {
     const message: Message = { request: { method: 'GET', path: '/foo/bar/that/company' } };
     const request = router.route(message).request;
-    expect(request.route.data).toEqual('/foo/bar/that/:partner');
+    expect(request.route.data).toEqual('/foo/bar/that/{partner}');
     expect(request.params).toEqual({ partner: 'company' });
   });
 

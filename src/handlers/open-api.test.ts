@@ -16,16 +16,12 @@ class CommonHeader {
   @Attr() z: number;
 }
 
-class FooCookie {
-  @Attr() k: string;
-}
-
 class FooPath {
   @Attr() k: boolean;
 }
 
 class FooQuery {
-  @Attr() k: number;
+  @Attr({ required: false }) k: number;
 }
 
 const routes: Route[] = [
@@ -43,7 +39,6 @@ const routes: Route[] = [
         methods: ['GET'],
         path: '/foo',
         request: {
-          cookie: FooCookie,
           path: FooPath,
           query: FooQuery,
         }
@@ -102,12 +97,16 @@ describe('OpenAPI unit tests', () => {
 
   test('request parameter metadata is recorded', () => {
     const op: OperationObject = openAPI.paths['/foo'].get;
-    expect(op.parameters).toContainEqual({ name: 'x', in: 'header', schema: { type: 'String' } });
-    expect(op.parameters).toContainEqual({ name: 'y', in: 'header', schema: { type: 'Boolean' } });
-    expect(op.parameters).toContainEqual({ name: 'z', in: 'header', schema: { type: 'Number' } });
-    expect(op.parameters).toContainEqual({ name: 'k', in: 'cookie', schema: { type: 'String' } });
-    expect(op.parameters).toContainEqual({ name: 'k', in: 'path', schema: { type: 'Boolean' } });
-    expect(op.parameters).toContainEqual({ name: 'k', in: 'query', schema: { type: 'Number' } });
+    expect(op.parameters).toContainEqual({ name: 'x', in: 'header', required: true,
+      schema: { type: 'String' } });
+    expect(op.parameters).toContainEqual({ name: 'y', in: 'header', required: true,
+      schema: { type: 'Boolean' } });
+    expect(op.parameters).toContainEqual({ name: 'z', in: 'header', required: true,
+      schema: { type: 'Number' } });
+    expect(op.parameters).toContainEqual({ name: 'k', in: 'path', required: true,
+      schema: { type: 'Boolean' } });
+    expect(op.parameters).toContainEqual({ name: 'k', in: 'query', required: false, 
+      schema: { type: 'Number' } });
   });
 
 });

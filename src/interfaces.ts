@@ -85,7 +85,12 @@ export interface Message<TRequest = Request,
 
 export interface Metadata {
   name: string;
+  opts?: MetadataOpts;
   type: string;
+}
+
+export interface MetadataOpts {
+  required?: boolean;
 }
 
 /**
@@ -123,7 +128,6 @@ export interface Request<TBody = any,
 
 export interface RequestMetadata {
   body?: Class;
-  cookie?: Class;
   header?: Class;
   path?: Class;
   query?: Class;

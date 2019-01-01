@@ -78,7 +78,7 @@ const routes: Route[] = [
         children: [
 
           {
-            path: '/bar/:id',
+            path: '/bar/{id}',
             request: {
               path: FooBarParams
             }

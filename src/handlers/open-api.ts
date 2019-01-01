@@ -39,13 +39,18 @@ import { tap } from 'rxjs/operators';
         parameters: []
       };
       // handle request parameters
-      ['cookie', 'header', 'path', 'query']
-        .map(type => ({ type, clazz: route.request ? route.request[type] : null }))
+      ['header', 'path', 'query']
+        .map(type => ({ type, clazz: route.request? route.request[type] : null }))
         .filter(({ type, clazz }) => !!clazz)
-        .map(({ type, clazz }) => ({ type, metadatas: getMetadata(clazz) }))
-        .forEach(({ type, metadatas }) => {
-          metadatas.forEach(metadata => {
-            operation.parameters.push({ name: metadata.name, in: type as ParameterLocation, schema: { type: metadata.type } });
+        .map(({ type, clazz }) => ({ type, metadata: getMetadata(clazz) }))
+        .forEach(({ type, metadata }) => {
+          metadata.forEach(metadatum => {
+            operation.parameters.push({ 
+              name: metadatum.name, 
+              in: type as ParameterLocation, 
+              required: metadatum.opts.required,
+              schema: { type: metadatum.type } 
+            });
           });
         });
       // NOTE: we allow multiple methods to alias to the same "operation"

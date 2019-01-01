@@ -66,6 +66,10 @@ export class Router {
     });
   }
 
+  private getPathParam(path: string): string {
+    return path.substring(1, path.length - 1);
+  }
+
   private harmonize(route: Route): Route {
     let description: string;
     let methods: Method[];
@@ -79,7 +83,6 @@ export class Router {
       paths.push(...this.split(route.path).reverse());
       if (route.request) {
         request.body = request.body || route.request.body;
-        request.cookie = request.cookie || route.request.cookie;
         request.header = request.header || route.request.header;
         request.path = request.path || route.request.path;
         request.query = request.query || route.request.query;
@@ -92,6 +95,10 @@ export class Router {
     methods = methods || ALL_METHODS;
     const path = '/' + paths.reverse().join('/');
     return { description, methods, path, request, summary };
+  }
+
+  private isPathParam(path: string): boolean {
+    return path.startsWith('{') && path.endsWith('}');
   }
 
   private match(paths: string[],
@@ -142,7 +149,7 @@ export class Router {
       if ((rpaths.length > paths.length)
         || ((route.pathMatch === 'full') && (rpaths.length !== paths.length)))
         return false;
-      return rpaths.every((rpath, ix) => rpath.startsWith(':') || (rpath === paths[ix]));
+      return rpaths.every((rpath, ix) => this.isPathParam(rpath) || (rpath === paths[ix]));
     });
     // if no route, fabricate a catch all
     // NOTE: we only want to do this once per not found
@@ -152,8 +159,8 @@ export class Router {
     }
     // accumulate path parameters
     rpaths.forEach((rpath, ix) => {
-      if (rpath.startsWith(':'))
-        params[rpath.substring(1)] = paths[ix];
+      if (this.isPathParam(rpath))
+        params[this.getPathParam(rpath)] = paths[ix];
     });
     return route;
   }
