@@ -3,7 +3,6 @@ import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
 import { Observable } from 'rxjs';
-import { StatusCode } from '../interfaces';
 
 import { tap } from 'rxjs/operators';
 
@@ -18,9 +17,9 @@ import { tap } from 'rxjs/operators';
       tap(({ request, response }) => {
         if (request.method === 'OPTIONS') {
           response.headers['Allow'] = ALL_METHODS.join(',');
-          response.statusCode = StatusCode.OK;
+          response.statusCode = 200;
         }
-        else response.statusCode = response.statusCode || StatusCode.NOT_FOUND;
+        else response.statusCode = response.statusCode || 404;
       })
     );
   }

@@ -3,7 +3,6 @@ import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
-import { StatusCode } from '../interfaces';
 
 import { catchError } from 'rxjs/operators';
 import { defaultIfEmpty } from 'rxjs/operators';
@@ -57,7 +56,7 @@ import { toArray } from 'rxjs/operators';
           // map the encoded body object back to the original message
           tap((body: any) => message.request.body = body),
           mapTo(message),
-          catchError(() => throwError(new Exception({ statusCode: StatusCode.BAD_REQUEST }))),
+          catchError(() => throwError(new Exception({ statusCode: 400 }))),
           defaultIfEmpty(message)
         );
       })

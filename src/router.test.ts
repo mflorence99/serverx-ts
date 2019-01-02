@@ -7,7 +7,6 @@ import { NotFound } from './handlers/not-found';
 import { Observable } from 'rxjs';
 import { Route } from './interfaces';
 import { Router } from './router';
-import { StatusCode } from './interfaces';
 import { StatusCode200 } from './handlers/statuscode-200';
 
 import { switchMap } from 'rxjs/operators';
@@ -29,7 +28,7 @@ import { throwError } from 'rxjs';
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       switchMap(() =>
-        throwError(new Exception({ statusCode: StatusCode.NOT_FOUND } ))
+        throwError(new Exception({ statusCode: 404 } ))
       )
     );
   }

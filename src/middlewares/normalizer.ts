@@ -6,7 +6,6 @@ import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
-import { StatusCode } from '../interfaces';
 
 import { map } from 'rxjs/operators';
 import { mapTo } from 'rxjs/operators';
@@ -27,7 +26,7 @@ import { tap } from 'rxjs/operators';
       switchMap((message: Message): Observable<Message> => {
         return of(message).pipe(
           map(({ request, response } ) => ({ body: response.body, headers: response.headers, path: request.path, statusCode: response.statusCode })),
-          map(({ body, headers, path, statusCode }) => ({ body, headers, path, statusCode: statusCode || StatusCode.OK })),
+          map(({ body, headers, path, statusCode }) => ({ body, headers, path, statusCode: statusCode || 200 })),
           tap(({ body, headers, path }) => {
             if (!headers['Content-Type']) {
               const fromBuffer = (body instanceof Buffer) && fileType(body);

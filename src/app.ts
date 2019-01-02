@@ -10,7 +10,6 @@ import { Response } from './interfaces';
 import { Response500 } from './interfaces';
 import { Route } from './interfaces';
 import { Router } from './router';
-import { StatusCode } from './interfaces';
 
 import { caseInsensitiveObject } from './utils';
 import { catchError } from 'rxjs/operators';
@@ -96,7 +95,7 @@ export abstract class App {
           stack: error.stack
         } as Response500),
         headers: caseInsensitiveObject({ 'Content-Type': 'application/json' }),
-        statusCode: StatusCode.INTERNAL_SERVER_ERROR
+        statusCode: 500
       };
       return of({ context, request, response });
     }

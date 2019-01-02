@@ -6,7 +6,6 @@ import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
-import { StatusCode } from '../interfaces';
 
 import { defaultIfEmpty } from 'rxjs/operators';
 import { filter } from 'rxjs/operators';
@@ -55,7 +54,7 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
         return of(message).pipe(
           filter((message: Message) => !this.opts.silent),
           tap(({ response }) => {
-            if (response.statusCode === StatusCode.INTERNAL_SERVER_ERROR)
+            if (response.statusCode === 500)
               this.logError(message);
             this.logMessage(message);
           }),

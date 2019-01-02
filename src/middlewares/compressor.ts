@@ -8,7 +8,6 @@ import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
-import { StatusCode } from '../interfaces';
 
 import { catchError } from 'rxjs/operators';
 import { defaultIfEmpty } from 'rxjs/operators';
@@ -100,7 +99,7 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
             response.headers['Content-Length'] = Buffer.byteLength(response.body);
           }),
           mapTo(message),
-          catchError(() => throwError(new Exception({ statusCode: StatusCode.BAD_REQUEST }))),
+          catchError(() => throwError(new Exception({ statusCode: 400 }))),
           defaultIfEmpty(message)
         );
       }),
