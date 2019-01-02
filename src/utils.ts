@@ -15,7 +15,7 @@ function normalize(k: string): string {
 
 export function caseInsensitiveObject(obj: any): any {
   const proxy = { };
-  Object.keys(obj).forEach((k: string) => proxy[normalize(k)] = obj[k]);
+  Object.entries(obj).forEach(([k, v]) => proxy[normalize(k)] = v);
   return new Proxy(proxy, {
     deleteProperty: (tgt: any, k: string) => delete tgt[normalize(k)],
     get: (tgt: any, k: string) => tgt[normalize(k)],

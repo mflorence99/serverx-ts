@@ -86,16 +86,14 @@ export class AWSLambdaApp extends App {
   private makeSearchParamsFromEvent(event: APIGatewayProxyEvent): URLSearchParams {
     const params = new URLSearchParams();
     if (event.queryStringParameters) {
-      Object.keys(event.queryStringParameters).forEach(k => {
-        params.append(k, event.queryStringParameters[k]);
+      Object.entries(event.queryStringParameters).forEach(([k, v]) => {
+        params.append(k, v);
       });
     }
     if (event.multiValueQueryStringParameters) {
-      Object.keys(event.multiValueQueryStringParameters).forEach(k => {
-        if (!params.has(k)) {
-          const vs = event.multiValueQueryStringParameters[k];
+      Object.entries(event.multiValueQueryStringParameters).forEach(([k, vs]) => {
+        if (!params.has(k)) 
           vs.forEach(v => params.append(k, v));
-        }
       });
     }
     return params;

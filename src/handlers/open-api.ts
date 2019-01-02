@@ -74,14 +74,14 @@ import { tap } from 'rxjs/operators';
         });
 
       // NOTE: we allow multiple methods to alias to the same "operation"
-      // while OpenAPI does not direcrly, so this look a little weird
+      // while OpenAPI does not direcrly, so this looks a little weird
       route.methods.forEach(method => item[method.toLowerCase()] = operation);
       acc[route.path] = item;
       return acc;
 
     }, { } as PathsObject);
     // add the paths back into the OpenAPI object
-    Object.keys(paths).forEach(path => openAPI.addPath(path, paths[path]));
+    Object.entries(paths).forEach(([pathName, path]) => openAPI.addPath(pathName, path));
     return openAPI;
   }
 
