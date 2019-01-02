@@ -93,7 +93,6 @@ import { tap } from 'rxjs/operators';
       route.methods.forEach(method => item[method.toLowerCase()] = operation);
       acc[route.path] = item;
       return acc;
-
     }, { } as PathsObject);
     // add the paths back into the OpenAPI object
     Object.entries(paths).forEach(([pathName, path]) => openAPI.addPath(pathName, path));
