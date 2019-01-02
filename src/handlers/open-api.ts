@@ -94,7 +94,7 @@ import { tap } from 'rxjs/operators';
   static makeSchemaObject(tgt: Class): SchemaObject {
     const metadata = resolveMetadata(getMetadata(tgt));
     const schema: SchemaObject = {
-      properties: {},
+      properties: { },
       required: [],
       type: 'object'
     };
@@ -112,7 +112,7 @@ import { tap } from 'rxjs/operators';
         subschema.type = 'array';
         // for arrays of objects
         if (metadatum.metadata.length > 0) {
-          subschema.items.properties = {};
+          subschema.items.properties = { };
           subschema.items.required = [];
           subschema.items.type = 'object';
           OpenAPI.makeSchemaObjectImpl(metadatum.metadata, subschema.items);
