@@ -81,6 +81,8 @@ export class Router {
     let description: string;
     let methods: Method[];
     const paths: string[] = [];
+    const redirectAs = route.redirectAs;
+    const redirectTo = route.redirectTo;
     const request: RequestMetadata = { };
     const responses: ResponseMetadata = { };
     let summary: string;
@@ -107,7 +109,13 @@ export class Router {
     // cleanup and return the business
     methods = methods || ALL_METHODS;
     const path = '/' + paths.reverse().join('/');
-    return { description, methods, path, request, responses, summary };
+    const harmonized: Route = { description, methods, path, request, responses, summary };
+    // NOTE: redirect isn't inherited
+    if (redirectTo) {
+      harmonized.redirectAs = redirectAs;
+      harmonized.redirectTo = redirectTo;
+    }
+    return harmonized;
   }
 
   private isPathParam(path: string): boolean {

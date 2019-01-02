@@ -83,6 +83,11 @@ import { tap } from 'rxjs/operators';
           operation.responses[statusCode] = { content };
         });
       }
+      // redirect gets a special response
+      if (route.redirectTo) {
+        const statusCode = route.redirectAs || 301;
+        operation.responses[String(statusCode)] = { headers: { 'Location': { schema: { type: 'string' } } } };
+      }
       // NOTE: we allow multiple methods to alias to the same "operation"
       // while OpenAPI does not direcrly, so this looks a little weird
       route.methods.forEach(method => item[method.toLowerCase()] = operation);

@@ -86,6 +86,13 @@ const routes: Route[] = [
             'application/json': BarBody
           }
         },
+      },
+
+      {
+        path: '/not-here',
+        methods: ['GET'],
+        redirectAs: 304,
+        redirectTo: '/over-there'
       }
 
     ]
@@ -141,15 +148,17 @@ describe('OpenAPI unit tests', () => {
 
   test('paths and methods are mapped correctly', () => {
     const pathNames = Object.keys(openAPI.paths);
-    expect(pathNames.length).toEqual(2);
+    expect(pathNames.length).toEqual(3);
     // NOTE: flattened paths are alpha-sorted
     expect(pathNames[0]).toEqual('/bar');
     expect(pathNames[1]).toEqual('/foo');
+    expect(pathNames[2]).toEqual('/not-here');
     expect(openAPI.paths['/foo'].get).toBeDefined();
     expect(openAPI.paths['/foo'].put).toBeDefined();
     expect(openAPI.paths['/foo'].post).not.toBeDefined();
     expect(openAPI.paths['/bar'].get).not.toBeDefined();
     expect(openAPI.paths['/bar'].post).toBeDefined();
+    expect(openAPI.paths['/not-here'].get).toBeDefined();
   });
 
   test('basic summary and description are accumulated', () => {
@@ -197,6 +206,11 @@ describe('OpenAPI unit tests', () => {
     expect(schema.properties['p']['type']).toEqual('string');
     expect(schema.properties['q']['type']).toEqual('boolean');
     expect(schema.properties['r']['type']).toEqual('integer');
+  });
+
+  test('redirect automatically generates a response', () => {
+    const headers = openAPI.paths['/not-here'].get.responses['304'].headers;
+    expect(headers['Location']).toBeDefined();
   });
 
 });
