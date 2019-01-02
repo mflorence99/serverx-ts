@@ -1,8 +1,10 @@
+import { Class } from '../interfaces';
 import { ContentObject } from 'openapi3-ts';
 import { Handler } from '../handler';
 import { InfoObject } from 'openapi3-ts';
 import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
+import { Metadata } from '../interfaces';
 import { Observable } from 'rxjs';
 import { OpenApiBuilder } from 'openapi3-ts';
 import { OperationObject } from 'openapi3-ts';
@@ -10,9 +12,10 @@ import { ParameterLocation } from 'openapi3-ts';
 import { PathItemObject } from 'openapi3-ts';
 import { PathsObject } from 'openapi3-ts';
 import { Route } from '../interfaces';
+import { SchemaObject } from 'openapi3-ts';
 
 import { getMetadata } from '../metadata';
-import { makeSchemaObject } from '../metadata';
+import { resolveMetadata } from '../metadata';
 import { tap } from 'rxjs/operators';
 
 /**
@@ -45,7 +48,7 @@ import { tap } from 'rxjs/operators';
       // handle request body
       if (route.request && route.request.body) {
         const content: ContentObject = Object.entries(route.request.body)
-          .map(([mimeType, clazz]) => ({ mimeType, schema: makeSchemaObject(clazz) }))
+          .map(([mimeType, clazz]) => ({ mimeType, schema: OpenAPI.makeSchemaObject(clazz) }))
           .reduce((acc, { mimeType, schema }) => {
             acc[mimeType] = { schema };
             return acc;
@@ -80,6 +83,39 @@ import { tap } from 'rxjs/operators';
     // add the paths back into the OpenAPI object
     Object.keys(paths).forEach(path => openAPI.addPath(path, paths[path]));
     return openAPI;
+  }
+
+  /**
+   * Make an OpenAPI schema from a class's metadata
+   */
+
+  static makeSchemaObject(tgt: Class): SchemaObject {
+    const metadata = resolveMetadata(getMetadata(tgt));
+    const schema: SchemaObject = {
+      properties: {},
+      required: [],
+      type: 'object'
+    };
+    return OpenAPI.makeSchemaObjectImpl(metadata, schema);
+  }
+
+  private static makeSchemaObjectImpl(metadata: Metadata[],
+                                      schema: SchemaObject): SchemaObject {
+    metadata.forEach(metadatum => {
+      // this is the normal case - we keep coded properties to a minimum
+      const subschema: SchemaObject = { type: metadatum.type.toLowerCase() };
+      // for objects we don't want these properties on the object unless we have to
+      if (metadatum.metadata.length > 0) {
+        subschema.properties = {};
+        subschema.required = [];
+        subschema.type = 'object';
+        OpenAPI.makeSchemaObjectImpl(metadatum.metadata, subschema);
+      }
+      schema.properties[metadatum.name] = subschema;
+      if (metadatum.opts.required)
+        schema.required.push(metadatum.name);
+    });
+    return schema;
   }
 
   handle(message$: Observable<Message>): Observable<Message> {

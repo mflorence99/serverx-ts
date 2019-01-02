@@ -85,6 +85,7 @@ export interface Message<TRequest = Request,
 
 export interface Metadata {
   _class: Class;
+  isArray: boolean;
   metadata: Metadata[];
   name: string;
   opts?: MetadataOpts;
@@ -92,6 +93,10 @@ export interface Metadata {
 }
 
 export interface MetadataOpts {
+  // NOTE: _class is only necessary because TypeScript's design:type tells us
+  // that a field is an array, but not of what type -- when it can we'll deprecate 
+  // @see https://github.com/Microsoft/TypeScript/issues/7169
+  _class?: Class;
   required?: boolean;
 }
 

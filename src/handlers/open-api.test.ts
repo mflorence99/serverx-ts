@@ -115,6 +115,38 @@ describe('OpenAPI unit tests', () => {
     expect(openAPI.paths['/bar'].post.description).toEqual('POST /bar');
   });
 
+  test('object types', () => {
+    class X {
+      @Attr() t: number;
+    }
+    class Y {
+      @Attr() b: X;
+      @Attr() c: string;
+    }
+    class Z {
+      @Attr() a: Y;
+    }
+    const schema: SchemaObject = OpenAPI.makeSchemaObject(Z);
+    expect(schema.properties['a']['type']).toEqual('object');
+    expect(schema.properties['a']['properties']['b']['type']).toEqual('object');
+    expect(schema.properties['a']['properties']['b']['properties']['t']['type']).toEqual('number');
+    expect(schema.properties['a']['properties']['c']['type']).toEqual('string');
+  });
+
+  test('array types', () => {
+    class X {
+      @Attr() p: string;
+      @Attr() q: number;
+    }
+    class Y {
+      @Attr({ _class: X }) t: X[];
+    }
+    const schema: SchemaObject = OpenAPI.makeSchemaObject(Y);
+    expect(schema.properties['t']['type']).toEqual('object');
+    expect(schema.properties['t']['properties']['p']['type']).toEqual('string');
+    expect(schema.properties['t']['properties']['q']['type']).toEqual('number');
+  });
+
   test('request parameter metadata is recorded', () => {
     const op: OperationObject = openAPI.paths['/foo'].get;
     expect(op.parameters).toContainEqual({ name: 'x', in: 'header', required: true,

@@ -1,9 +1,7 @@
 import { Attr } from './metadata';
 import { Metadata } from './interfaces';
-import { SchemaObject } from 'openapi3-ts';
 
 import { getMetadata } from './metadata';
-import { makeSchemaObject } from './metadata';
 import { resolveMetadata } from './metadata';
 
 describe('Decorator unit tests', () => {
@@ -50,24 +48,6 @@ describe('Decorator unit tests', () => {
     expect(metadata.length).toEqual(1);
     expect(metadata[0].name).toEqual('t');
     expect(metadata[0].type).toEqual('Number');
-  });
-
-  test('object types', () => {
-    class X {
-      @Attr() t: number;
-    }
-    class Y {
-      @Attr() b: X;
-      @Attr() c: string;
-    }
-    class Z {
-      @Attr() a: Y;
-    }
-    const schema: SchemaObject = makeSchemaObject(Z);
-    expect(schema.properties['a']['type']).toEqual('object');
-    expect(schema.properties['a']['properties']['b']['type']).toEqual('object');
-    expect(schema.properties['a']['properties']['b']['properties']['t']['type']).toEqual('number');
-    expect(schema.properties['a']['properties']['c']['type']).toEqual('string');
   });
 
 });
