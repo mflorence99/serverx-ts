@@ -59,7 +59,7 @@ class FooBody {
   @Attr() p: string;
   @Attr() q: boolean;
   @Attr() r: number;
-  @Attr() t: FooBodyInner;
+  @Attr({ _class: FooBodyInner }) t: FooBodyInner[];
 }
 
 class FooBarParams {

@@ -87,6 +87,8 @@ import { tap } from 'rxjs/operators';
 
   /**
    * Make an OpenAPI schema from a class's metadata
+   * 
+   * @see https://swagger.io/docs/specification/data-models/data-types
    */
 
   static makeSchemaObject(tgt: Class): SchemaObject {
@@ -104,9 +106,21 @@ import { tap } from 'rxjs/operators';
     metadata.forEach(metadatum => {
       // this is the normal case - we keep coded properties to a minimum
       const subschema: SchemaObject = { type: metadatum.type.toLowerCase() };
-      // for objects we don't want these properties on the object unless we have to
-      if (metadatum.metadata.length > 0) {
-        subschema.properties = {};
+      // for arrays
+      if (metadatum.isArray) {
+        subschema.items = { type: metadatum.type.toLowerCase() };
+        subschema.type = 'array';
+        // for arrays of objects
+        if (metadatum.metadata.length > 0) {
+          subschema.items.properties = {};
+          subschema.items.required = [];
+          subschema.items.type = 'object';
+          OpenAPI.makeSchemaObjectImpl(metadatum.metadata, subschema.items);
+        }
+      }
+      // for objects 
+      else if (metadatum.metadata.length > 0) {
+        subschema.properties = { };
         subschema.required = [];
         subschema.type = 'object';
         OpenAPI.makeSchemaObjectImpl(metadatum.metadata, subschema);

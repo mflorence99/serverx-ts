@@ -142,9 +142,10 @@ describe('OpenAPI unit tests', () => {
       @Attr({ _class: X }) t: X[];
     }
     const schema: SchemaObject = OpenAPI.makeSchemaObject(Y);
-    expect(schema.properties['t']['type']).toEqual('object');
-    expect(schema.properties['t']['properties']['p']['type']).toEqual('string');
-    expect(schema.properties['t']['properties']['q']['type']).toEqual('number');
+    expect(schema.properties['t']['type']).toEqual('array');
+    expect(schema.properties['t']['items']['type']).toEqual('object');
+    expect(schema.properties['t']['items']['properties']['p']['type']).toEqual('string');
+    expect(schema.properties['t']['items']['properties']['q']['type']).toEqual('number');
   });
 
   test('request parameter metadata is recorded', () => {
