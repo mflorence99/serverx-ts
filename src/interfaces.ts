@@ -1,3 +1,4 @@
+import { Attr } from './metadata';
 import { Handler } from './handler';
 import { IncomingHttpHeaders } from 'http';
 import { InfoObject } from 'openapi3-ts';
@@ -18,29 +19,11 @@ export interface Class<T = any> {
 }
 
 /**
- * MIME type
+ * Content metadata
  */
 
-export enum ContentType {
-  APPLICATION = 'application/*',
-  APPLICATION_ECMASCRIPT = 'application/ecmascript',
-  APPLICATION_JAVASCRIPT = 'application/javascript',
-  APPLICATION_JSON = 'application/json',
-  APPLICATION_OCTET_STREAM = 'application/octet-stream',
-  APPLICATION_X_WWW_FORM_URLENCODED = 'x-www-form-urlencoded',
-  AUDIO = 'audio/*',
-  AUDIO_MPEG = 'audio/mpeg',
-  AUDIO_OGG = 'audio/ogg',
-  FONT_WOFF2 = 'font/woff2',
-  IMAGE_GIF = 'image/gif',
-  IMAGE_JPEG = 'image/jpeg',
-  IMAGE_PNG = 'image/png',
-  IMAGE_SVG_XML = 'image/svg+xml',
-  TEXT_CSS = 'text/css',
-  TEXT_HTML = 'text/html',
-  TEXT_PLAIN = 'text/plain',
-  TEXT_YAML = 'text/yaml',
-  VIDEO_MP4 = 'video/mp4',
+export interface ContentMetadata {
+  [contentType: string]: Class;
 }
 
 /**
@@ -97,6 +80,8 @@ export interface MetadataOpts {
   // that a field is an array, but not of what type -- when it can we'll deprecate 
   // @see https://github.com/Microsoft/TypeScript/issues/7169
   _class?: Class;
+  // NOTE: float: false (the default) indicates that a Number is really an integer 
+  float?: boolean;
   required?: boolean;
 }
 
@@ -130,11 +115,11 @@ export interface Request<TBody = any,
 }
 
 /**
- * Request definition
+ * Request metadata
  */
 
 export interface RequestMetadata {
-  body?: { [mimeType: string]: Class };
+  body?: ContentMetadata;
   header?: Class;
   path?: Class;
   query?: Class;
@@ -150,6 +135,23 @@ export interface Response<TBody = any,
   headers?: THeaders;
   isBase64Encoded?: boolean;
   statusCode?: StatusCode;
+}
+
+/**
+ * Response metadata
+ */
+
+export interface ResponseMetadata {
+  [statusCode: string]: ContentMetadata;
+}
+
+/**
+ * 500 response
+ */
+
+export class Response500 {
+  @Attr() error: string;
+  @Attr() stack: string;
 }
 
 /**
@@ -171,6 +173,7 @@ export interface Route {
   redirectAs?: number;
   redirectTo?: string;
   request?: RequestMetadata;
+  responses?: ResponseMetadata;
   services?: Provider[];
   summary?: string;
 }

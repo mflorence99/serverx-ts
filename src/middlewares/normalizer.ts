@@ -2,7 +2,6 @@ import * as fileType from 'file-type';
 import * as mime from 'mime';
 import * as yaml from 'js-yaml';
 
-import { ContentType } from '../interfaces';
 import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
@@ -32,18 +31,18 @@ import { tap } from 'rxjs/operators';
           tap(({ body, headers, path }) => {
             if (!headers['Content-Type']) {
               const fromBuffer = (body instanceof Buffer) && fileType(body);
-              const mimeType = fromBuffer? fromBuffer.mime : mime.getType(path);
+              const contentType = fromBuffer? fromBuffer.mime : mime.getType(path);
               // NOTE: JSON is the default
-              headers['Content-Type'] = mimeType || ContentType.APPLICATION_JSON;
+              headers['Content-Type'] = contentType || 'application/json';
             }
           }),
           map(({ body, headers, statusCode }) => {
             if (body && !(body instanceof Buffer)) {
               switch (headers['Content-Type']) {
-                case ContentType.APPLICATION_JSON:
+                case 'application/json':
                   body = JSON.stringify(body);
                   break;
-                case ContentType.TEXT_YAML:
+                case 'text/yaml':
                   body = yaml.safeDump(body);
                   break;
               }

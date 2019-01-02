@@ -27,7 +27,7 @@ import { tap } from 'rxjs/operators';
   /**
    * Generate OpenAPI from routes
    * 
-   * TODO: very temporary
+   * TODO: refactor if it gets any bigger
    */
 
   static fromRoutes(info: InfoObject, 
@@ -36,7 +36,6 @@ import { tap } from 'rxjs/operators';
     // create each path from a corresponding route
     const paths = flattened.reduce((acc, route) => {
       const item: PathItemObject = acc[route.path] || { };
-
       // skeleton operation object
       const operation: OperationObject = {
         description: route.description || '',
@@ -44,35 +43,46 @@ import { tap } from 'rxjs/operators';
         summary: route.summary || '',
         parameters: []
       };
-
       // handle request body
       if (route.request && route.request.body) {
         const content: ContentObject = Object.entries(route.request.body)
-          .map(([mimeType, clazz]) => ({ mimeType, schema: OpenAPI.makeSchemaObject(clazz) }))
-          .reduce((acc, { mimeType, schema }) => {
-            acc[mimeType] = { schema };
+          .map(([contentType, clazz]) => ({ contentType, schema: OpenAPI.makeSchemaObject(clazz) }))
+          .reduce((acc, { contentType, schema }) => {
+            acc[contentType] = { schema };
             return acc;
           }, { });
         operation.requestBody = { content };
       }
-
       // handle request parameters
-      ['header', 'path', 'query']
-        .map(type => ({ type, clazz: route.request? route.request[type] : null }))
-        .filter(({ type, clazz }) => !!clazz)
-        .map(({ type, clazz }) => ({ type, metadata: getMetadata(clazz) }))
-        .forEach(({ type, metadata }) => {
-          metadata.forEach(metadatum => {
-            operation.parameters.push({ 
-              name: metadatum.name, 
-              in: type as ParameterLocation, 
-              // NOTE: path params are always required
-              required: metadatum.opts.required || (type === 'path'),
-              schema: { type: metadatum.type.toLowerCase() } 
+      if (route.request) {
+        ['header', 'path', 'query']
+          .map(type => ({ type, clazz: route.request[type] }))
+          .filter(({ type, clazz }) => !!clazz)
+          .map(({ type, clazz }) => ({ type, metadata: getMetadata(clazz) }))
+          .forEach(({ type, metadata }) => {
+            metadata.forEach(metadatum => {
+              operation.parameters.push({ 
+                name: metadatum.name, 
+                in: type as ParameterLocation, 
+                // NOTE: path params are always required
+                required: metadatum.opts.required || (type === 'path'),
+                schema: { type: OpenAPI.typeFor(metadatum) } 
+              });
             });
           });
+      }
+      // handle responses
+      if (route.responses) {
+        Object.keys(route.responses).forEach(statusCode => {
+          const content: ContentObject = Object.entries(route.responses[statusCode])
+            .map(([contentType, clazz]) => ({ contentType, schema: OpenAPI.makeSchemaObject(clazz) }))
+            .reduce((acc, { contentType, schema }) => {
+              acc[contentType] = { schema };
+              return acc;
+            }, { });
+          operation.responses[statusCode] = { content };
         });
-
+      }
       // NOTE: we allow multiple methods to alias to the same "operation"
       // while OpenAPI does not direcrly, so this looks a little weird
       route.methods.forEach(method => item[method.toLowerCase()] = operation);
@@ -105,10 +115,10 @@ import { tap } from 'rxjs/operators';
                                       schema: SchemaObject): SchemaObject {
     metadata.forEach(metadatum => {
       // this is the normal case - we keep coded properties to a minimum
-      const subschema: SchemaObject = { type: metadatum.type.toLowerCase() };
+      const subschema: SchemaObject = { type: OpenAPI.typeFor(metadatum) };
       // for arrays
       if (metadatum.isArray) {
-        subschema.items = { type: metadatum.type.toLowerCase() };
+        subschema.items = { type: OpenAPI.typeFor(metadatum)  };
         subschema.type = 'array';
         // for arrays of objects
         if (metadatum.metadata.length > 0) {
@@ -130,6 +140,12 @@ import { tap } from 'rxjs/operators';
         schema.required.push(metadatum.name);
     });
     return schema;
+  }
+
+  private static typeFor(metadata: Metadata): string {
+    if (metadata.type === 'Number')
+      return metadata.opts.float? 'number' : 'integer';
+    else return metadata.type.toLowerCase();
   }
 
   handle(message$: Observable<Message>): Observable<Message> {

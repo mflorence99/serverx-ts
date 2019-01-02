@@ -11,6 +11,7 @@ import { MetadataOpts } from './interfaces';
 const METADATA = Symbol('METADATA');
 
 const DEFAULT_OPTS: MetadataOpts = {
+  float: false,
   required: false
 };
 
@@ -21,7 +22,9 @@ const DEFAULT_OPTS: MetadataOpts = {
 export function Attr(opts: MetadataOpts = DEFAULT_OPTS): any {
 
   return function(tgt: any, name: string): void {
+    // grab the metadata to date for this class
     const attrs: Metadata[] = Reflect.getMetadata(METADATA, tgt.constructor) || [];
+    // what type does TypeScript say this property is?
     let _class = Reflect.getMetadata('design:type', tgt, name);
     let type = _class.name;
     // NOTE: _class is only necessary because TypeScript's design:type tells us
@@ -32,6 +35,7 @@ export function Attr(opts: MetadataOpts = DEFAULT_OPTS): any {
       _class = opts._class;
       type = _class.name;
     }
+    // update the record of metadata by class
     attrs.push({ _class, isArray, metadata: [], name, type, opts });
     Reflect.defineMetadata(METADATA, attrs, tgt.constructor);
   };
@@ -47,7 +51,7 @@ export function getMetadata(tgt: Class): Metadata[] {
 }
 
 /**
- * Recursively resolve metdata withinh meta data
+ * Recursively resolve metdata within metadata
  */
 
 export function resolveMetadata(metadata: Metadata[]): Metadata[] {

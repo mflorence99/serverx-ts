@@ -8,6 +8,8 @@ import { NotFound } from './handlers/not-found';
 import { RedirectTo } from './handlers/redirect-to';
 import { ReflectiveInjector } from 'injection-js';
 import { RequestMetadata } from './interfaces';
+import { Response500 } from './interfaces';
+import { ResponseMetadata } from './interfaces';
 import { Route } from './interfaces';
 import { StatusCode200 } from './handlers/statuscode-200';
 
@@ -23,11 +25,16 @@ export class Router {
   constructor(routes: Route[],
               middlewares: Class[] = []) { 
     this.routes = [{
-      path: '',
-      middlewares: middlewares,
-      services: [LogProvider],
       children: routes,
-      phantom: true
+      middlewares: middlewares,
+      path: '',
+      phantom: true,
+      responses: {
+        '500': { 
+          'application/json': Response500
+        }
+      },
+      services: [LogProvider]
     }];
   }
 
@@ -75,6 +82,7 @@ export class Router {
     let methods: Method[];
     const paths: string[] = [];
     const request: RequestMetadata = { };
+    const responses: ResponseMetadata = { };
     let summary: string;
     // accumulate route components
     while (route) {
@@ -87,6 +95,11 @@ export class Router {
         request.path = request.path || route.request.path;
         request.query = request.query || route.request.query;
       }
+      if (route.responses) {
+        Object.keys(route.responses).forEach(statusCode => {
+          responses[statusCode] = responses[statusCode] || route.responses[statusCode];
+        });
+      }
       summary = summary || route.summary;
       // now look at parent
       route = route.parent;
@@ -94,7 +107,7 @@ export class Router {
     // cleanup and return the business
     methods = methods || ALL_METHODS;
     const path = '/' + paths.reverse().join('/');
-    return { description, methods, path, request, summary };
+    return { description, methods, path, request, responses, summary };
   }
 
   private isPathParam(path: string): boolean {

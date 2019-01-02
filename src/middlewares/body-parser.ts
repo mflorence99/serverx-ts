@@ -1,4 +1,3 @@
-import { ContentType } from '../interfaces';
 import { Exception } from '../interfaces';
 import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
@@ -39,9 +38,9 @@ import { toArray } from 'rxjs/operators';
               map((buffer: Buffer): string => buffer.toString()),
               map((data: string): any => {
                 switch (request.headers['content-type']) {
-                  case ContentType.APPLICATION_JSON:
+                  case 'application/json':
                     return JSON.parse(data);
-                  case ContentType.APPLICATION_X_WWW_FORM_URLENCODED:
+                  case 'x-www-form-urlencoded':
                     return decodeURIComponent(data)
                       .split('&')
                       .map(kv => kv.split('='))

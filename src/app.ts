@@ -1,5 +1,4 @@
 import { Class } from './interfaces';
-import { ContentType } from './interfaces';
 import { Exception } from './interfaces';
 import { Handler } from './handler';
 import { InfoObject } from 'openapi3-ts';
@@ -8,6 +7,7 @@ import { Middleware } from './middleware';
 import { MiddlewareMethod } from './middleware';
 import { Observable } from 'rxjs';
 import { Response } from './interfaces';
+import { Response500 } from './interfaces';
 import { Route } from './interfaces';
 import { Router } from './router';
 import { StatusCode } from './interfaces';
@@ -94,8 +94,8 @@ export abstract class App {
         body: JSON.stringify({
           error: error.toString(),
           stack: error.stack
-        }),
-        headers: caseInsensitiveObject({ 'Content-Type': ContentType.APPLICATION_JSON }),
+        } as Response500),
+        headers: caseInsensitiveObject({ 'Content-Type': 'application/json' }),
         statusCode: StatusCode.INTERNAL_SERVER_ERROR
       };
       return of({ context, request, response });

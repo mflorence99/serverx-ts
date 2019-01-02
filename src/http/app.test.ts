@@ -1,4 +1,3 @@
-import { ContentType } from '../interfaces';
 import { Handler } from '../handler';
 import { HttpApp } from './app';
 import { IncomingMessage } from 'http';
@@ -162,7 +161,7 @@ describe('HttpApp unit tests', () => {
     expect(response.status).toEqual(200);
     response = await ax.request({ url: 'http://localhost:8080/fizz/bazz', method: 'GET' });
     expect(response.status).toEqual(200);
-    response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': ContentType.APPLICATION_JSON } });
+    response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': 'application/json' } });
     expect(response.data).toEqual('Goodbye, Marco!');
     try {
       await ax.get('http://localhost:8080/xxx');

@@ -11,6 +11,12 @@ const info: InfoObject = {
   version: '0.0.0'
 };
 
+class BarBody {
+  @Attr() p: string;
+  @Attr() q: boolean;
+  @Attr() r: number;
+}
+
 class CommonHeader {
   @Attr({ required: true }) x: string;
   @Attr() y: boolean;
@@ -74,7 +80,12 @@ const routes: Route[] = [
         summary: 'Lower level',
         description: 'POST /bar',
         methods: ['POST'],
-        path: '/bar'
+        path: '/bar',
+        responses: {
+          '200': {
+            'application/json': BarBody
+          }
+        },
       }
 
     ]
@@ -87,6 +98,41 @@ const flattened = router.flatten();
 const openAPI = OpenAPI.fromRoutes(info, flattened).getSpec();
 
 describe('OpenAPI unit tests', () => {
+
+  test('object types', () => {
+    class X {
+      @Attr() t: number;
+      @Attr({ float: true }) u: number;
+    }
+    class Y {
+      @Attr() b: X;
+      @Attr() c: string;
+    }
+    class Z {
+      @Attr() a: Y;
+    }
+    const schema: SchemaObject = OpenAPI.makeSchemaObject(Z);
+    expect(schema.properties['a']['type']).toEqual('object');
+    expect(schema.properties['a']['properties']['b']['type']).toEqual('object');
+    expect(schema.properties['a']['properties']['b']['properties']['t']['type']).toEqual('integer');
+    expect(schema.properties['a']['properties']['b']['properties']['u']['type']).toEqual('number');
+    expect(schema.properties['a']['properties']['c']['type']).toEqual('string');
+  });
+
+  test('array types', () => {
+    class X {
+      @Attr() p: string;
+      @Attr() q: number;
+    }
+    class Y {
+      @Attr({ _class: X }) t: X[];
+    }
+    const schema: SchemaObject = OpenAPI.makeSchemaObject(Y);
+    expect(schema.properties['t']['type']).toEqual('array');
+    expect(schema.properties['t']['items']['type']).toEqual('object');
+    expect(schema.properties['t']['items']['properties']['p']['type']).toEqual('string');
+    expect(schema.properties['t']['items']['properties']['q']['type']).toEqual('integer');
+  });
 
   test('basic smoke test', () => {
     expect(openAPI.info.title).toEqual('open-api.test');
@@ -115,39 +161,6 @@ describe('OpenAPI unit tests', () => {
     expect(openAPI.paths['/bar'].post.description).toEqual('POST /bar');
   });
 
-  test('object types', () => {
-    class X {
-      @Attr() t: number;
-    }
-    class Y {
-      @Attr() b: X;
-      @Attr() c: string;
-    }
-    class Z {
-      @Attr() a: Y;
-    }
-    const schema: SchemaObject = OpenAPI.makeSchemaObject(Z);
-    expect(schema.properties['a']['type']).toEqual('object');
-    expect(schema.properties['a']['properties']['b']['type']).toEqual('object');
-    expect(schema.properties['a']['properties']['b']['properties']['t']['type']).toEqual('number');
-    expect(schema.properties['a']['properties']['c']['type']).toEqual('string');
-  });
-
-  test('array types', () => {
-    class X {
-      @Attr() p: string;
-      @Attr() q: number;
-    }
-    class Y {
-      @Attr({ _class: X }) t: X[];
-    }
-    const schema: SchemaObject = OpenAPI.makeSchemaObject(Y);
-    expect(schema.properties['t']['type']).toEqual('array');
-    expect(schema.properties['t']['items']['type']).toEqual('object');
-    expect(schema.properties['t']['items']['properties']['p']['type']).toEqual('string');
-    expect(schema.properties['t']['items']['properties']['q']['type']).toEqual('number');
-  });
-
   test('request parameter metadata is recorded', () => {
     const op: OperationObject = openAPI.paths['/foo'].get;
     expect(op.parameters).toContainEqual({ name: 'x', in: 'header', required: true,
@@ -155,22 +168,35 @@ describe('OpenAPI unit tests', () => {
     expect(op.parameters).toContainEqual({ name: 'y', in: 'header', required: false,
       schema: { type: 'boolean' } });
     expect(op.parameters).toContainEqual({ name: 'z', in: 'header', required: false,
-      schema: { type: 'number' } });
+      schema: { type: 'integer' } });
     expect(op.parameters).toContainEqual({ name: 'k', in: 'path', required: true,
       schema: { type: 'boolean' } });
     expect(op.parameters).toContainEqual({ name: 'k', in: 'query', required: true, 
-      schema: { type: 'number' } });
+      schema: { type: 'integer' } });
   });
 
   test('request body metadata is recorded', () => {
     const schema: SchemaObject = openAPI.paths['/foo'].put.requestBody.content['application/json'].schema;
     expect(schema.properties['p']['type']).toEqual('string');
     expect(schema.properties['q']['type']).toEqual('boolean');
-    expect(schema.properties['r']['type']).toEqual('number');
+    expect(schema.properties['r']['type']).toEqual('integer');
     expect(schema.properties['t']['type']).toEqual('object');
-    expect(schema.properties['t']['properties']['a']['type']).toEqual('number');
+    expect(schema.properties['t']['properties']['a']['type']).toEqual('integer');
     expect(schema.properties['t']['properties']['b']['type']).toEqual('string');
     expect(schema.properties['t']['properties']['c']['type']).toEqual('boolean');
+  });
+
+  test('response 500 is baked in', () => {
+    const schema: SchemaObject = openAPI.paths['/bar'].post.responses['500'].content['application/json'].schema;
+    expect(schema.properties['error']['type']).toEqual('string');
+    expect(schema.properties['stack']['type']).toEqual('string');
+  });
+
+  test('responses can be specified at any level', () => {
+    const schema: SchemaObject = openAPI.paths['/bar'].post.responses['200'].content['application/json'].schema;
+    expect(schema.properties['p']['type']).toEqual('string');
+    expect(schema.properties['q']['type']).toEqual('boolean');
+    expect(schema.properties['r']['type']).toEqual('integer');
   });
 
 });
