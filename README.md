@@ -16,7 +16,8 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
   * [Design Objectives](#design-objectives)
   * [Design Non-Objectives](#design-non-objectives)
   * [Bookmarks for Future Work](#bookmarks-for-future-work)
-- [Concepts](#concepts)
+- [Key Concepts](#key-concepts)
+- [Sample Application](#sample-application)
 
 <!-- tocstop -->
 
