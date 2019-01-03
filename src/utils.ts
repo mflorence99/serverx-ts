@@ -8,6 +8,7 @@ import { Readable } from 'stream';
  */
 
 function normalize(k: string): string {
+  if (!k.split) return k;
   const words = k.split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
   return words.join('-');

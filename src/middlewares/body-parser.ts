@@ -1,8 +1,12 @@
 import { Exception } from '../interfaces';
+import { Inject } from 'injection-js';
 import { Injectable } from 'injection-js';
+import { InjectionToken } from 'injection-js';
 import { Message } from '../interfaces';
+import { Method } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
+import { Optional } from 'injection-js';
 
 import { catchError } from 'rxjs/operators';
 import { defaultIfEmpty } from 'rxjs/operators';
@@ -16,6 +20,20 @@ import { throwError } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
 /**
+ * Body parser options
+ */
+
+export interface BodyParserOpts {
+  methods?: Method[];
+}
+
+export const BODY_PARSER_OPTS = new InjectionToken<BodyParserOpts>('BODY_PARSER_OPTS');
+
+export const BODY_PARSER_DEFAULT_OPTS: BodyParserOpts = {
+  methods: ['POST', 'PUT', 'PATCH']
+};
+
+/**
  * Body parser
  * 
  * @see https://github.com/marblejs/marble/blob/master/packages/middleware-body/src/index.ts
@@ -23,12 +41,18 @@ import { toArray } from 'rxjs/operators';
 
 @Injectable() export class BodyParser extends Middleware {
 
+  private opts: BodyParserOpts;
+
+  constructor(@Optional() @Inject(BODY_PARSER_OPTS) opts: BodyParserOpts) {
+    super();
+    this.opts = opts || BODY_PARSER_DEFAULT_OPTS;
+  }
+
   prehandle(message$: Observable<Message>): Observable<Message> {
-    const PARSEABLE_METHODS = ['POST', 'PUT', 'PATCH'];
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
         return of(message).pipe(
-          filter(({ request }) => !!request.stream$ && PARSEABLE_METHODS.includes(request.method)),
+          filter(({ request }) => !!request.stream$ && (!this.opts.methods || this.opts.methods.includes(request.method))),
           // read the stream into a string, then into encoded form
           switchMap(({ request }): Observable<any> => {
             return request.stream$.pipe(

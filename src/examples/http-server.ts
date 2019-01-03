@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { Attr } from '../metadata';
 import { Compressor } from '../middlewares//compressor';
 import { COMPRESSOR_OPTS } from '../middlewares//compressor';
+import { CORS } from '../middlewares/cors';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
@@ -71,7 +72,7 @@ const routes: Route[] = [
   {
     path: '',
     methods: ['GET'],
-    middlewares: [RequestLogger, Compressor],
+    middlewares: [RequestLogger, Compressor, CORS],
     services: [
       { provide: REQUEST_LOGGER_OPTS, useValue: { colorize: true } },
       { provide: COMPRESSOR_OPTS, useValue: { threshold: 0 } } 

@@ -1,10 +1,12 @@
 import * as zlib from 'zlib';
 
+import { ALL_METHODS } from '../interfaces';
 import { Exception } from '../interfaces';
 import { Inject } from 'injection-js';
 import { Injectable } from 'injection-js';
 import { InjectionToken } from 'injection-js';
 import { Message } from '../interfaces';
+import { Method } from '../interfaces';
 import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
@@ -18,6 +20,7 @@ import { of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { vary } from '../ported/vary';
 
 /**
  * Compressor options
@@ -45,6 +48,7 @@ export enum CompressorStrategy {
 
 export interface CompressorOpts {
   level?: CompressorLevel;
+  methods?: Method[];
   strategy?: CompressorStrategy;
   threshold?: number;
 }
@@ -53,6 +57,7 @@ export const COMPRESSOR_OPTS = new InjectionToken<CompressorOpts>('COMPRESSOR_OP
 
 export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
   level: CompressorLevel.DEFAULT_COMPRESSION,
+  methods: ALL_METHODS,
   strategy: CompressorStrategy.DEFAULT_STRATEGY,
   threshold: 1024
 };
@@ -65,17 +70,17 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
 
   private opts: CompressorOpts;
 
-  constructor( @Optional() @Inject(COMPRESSOR_OPTS) opts: CompressorOpts) {
+  constructor(@Optional() @Inject(COMPRESSOR_OPTS) opts: CompressorOpts) {
     super();
     this.opts = opts || COMPRESSOR_DEFAULT_OPTS;
   }
 
   posthandle(message$: Observable<Message>): Observable<Message> {
-    const COMPRESSABLE_METHODS = ['GET', 'POST', 'PUT'];
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
         const { request, response } = message;
         return of(message).pipe(
+          tap(({ response }) => vary(response, 'Accept-Encoding')),
           map((message: Message) => {
             const accepts = (String(request.headers['Accept-Encoding']) || '').split(/, /);
             const willDeflate = accepts.includes('deflate');
@@ -85,7 +90,7 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
           filter(({ willDeflate, willGZIP }) => {
             const alreadyEncoded = !!request.headers['Content-Encoding'];
             const size = Number(response.headers['Content-Length'] || '0');
-            return (COMPRESSABLE_METHODS.includes(request.method)
+            return ((!this.opts.methods || this.opts.methods.includes(request.method))
               && response.body
               && !alreadyEncoded
               && (willDeflate || willGZIP)

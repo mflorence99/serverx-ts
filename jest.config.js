@@ -8,6 +8,7 @@ module.exports = {
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
   "collectCoverage": true,
   "coverageReporters": ["json-summary"],
+  "coveragePathIgnorePatterns": ["/node_modules/", "/src/ported/"],
   "moduleFileExtensions": [
     "ts",
     "tsx",

@@ -9,7 +9,7 @@ import str = require('string-to-stream');
 describe('BodyParser unit tests', () => {
 
   test('parses JSON', done => {
-    const bodyParser = new BodyParser();
+    const bodyParser = new BodyParser(null);
     const body = JSON.stringify({ x : 'y' });
     const message: Message = {
       request: { path: '/foo/bar', method: 'POST', headers: { 'content-type': 'application/json' }, stream$: fromReadableStream(str(body)) }
@@ -22,7 +22,7 @@ describe('BodyParser unit tests', () => {
   });
 
   test('parses form encoded', done => {
-    const bodyParser = new BodyParser();
+    const bodyParser = new BodyParser(null);
     const body = encodeURIComponent('a=b&x=y');
     const message: Message = {
       request: { path: '/foo/bar', method: 'POST', headers: { 'content-type': 'x-www-form-urlencoded' }, stream$: fromReadableStream(str(body)) }
@@ -36,7 +36,7 @@ describe('BodyParser unit tests', () => {
   });
 
   test('nothing to parse', done => {
-    const bodyParser = new BodyParser();
+    const bodyParser = new BodyParser(null);
     const message: Message = {
       request: { path: '/foo/bar', method: 'POST', headers: { 'content-type': 'x-www-form-urlencoded' }, stream$: null }
     };
