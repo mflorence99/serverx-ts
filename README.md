@@ -23,7 +23,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 ## Rationale
 
-> ServeRX-ts is an experimental project only. It doesn't advocate replacing any other framework and certainly not those it has drawn extensively from.
+> ServeRX-ts is an experimental project only. It doesn't advocate replacing any other framework and certainly not those from which it has drawn extensively.
 
 ### Design Objectives
 
@@ -41,7 +41,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 * **OpenAPI support** out-of-the-box to support the automated discovery and activation of the microservices for which ServeRX-ts is intended via the standard [OpenAPI](https://swagger.io/docs/specification/about/) specification
 
-* **Full type safety** by using TypeScript exclusively
+* **Full type safety** by using [TypeScript](https://www.typescriptlang.org/) exclusively
 
 * **Maximal test coverage** using [Jest](https://jestjs.io/)
 
@@ -91,66 +91,46 @@ import { Route } from 'serverx-ts';
 import { createServer } from 'http';
 import { tap } from 'rxjs/operators';
 
-@Injectable() class Hello extends Handler {
+@Injectable() class HelloWorld extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
-        response.body = 'Hello, http!';
-      })
-    );
-  }
-}
-
-@Injectable() class Goodbye extends Handler {
-  handle(message$: Observable<Message>): Observable<Message> {
-    return message$.pipe(
-      tap(({ response }) => {
-        response.body = 'Goodbye, http!';
+        response.body = 'Hello, world!';
       })
     );
   }
 }
 
 const routes: Route[] = [
-
   {
     path: '',
     methods: ['GET'],
     middlewares: [RequestLogger, Compressor, CORS],
     children: [
-
       {
         path: '/hello',
-        handler: Hello
+        handler: HelloWorld
       },
-
-      {
-        path: '/goodbye',
-        handler: Goodbye
-      },
-
       {
         // NOTE: default handler sends 200
         // example useful in load balancers
         path: '/isalive'
       },
-
       {
         path: '/not-here',
         redirectTo: 'http://over-there.com'
       }
-
     ]
   }
-
 ];
 
 // local HTTP server
-const app = new HttpApp(routes);
-createServer(app.listen()).listen(4200);
+const httpApp = new HttpApp(routes);
+createServer(httpApp.listen()).listen(4200);
 
 // AWS Lambda function
+const lambdaApp = new AWSLambdaApp(routes);
 export function handler(event, context) {
-  app.handle(event, context);
+  lambdaApp.handle(event, context);
 }
 ```
