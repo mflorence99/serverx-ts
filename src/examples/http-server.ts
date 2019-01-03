@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 
 import { Attr } from '../metadata';
-import { Compressor } from '../middlewares//compressor';
-import { COMPRESSOR_OPTS } from '../middlewares//compressor';
+import { Compressor } from '../middlewares/compressor';
+import { COMPRESSOR_OPTS } from '../middlewares/compressor';
 import { CORS } from '../middlewares/cors';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
