@@ -18,6 +18,14 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
   * [Bookmarks for Future Work](#bookmarks-for-future-work)
 - [Key Concepts](#key-concepts)
 - [Sample Application](#sample-application)
+- [Primer](#primer)
+  * [Serverless Support](#serverless-support)
+  * [Messages](#messages)
+  * [Handlers](#handlers)
+  * [Middleware](#middleware)
+  * [Services](#services)
+  * [Routing](#routing)
+  * [OpenAPI](#openapi)
 
 <!-- tocstop -->
 
@@ -27,35 +35,35 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 ### Design Objectives
 
-* **Declarative routes** like [Angular](https://angular.io/guide/router)
+* *Declarative routes* like [Angular](https://angular.io/guide/router)
 
-* **Functional reactive programming** using [RxJS](https://rxjs.dev) like [Marble.js](https://github.com/marblejs/marble) 
+* *Functional reactive programming* using [RxJS](https://rxjs.dev) like [Marble.js](https://github.com/marblejs/marble) 
 
-* **Dependency injection** like [Angular](https://v4.angular.io/guide/dependency-injection) and [NestJS](https://nestjs.com/)
+* *Dependency injection* like [Angular](https://v4.angular.io/guide/dependency-injection) and [NestJS](https://nestjs.com/)
 
-* **Serverless support** out-of-the-box for [AWS Lambda](https://aws.amazon.com/lambda/) with functionality similar to [AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) but without the overhead
+* *Serverless support* out-of-the-box for [AWS Lambda](https://aws.amazon.com/lambda/) with functionality similar to [AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) but without the overhead
 
-* **Low cold-start latency** as needed in serverless deployments, where in theory every request can trigger a cold start
+* *Low cold-start latency* as needed in serverless deployments, where in theory every request can trigger a cold start
 
-* **Optimized for microservices** in particular those that deploy `application/json` responses and typically deployed in serverless environments
+* *Optimized for microservices* in particular those that deploy `application/json` responses and typically deployed in serverless environments
 
-* **OpenAPI support** out-of-the-box to support the automated discovery and activation of the microservices for which ServeRX-ts is intended via the standard [OpenAPI](https://swagger.io/docs/specification/about/) specification
+* *OpenAPI support* out-of-the-box to support the automated discovery and activation of the microservices for which ServeRX-ts is intended via the standard [OpenAPI](https://swagger.io/docs/specification/about/) specification
 
-* **Full type safety** by using [TypeScript](https://www.typescriptlang.org/) exclusively
+* *Full type safety* by using [TypeScript](https://www.typescriptlang.org/) exclusively
 
-* **Maximal test coverage** using [Jest](https://jestjs.io/)
+* *Maximal test coverage* using [Jest](https://jestjs.io/)
 
 ### Design Non-Objectives
 
-* **Deployment of static resources** which can be commoditized via, for example, a CDN
+* *Deployment of static resources* which can be commoditized via, for example, a CDN
 
-* **FRP religion** ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
+* *FRP religion* ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
 
 ### Bookmarks for Future Work
 
-* **Google Cloud Function** support
+* *Google Cloud Function* support
 
-* **Emulator for Express middleware** (but that's hard and definitely back-burner!)
+* *Emulator for Express middleware* (but that's hard and definitely back-burner!)
 
 ## Key Concepts
 
@@ -134,3 +142,61 @@ export function handler(event, context) {
   lambdaApp.handle(event, context);
 }
 ```
+
+## Primer
+
+> There's just enough information here to understand the principles behind ServeRX-ts. Much detail can be learned from [interfaces.ts](https://github.com/mflorence99/serverx-ts/blob/master/src/interfaces.ts) and from the [Jest](https://jestjs.io/) test cases, which are in-line with the body of the code.
+
+### Serverless Support
+
+[AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) connects AWS Lambda to an Express application by creating a proxy server and routing lambda calls through it so that they appear to Express code as regular HTTP requests and responses. That's a lot of overhead for a cold start, bearing in mind that in theory every serverless request could require a cold start.
+
+[Google Cloud Functions](https://cloud.google.com/functions/docs/writing/http) take a different approach and fabricate Express [request](https://expressjs.com/en/api.html#req) and [response](https://expressjs.com/en/api.html#res) objects.
+
+ServeRX-ts attempts to minimize overhead by injecting serverless calls right into its application code. This approach led a number of design decisions, notably `messages`, discussed next.
+
+### Messages
+
+ServerRX-ts creates `messages` from inbound requests (either HTTP or serverless) and represents the request and response as simple inner objects.
+
+`message.context` | `message.request` | `message.response`
+---|---|---
+`info: InfoObject` | `body: any` | `body: any`
+`router: Router` | `headers: any` | `headers: any`
+&nbsp; | `httpVersion: string` | `statusCode: number`
+&nbsp; | `method: string` | 
+&nbsp; | `params: any` | 
+&nbsp; | `path: string` | 
+&nbsp; | `query: URLSearchParams` | 
+&nbsp; | `remoteAddr: string` | 
+&nbsp; | `route: Route` | 
+&nbsp; | `timestamp: number` | 
+
+`messages` are strictly mutable, meaning that application code cannot create new ones. Similarly, inner `request` and `response` should be mutated. A common mutation, for example, is to add or remove `request` or `response` `headers`.
+
+### Handlers
+
+The job of a ServeRX-ts `handler` is to populate `message.response`, perhaps by analyzing the data in `message.request`.
+
+If `response.headers['Content-Type']` is not set, then ServeRX-ts sets it to `application/json`. If `response.statusCode` is not set, then ServeRX-ts sets it to `200`.
+
+All handlers must implement a `handle` method to process a stream of `messages`. Typically:
+
+```ts
+@Injectable() class MyHandler extends Handler {
+  handle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe(
+      ...
+    );
+  }
+}
+```
+
+### Middleware
+
+### Services
+
+### Routing
+
+### OpenAPI
+

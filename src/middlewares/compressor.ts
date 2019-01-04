@@ -72,7 +72,7 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
 
   constructor(@Optional() @Inject(COMPRESSOR_OPTS) opts: CompressorOpts) {
     super();
-    this.opts = opts || COMPRESSOR_DEFAULT_OPTS;
+    this.opts = opts? { ...COMPRESSOR_DEFAULT_OPTS, ...opts } : COMPRESSOR_DEFAULT_OPTS;
   }
 
   posthandle(message$: Observable<Message>): Observable<Message> {

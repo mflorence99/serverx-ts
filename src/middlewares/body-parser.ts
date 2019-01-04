@@ -45,7 +45,7 @@ export const BODY_PARSER_DEFAULT_OPTS: BodyParserOpts = {
 
   constructor(@Optional() @Inject(BODY_PARSER_OPTS) opts: BodyParserOpts) {
     super();
-    this.opts = opts || BODY_PARSER_DEFAULT_OPTS;
+    this.opts = opts? { ...BODY_PARSER_DEFAULT_OPTS, ...opts } : BODY_PARSER_DEFAULT_OPTS;
   }
 
   prehandle(message$: Observable<Message>): Observable<Message> {

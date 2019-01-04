@@ -45,7 +45,7 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
   constructor(private log: LogProvider,
               @Optional() @Inject(REQUEST_LOGGER_OPTS) opts: RequestLoggerOpts) {
     super();
-    this.opts = opts || REQUEST_LOGGER_DEFAULT_OPTS;
+    this.opts = opts? { ...REQUEST_LOGGER_DEFAULT_OPTS, ...opts } : REQUEST_LOGGER_DEFAULT_OPTS;
   }
 
   postcatch(message$: Observable<Message>): Observable<Message> {

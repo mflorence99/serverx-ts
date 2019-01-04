@@ -52,7 +52,7 @@ export const CORS_DEFAULT_OPTS: CORSOpts = {
 
   constructor(@Optional() @Inject(CORS_OPTS) opts: CORSOpts) {
     super();
-    this.opts = opts ? { ...CORS_DEFAULT_OPTS, ...opts } : CORS_DEFAULT_OPTS;
+    this.opts = opts? { ...CORS_DEFAULT_OPTS, ...opts } : CORS_DEFAULT_OPTS;
   }
 
   prehandle(message$: Observable<Message>): Observable<Message> {
