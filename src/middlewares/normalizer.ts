@@ -51,7 +51,7 @@ import { tap } from 'rxjs/operators';
           tap(({ body, headers, statusCode }) => {
             // NOTE: Safari (and potentially other browsers) need content-length 0,
             // for 204 or they just hang waiting for a body
-            if (statusCode === 204)
+            if (!body || (statusCode === 204))
               headers['Content-Length'] = '0';
             else if (body)
               headers['Content-Length'] = Buffer.byteLength(body);

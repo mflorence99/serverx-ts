@@ -15,7 +15,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 - [Rationale](#rationale)
   * [Design Objectives](#design-objectives)
   * [Design Non-Objectives](#design-non-objectives)
-  * [Bookmarks for Future Work](#bookmarks-for-future-work)
+  * [Some Bookmarks for Future Work](#some-bookmarks-for-future-work)
 - [Key Concepts](#key-concepts)
 - [Sample Application](#sample-application)
 - [Primer](#primer)
@@ -23,6 +23,9 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
   * [Messages](#messages)
   * [Handlers](#handlers)
   * [Middleware](#middleware)
+    + [Immediate Response](#immediate-response)
+    + [Built-in Middleware](#built-in-middleware)
+    + [Available Middleware](#available-middleware)
   * [Services](#services)
   * [Routing](#routing)
   * [OpenAPI](#openapi)
@@ -45,7 +48,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 * *Low cold-start latency* as needed in serverless deployments, where in theory every request can trigger a cold start
 
-* *Optimized for microservices* in particular those that deploy `application/json` responses and typically deployed in serverless environments
+* *Optimized for microservices* in particular those that send `application/json` responses and typically deployed in serverless environments
 
 * *OpenAPI support* out-of-the-box to support the automated discovery and activation of the microservices for which ServeRX-ts is intended via the standard [OpenAPI](https://swagger.io/docs/specification/about/) specification
 
@@ -59,7 +62,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 * *FRP religion* ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
 
-### Bookmarks for Future Work
+### Some Bookmarks for Future Work
 
 * *Google Cloud Function* support
 
@@ -67,7 +70,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 ## Key Concepts
 
-Like [Marble.js](https://github.com/marblejs/marble), linear request/response logic is not used to process HTTP traffic. Instead, application code operates on an observable stream. ServeRX-ts does not provide any abstractions for server creation. Instead, either standard [Node.js](https://nodejs.org) APIs are used or appropriate serverless functions.
+Like [Marble.js](https://github.com/marblejs/marble), linear request/response logic is not used to process HTTP traffic. Instead, application code operates on an observable stream. ServeRX-ts does not provide any abstractions for server creation. Either standard [Node.js](https://nodejs.org) APIs are used or appropriate serverless functions.
 
 ServeRX-ts *does* however abstract requests and responses (whatever their source or destination) and bundles them into a stream of `messages`. 
 
@@ -75,7 +78,7 @@ A `Handler` is application code that observes this stream, mapping requests into
 
 Similarly, `middleware` is code that maps requests into new requests and/or responses into new responses. For example, CORS middleware takes note of request headers and injects appropriate response headers.
 
-`Services` can be injected into both handlers and middleware. ServeRX-ts uses the [injection-js](https://github.com/mgechev/injection-js) dependency injection `DI` library, which itself provides the same capabilities as in [Angular 4](https://v4.angular.io/guide/dependency-injection). In Angular, services are often used to provide common state, which makes less sense server-side. However in ServeRX-ts, services are a good means of isolating common functionality into testable and mockable units.
+`Services` can be injected into both handlers and middleware. ServeRX-ts uses the [injection-js](https://github.com/mgechev/injection-js) dependency injection library, which itself provides the same capabilities as in [Angular 4](https://v4.angular.io/guide/dependency-injection). In Angular, services are often used to provide common state, which makes less sense server-side. However in ServeRX-ts, services are a good means of isolating common functionality into testable, extensible and mockable units.
 
 `DI` is also often used in ServeRX-ts to inject configuration parameters into handlers, middleware and services.
 
@@ -149,15 +152,15 @@ export function handler(event, context) {
 
 ### Serverless Support
 
-[AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) connects AWS Lambda to an Express application by creating a proxy server and routing lambda calls through it so that they appear to Express code as regular HTTP requests and responses. That's a lot of overhead for a cold start, bearing in mind that in theory every serverless request could require a cold start.
+[AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) connects AWS Lambda to an [Express](https://expressjs.com/) application by creating a proxy server and routing lambda calls through it so that they appear to [Express](https://expressjs.com/) code as regular HTTP requests and responses. That's a lot of overhead for a cold start, bearing in mind that in theory every serverless request could require a cold start.
 
-[Google Cloud Functions](https://cloud.google.com/functions/docs/writing/http) take a different approach and fabricate Express [request](https://expressjs.com/en/api.html#req) and [response](https://expressjs.com/en/api.html#res) objects.
+[Google Cloud Functions](https://cloud.google.com/functions/docs/writing/http) take a different approach and fabricate [Express](https://expressjs.com/) [request](https://expressjs.com/en/api.html#req) and [response](https://expressjs.com/en/api.html#res) objects.
 
 ServeRX-ts attempts to minimize overhead by injecting serverless calls right into its application code. This approach led a number of design decisions, notably `messages`, discussed next.
 
 ### Messages
 
-ServerRX-ts creates `messages` from inbound requests (either HTTP or serverless) and represents the request and response as simple inner objects.
+ServeRX-ts creates `messages` from inbound requests (either HTTP or serverless) and represents the request and response as simple inner objects.
 
 `message.context` | `message.request` | `message.response`
 ---|---|---
@@ -185,16 +188,72 @@ All handlers must implement a `handle` method to process a stream of `messages`.
 ```ts
 @Injectable() class MyHandler extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
-    return message$.pipe(
-      ...
-    );
+    return message$.pipe( ... );
   }
 }
 ```
 
 ### Middleware
 
+The job of ServeRX-ts `middleware` is to prepare and/or post-process streams of `messages`. In a framework like [Express](https://expressjs.com/), programmers can control when `middleware` is executed by the appropriate placement of `app.use()` calls. Because routing in ServeRX-ts is declarative, it uses a different approach.
+
+All ServeRX-ts `middleware` must implement either a `prehandle` or a `posthandle` method, or in special circumstances, both. All `prehandle` methods are executed before a `handler` gains control and all `posthandle` methods afterwards. Otherwise the shape of `middleware` is very similar to that of a `handler`:
+
+```ts
+@Injectable() class MyMiddleware extends Middleware {
+  prehandle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe( ... );
+  }
+}
+```
+
+A third entrypoint exists: the `postcatch` method is invoked after all `posthandle` methods and even after an error has been thrown. The built-in [RequestLogger](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.ts) `middleware` uses this entrypoint to make sure that *all* requests are logged, even those that end in a failure.
+
+> The `postcatch` method cannot itself cause or throw an error.
+
+#### Immediate Response
+
+`middleware` code can trigger an immediate response, bypassing downstream `middleware` and any `handler` by simply throwing an error. A good example might be authentication `middleware` that rejects a request by throwing a 401 error.
+
+> A `handler` can do this too, but errors are more commonly thrown by `middleware`.
+
+```ts
+import { Exception } from '../interfaces';
+// more imports
+@Injectable() class Authenticator extends Middleware {
+  prehandle(message$: Observable<Message>): Observable<Message> {
+    return message$.pipe(
+      // more pipeline functions
+      switchMap((message: Message): Observable<Message> => {
+        return iif(() => isAuthenticated, 
+          // NOTE: the format of an Exception is the same as a Response
+          throwError(new Exception({ statusCode: 401 })),
+          of(message)); 
+      })
+    );
+  }
+}
+```
+
+#### Built-in Middleware
+
+* The [Normalizer](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/normalizer.ts) `middleware` is automatically provided for all routes and is guaranteed to run after all other `posthandler`s. It makes sure that `response.headers['Content-Length']`, `response.headers['Content-Type']` and `response.statusCode` are set correctly.
+
+* The [BodyParser](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/body-parser.ts) `middleware` is automatically provided, except in serverless environments, where body parsing is automatically performed. 
+
+#### Available Middleware
+
+* The [Compressor](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/compressor.ts) `middleware` performs `request.body` `gzip` or `deflate` compression, if accepted by the client. See the [compressor tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/compressor.test.ts) for an illustration of how it is used and configured.
+
+* The [CORS](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/cors.ts) `middleware` is a wrapper around the robust [Express CORS middleware](https://expressjs.com/en/resources/middleware/cors.html). See the [CORS tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/cors.test.ts) for an illustration of how it is used and configured.
+
+* The [RequestLogger](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.ts) `middleware` is a gross simplification of the [Express Morgan middleware](https://github.com/expressjs/morgan). See the [request logger tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.test.ts) for an illustration of how it is used and configured.
+
+* The [Timer](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/timer.ts) `middleware` injects timing information into `response.header`. See the [timer tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/timer.test.ts) for an illustration of how it is used.
+
 ### Services
+
+> TODO: discuss default [LogProvider](https://github.com/mflorence99/serverx-ts/blob/master/src/services/log-provider.ts) and possible [Loggly](https://www.loggly.com/docs/node-js-logs-2/) log provider.
 
 ### Routing
 
