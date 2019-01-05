@@ -28,7 +28,11 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
     + [Available Middleware](#available-middleware)
   * [Services](#services)
   * [Routing](#routing)
+    + [Inheritance](#inheritance)
+    + [Redirect](#redirect)
+    + [Route Data](#route-data)
   * [OpenAPI](#openapi)
+    + [Informational Annotations](#informational-annotations)
 
 <!-- tocstop -->
 
@@ -317,10 +321,31 @@ ServeRX-ts leverages inheritance to inject its standard `middleware` and `servic
   {
     path: '',
     middlewares: [BodyParser /* HTTP only */, Normalizer],
-    services: [LogProvider]
+    services: [LogProvider],
     children: [ /* supplied routes */ ]
   }
 ```
+
+#### Path Parameters
+
+Path parameters are coded using [OpenAPI notation](https://swagger.io/specification/):
+
+```ts
+  {
+    methods: ['GET'],
+    path: '/foo/{this}',
+    handler: Foo
+  },
+  {
+    methods: ['GET'],
+    path: '/foo/{this}/{that}',
+    handler: Foo
+  }
+```
+
+> Notice how optional parameters are coded by routing variants to the same `handler`.
+
+Path parameters are available to `handlers` in `message.request.params`.
 
 #### Redirect
 
@@ -354,3 +379,152 @@ An arbitrary `data` object can be attached to a route:
 
 ### OpenAPI
 
+ServeRX-ts supplies an [OpenAPI](https://github.com/mflorence99/serverx-ts/blob/master/src/handlers/open-api.ts) `handler` that can be used in any route, although by convention:
+
+```ts
+const routes: Route[] = [
+  {
+    path: '',
+    children: [
+      {
+        path: 'openapi.yml',
+        handler: OpenAPI
+      },
+      // other routes
+    ]
+  }
+];
+
+const app = new HttpApp(routes, { title: 'http-server', version: '1.0' });
+```
+
+The `OpenAPI` `handler` creates a `YAML` response that describes the entire ServeRX-ts application.
+
+> Notice how an `InfoObject` can be passed to `HttpApp`, `AWSLambdaApp` and so on to fulfill the [OpenAPI specification](https://swagger.io/specification/). The excellent [OpenApi3-TS](https://github.com/metadevpro/openapi3-ts) package is a ServeRX-ts dependency and its model definitions can ve imported for type-safety.
+
+#### Informational Annotations
+
+Routes can be annotated with `summary` and `description` information:
+
+```ts
+const routes: Route[] = [
+  {
+    path: '',
+    methods: ['GET'],
+    summary: 'A family of blah blah endpoints',
+    children: [
+      {
+        description: 'Get some bar-type data',
+        path: '/bar',
+        Handler: FooBar
+      },
+      {
+        description: 'Get some baz-type data',
+        path: '/baz',
+        Handler: FooBaz
+      }
+    ]
+  }
+];
+```
+
+> Both `summary` and `description` are inherited.
+
+> Because ServeRX-ts is biased toward microservices, ServeRX-ts does not currently support the many other informational annotations that the full [OpenAPI specification](https://swagger.io/specification/) does.
+
+#### Metadata Annotations
+
+Routes can also be annotated with `request` and `responses` metadata. The idea is to provide `OpenAPI` with decorated classes that describe the format of headers, parameters and request/response body. These classes are the same classes that would be used in `middleware` and `handlers` for type-safety. The `request` and `responses` annotations are inherited.
+
+Consider the following classes:
+
+```ts
+class CommonHeader {
+  @Attr({ required: true }) x: string;
+  @Attr() y: boolean;
+  @Attr() z: number;
+}
+
+class FooBodyInner {
+  @Attr() a: number;
+  @Attr() b: string;
+  @Attr() c: boolean;
+}   
+
+class FooBody {
+  @Attr() p: string;
+  @Attr() q: boolean;
+  @Attr() r: number;
+  // NOTE: _class is only necessary because TypeScript's design:type tells us
+  // that a field is an array, but not of what type -- when it can we'll deprecate 
+  @Attr({ _class: FooBodyInner }) t[]: FooBodyInner;
+}
+
+class FooPath {
+  @Attr() k: boolean;
+}
+
+class FooQuery {
+  @Attr({ required: true }) k: number;
+}
+```
+
+They could be used in the following routes:
+
+```ts
+const routes: Route[] = [
+  {
+    path: '',
+    request: {
+      header: CommonHeader
+    },
+    children: [
+      {
+        methods: ['GET'],
+        path: '/foo',
+        request: {
+          path: FooPath,
+          query: FooQuery,
+        }
+      },
+      {
+        methods: ['PUT'],
+        path: '/foo',
+        request: {
+          body: {
+            'application/x-www-form-urlencoded': FooBody,
+            'application/json': FooBody
+          }
+        }
+      },
+      {
+        methods: ['POST'],
+        path: '/bar',
+        responses: {
+          '200': {
+            'application/json': BarBody
+          }
+        },
+      }
+    ]
+  }
+];
+```
+
+> Notice how `request` and `responses` are inherited cumulatively.
+
+When ServeRX-ts wraps supplied routes, it automatically adds metadata about the `500` response it handles itself, as if this were coded:
+
+```ts
+  {
+    path: '',
+    middlewares: [BodyParser /* HTTP only */, Normalizer],
+    services: [LogProvider],
+    responses: {
+      '500': { 
+        'application/json': Response500
+      }
+    },
+    children: [ /* supplied routes */ ]
+  }
+```
