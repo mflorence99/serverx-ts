@@ -225,7 +225,7 @@ import { Exception } from '../interfaces';
     return message$.pipe(
       // more pipeline functions
       switchMap((message: Message): Observable<Message> => {
-        return iif(() => isAuthenticated, 
+        return iif(() => !isAuthenticated, 
           // NOTE: the format of an Exception is the same as a Response
           throwError(new Exception({ statusCode: 401 })),
           of(message)); 
@@ -256,6 +256,101 @@ import { Exception } from '../interfaces';
 > TODO: discuss default [LogProvider](https://github.com/mflorence99/serverx-ts/blob/master/src/services/log-provider.ts) and possible [Loggly](https://www.loggly.com/docs/node-js-logs-2/) log provider.
 
 ### Routing
+
+ServeRX's routes follow the pattern set by [Angular](https://angular.io/guide/router): they are declarative and hierarchical. For example, the following defines two routes, `GET /foo/bar` and `PUT /foo/baz`:
+
+```ts
+const routes: Route[] = {
+  {
+    path: '/foo',
+    children: [
+      {
+        methods: ['GET'],
+        path: '/bar',
+        Handler: FooBar
+      },
+      {
+        methods: ['PUT'],
+        path: '/baz',
+        Handler: FooBaz
+      }
+    ]
+  }
+};
+```
+
+> Notice how path components are inherited from parent to child. Parent/child relationships can be arbitrarily deep.
+
+#### Inheritance
+
+Paths are not the only route attribute that is inherited; `methods`, `middleware` and `services` are too. Consider this example:
+
+```ts
+const routes: Route[] = [
+  {
+    path: '',
+    methods: ['GET'],
+    middlewares: [RequestLogger, CORS],
+    services: [{ provide: REQUEST_LOGGER_OPTS, useValue: { colorize: true } }]
+    children: [
+      {
+        path: '/bar',
+        Handler: FooBar
+      },
+      {
+        path: '/baz',
+        services: [{ provide: LogProvider, useClass: MyLogProvider }]
+        Handler: FooBaz
+      }
+    ]
+  }
+];
+```
+
+> Notice how an empty `path` component propagates inheritance but doesn't affect the computed path.
+
+Routes for `GET /bar` and `GET /baz` are defined. Both share the `RequestLogger` and `CORS` `middleware`, the former nominally configured to colorize its output. However, `GET /baz` uses its own custom `LogProvider`.
+
+ServeRX-ts leverages inheritance to inject its standard `middleware` and `services` without special code. The Router takes the supplied routes and wraps them like this:
+
+```ts
+  {
+    path: '',
+    middlewares: [BodyParser /* HTTP only */, Normalizer],
+    services: [LogProvider]
+    children: [ /* supplied routes */ ]
+  }
+```
+
+#### Redirect
+
+A redirect can be coded directly into a route:
+
+```ts
+  {
+    methods: ['GET', 'PUT', 'POST'],
+    path: '/not-here',
+    redirectTo: 'http://over-there.com',
+    redirectAs: 307
+  }
+```
+
+> If `redirectAs` is not coded, `301` is assumed.
+
+#### Route Data
+
+An arbitrary `data` object can be attached to a route:
+
+```ts
+  {
+    data: { db: process.env['DB'] },
+    methods: ['GET'],
+    path: '/foo/bar/baz',
+    handler: FooBarBaz
+  }
+```
+
+> Route `data` can be accessed by both `middleware` and a `handler` via `message.request.route.data`.
 
 ### OpenAPI
 
