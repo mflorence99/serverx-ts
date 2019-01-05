@@ -29,10 +29,12 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
   * [Services](#services)
   * [Routing](#routing)
     + [Inheritance](#inheritance)
+    + [Path Parameters](#path-parameters)
     + [Redirect](#redirect)
     + [Route Data](#route-data)
   * [OpenAPI](#openapi)
     + [Informational Annotations](#informational-annotations)
+    + [Metadata Annotations](#metadata-annotations)
 
 <!-- tocstop -->
 
