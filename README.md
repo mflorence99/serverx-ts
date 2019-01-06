@@ -232,7 +232,7 @@ A third entrypoint exists: the `postcatch` method is invoked after all `posthand
 > A `handler` can do this too, but errors are more commonly thrown by `middleware`.
 
 ```ts
-import { Exception } from '../interfaces';
+import { Exception } from 'serverx-ts';
 // more imports
 @Injectable() class Authenticator extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
