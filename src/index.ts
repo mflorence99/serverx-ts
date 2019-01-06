@@ -1,5 +1,6 @@
 export * from './aws-lambda';
 export * from './examples';
+export * from './gcf';
 export * from './handler';
 export * from './handlers';
 export * from './http';

@@ -45,7 +45,7 @@ export class AWSLambdaApp extends App {
       },
       request: {
         // @see https://stackoverflow.com/questions/41648467
-        body: (this.event.body != null) ? JSON.parse(this.event.body) : { },
+        body: (this.event.body != null)? JSON.parse(this.event.body) : { },
         headers: caseInsensitiveObject(this.event.headers || { }),
         httpVersion: '1.1',
         method: <Method>this.event.httpMethod,

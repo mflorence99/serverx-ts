@@ -105,10 +105,6 @@ const routes: Route[] = [
   
 ];
 
-const ax = axios.create({
-  baseURL: 'http://localhost:8080'
-});
-
 // @see https://angularfirebase.com/snippets/testing-rxjs-observables-with-jest/
 
 describe('HttpApp unit tests', () => {
@@ -156,15 +152,15 @@ describe('HttpApp unit tests', () => {
     const app = new HttpApp(routes);
     const listener = app.listen();
     const server = createServer(listener).listen(8080);
-    let response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'GET' });
+    let response = await axios.request({ url: 'http://localhost:8080/foo/bar', method: 'GET' });
     expect(response.data).toEqual('Hello, http!');
     expect(response.status).toEqual(200);
-    response = await ax.request({ url: 'http://localhost:8080/fizz/bazz', method: 'GET' });
+    response = await axios.request({ url: 'http://localhost:8080/fizz/bazz', method: 'GET' });
     expect(response.status).toEqual(200);
-    response = await ax.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': 'application/json' } });
+    response = await axios.request({ url: 'http://localhost:8080/foo/bar', method: 'PUT', data: { name: 'Marco' }, headers: { 'Content-Type': 'application/json' } });
     expect(response.data).toEqual('Goodbye, Marco!');
     try {
-      await ax.get('http://localhost:8080/xxx');
+      await axios.get('http://localhost:8080/xxx');
     }
     catch (error) {
       expect(error.response.status).toEqual(404);

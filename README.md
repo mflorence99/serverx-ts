@@ -52,6 +52,8 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 * *Serverless support* out-of-the-box for [AWS Lambda](https://aws.amazon.com/lambda/) with functionality similar to [AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) but without the overhead
 
+* *Serverless support* out-of-the-box for [Google Cloud HTTP Functions](https://cloud.google.com/functions/docs/writing/http)
+
 * *Low cold-start latency* as needed in serverless deployments, where in theory every request can trigger a cold start
 
 * *Optimized for microservices* in particular those that send `application/json` responses and typically deployed in serverless environments
@@ -69,8 +71,6 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 * *FRP religion* ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
 
 ### Some Bookmarks for Future Work
-
-* *Google Cloud Function* support
 
 * *Emulator for Express middleware* (but that's hard and definitely back-burner!)
 
@@ -95,8 +95,10 @@ Routes can be annotated with [OpenAPI](https://swagger.io/docs/specification/abo
 ## Sample Application
 
 ```ts
+import { AWSLambdaApp } from 'serverx-ts';
 import { Compressor } from 'serverx-ts';
 import { CORS } from 'serverx-ts';
+import { GCFApp } from 'serverx-ts';
 import { Handler } from 'serverx-ts';
 import { HttpApp } from 'serverx-ts';
 import { Injectable } from 'injection-js';
@@ -148,7 +150,13 @@ createServer(httpApp.listen()).listen(4200);
 // AWS Lambda function
 const lambdaApp = new AWSLambdaApp(routes);
 export function handler(event, context) {
-  lambdaApp.handle(event, context);
+  return lambdaApp.handle(event, context);
+}
+
+// Google Cloud HTTP Function
+const gcfApp = new GCFApp(routes);
+export async function handler(req, res) {
+  await gcfApp.handle(req, res);
 }
 ```
 
@@ -402,7 +410,7 @@ const app = new HttpApp(routes, { title: 'http-server', version: '1.0' });
 
 The `OpenAPI` `handler` creates a `YAML` response that describes the entire ServeRX-ts application.
 
-> Notice how an `InfoObject` can be passed to `HttpApp`, `AWSLambdaApp` and so on to fulfill the [OpenAPI specification](https://swagger.io/specification/). The excellent [OpenApi3-TS](https://github.com/metadevpro/openapi3-ts) package is a ServeRX-ts dependency and its model definitions can ve imported for type-safety.
+> Notice how an `InfoObject` can be passed to `HttpApp`, `AWSLambdaApp` and so on to fulfill the [OpenAPI specification](https://swagger.io/specification/). The excellent [OpenApi3-TS](https://github.com/metadevpro/openapi3-ts) package is a ServeRX-ts dependency and its model definitions can be imported for type-safety.
 
 #### Informational Annotations
 

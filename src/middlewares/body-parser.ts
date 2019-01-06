@@ -68,7 +68,7 @@ export const BODY_PARSER_DEFAULT_OPTS: BodyParserOpts = {
                       .split('&')
                       .map(kv => kv.split('='))
                       .reduce((acc, [k, v]) => {
-                        acc[k] = isNaN(+v) ? v : +v;
+                        acc[k] = isNaN(+v)? v : +v;
                         return acc;
                       }, { });
                   default:

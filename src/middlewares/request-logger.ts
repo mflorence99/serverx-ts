@@ -68,7 +68,7 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
 
   private get(str: any,
               color: string = null): string {
-    str = str ? String(str) : '-';
+    str = str? String(str) : '-';
     return (this.log.canColorize() && this.opts.colorize && color)? chalk[color](str) : str;
   }
 

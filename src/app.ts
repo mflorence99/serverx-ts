@@ -116,7 +116,7 @@ export abstract class App {
       middlewares.push(...Middleware.makeInstances(route));
       route = route.parent;
     }
-    return (middlewares.length === 0) ? [of(message)] :
+    return (middlewares.length === 0)? [of(message)] :
       middlewares.map(middleware => middleware[method](of(message)));
   }
 

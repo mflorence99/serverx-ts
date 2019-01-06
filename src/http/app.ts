@@ -53,7 +53,7 @@ export class HttpApp extends App {
       this.req = req;
       this.res = res as ServerResponse;
       // synthesize Message from Http req/res
-      const parsed = <any>url.parse(this.req.url, true); 
+      const parsed = <any>url.parse(this.req.url); 
       const message: Message = {
         context: {
           info: this.info,
@@ -66,7 +66,7 @@ export class HttpApp extends App {
           method: <Method>this.req.method,
           params: { },
           path: parsed.pathname,
-          query: parsed.searchParams || new URLSearchParams(),
+          query: new URLSearchParams(parsed.search),
           remoteAddr: this.req.connection? this.req.connection.remoteAddress : null,
           route: null,
           stream$: this.req.on? fromReadableStream(this.req) : null,
@@ -107,7 +107,6 @@ export class HttpApp extends App {
   // private methods
 
   private handleResponse(response: Response): void {
-    // TODO: this isn't right yet
     if (this.res.end) {
       this.res.writeHead(response.statusCode, response.headers);
       this.res.end(response.body);
