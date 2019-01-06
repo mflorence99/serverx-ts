@@ -4,14 +4,18 @@ import { Readable } from 'stream';
 /**
  * Create a case-insensitive object
  * 
- * NOTE: biassed to HTTP headers
+ * NOTE: biased to HTTP headers
  */
 
 function normalize(k: string): string {
-  if (!k.split) return k;
-  const words = k.split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-  return words.join('-');
+  if (k.split) {
+    const words = k.split('-')
+    // @see https://en.wikipedia.org/wiki/HTTP_referer
+      .map(word => (word.toLowerCase() === 'referer')? 'referrer' : word)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    return words.join('-');
+  }
+  else return k;
 }
 
 export function caseInsensitiveObject(obj: any): any {
