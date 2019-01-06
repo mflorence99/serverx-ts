@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 function normalize(k: string): string {
   if (k.split) {
     const words = k.split('-')
-    // @see https://en.wikipedia.org/wiki/HTTP_referer
+      // @see https://en.wikipedia.org/wiki/HTTP_referer
       .map(word => (word.toLowerCase() === 'referer')? 'referrer' : word)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
     return words.join('-');

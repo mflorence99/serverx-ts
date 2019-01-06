@@ -56,7 +56,7 @@ export const CORS_DEFAULT_OPTS: CORSOpts = {
   }
 
   prehandle(message$: Observable<Message>): Observable<Message> {
-   const next = () => { };
+    const next = () => { };
     return message$.pipe(
       tap(({ request, response }) => cors(this.opts, request, response, next)),
       switchMap((message: Message): Observable<Message> => {

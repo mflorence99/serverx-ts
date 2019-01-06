@@ -14,7 +14,7 @@ import { tap } from 'rxjs/operators';
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ request, response }) => {
-        response.headers = { Location: request.route.redirectTo };
+        response.headers['Location'] = request.route.redirectTo;
         response.statusCode = request.route.redirectAs || 301;
       })
     );

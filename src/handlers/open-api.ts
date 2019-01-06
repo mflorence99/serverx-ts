@@ -89,7 +89,7 @@ import { tap } from 'rxjs/operators';
         operation.responses[String(statusCode)] = { headers: { 'Location': { schema: { type: 'string' } } } };
       }
       // NOTE: we allow multiple methods to alias to the same "operation"
-      // while OpenAPI does not direcrly, so this looks a little weird
+      // while OpenAPI does not directly, so this looks a little weird
       route.methods.forEach(method => item[method.toLowerCase()] = operation);
       acc[route.path] = item;
       return acc;

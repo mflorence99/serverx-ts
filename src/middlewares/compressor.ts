@@ -25,8 +25,6 @@ import { vary } from '../ported/vary';
 /**
  * Compressor options
  * 
- * TODO: ignored for Brotli ??
- * 
  * @see https://nodejs.org/api/zlib.html#zlib_class_options
  * @see http://zlib.net/manual.html#Constants
  */
