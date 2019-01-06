@@ -40,7 +40,7 @@ export class GCFApp extends App {
     this.res = res;
     // synthesize Message from GCF Express-simulated req and res
     // NOTE: req is augmented IncomingMessage
-    const parsed = <any>url.parse(this.req.url);
+    const parsed = url.parse(this.req.url);
     const message: Message = {
       context: {
         info: this.info,
@@ -73,8 +73,8 @@ export class GCFApp extends App {
         map((message: Message): Response => message.response),
         tap((response: Response) => {
           if (this.res.send) {
-            Object.entries(response.headers).forEach(([k, v]) => res.set(k, <string>v));
-            res.status(response.statusCode).send(response.body);
+            Object.entries(response.headers).forEach(([k, v]) => this.res.set(k, <any>v));
+            this.res.status(response.statusCode).send(response.body);
           }
         })
       ).toPromise();

@@ -53,7 +53,7 @@ export class HttpApp extends App {
       this.req = req;
       this.res = res as ServerResponse;
       // synthesize Message from Http req/res
-      const parsed = <any>url.parse(this.req.url); 
+      const parsed = url.parse(this.req.url); 
       const message: Message = {
         context: {
           info: this.info,
