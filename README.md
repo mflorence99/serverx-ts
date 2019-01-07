@@ -95,6 +95,8 @@ Routes can be annotated with [OpenAPI](https://swagger.io/docs/specification/abo
 ## Sample Application
 
 ```ts
+import 'reflect-metadata';
+
 import { AWSLambdaApp } from 'serverx-ts';
 import { Compressor } from 'serverx-ts';
 import { CORS } from 'serverx-ts';
@@ -132,7 +134,7 @@ const routes: Route[] = [
       },
       {
         // NOTE: default handler sends 200
-        // example useful in load balancers
+        // for example: useful in load balancers
         path: '/isalive'
       },
       {

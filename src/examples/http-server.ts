@@ -115,7 +115,6 @@ const routes: Route[] = [
       },
 
       {
-        description: 'This one will blow your mind!',
         path: '/goodbye',
         handler: Goodbye
       },
@@ -125,6 +124,7 @@ const routes: Route[] = [
       },
 
       {
+        description: 'This one will blow your mind!',
         methods: ['GET'],
         path: '/explode',
         handler: Explode

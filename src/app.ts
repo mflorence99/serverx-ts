@@ -46,7 +46,7 @@ export abstract class App {
         const middlewares$ = this.makeMiddlewares$(request.route, message, 'prehandle');
         return combineLatest(middlewares$);
       }),
-      // NOTE: because of muatability, they're all the same message
+      // NOTE: because of mutability, they're all the same message
       map((messages: Message[]): Message => messages[0]),
       // run the handler
       mergeMap((message: Message): Observable<Message> => {
@@ -58,7 +58,7 @@ export abstract class App {
         const middlewares$ = this.makeMiddlewares$(request.route, message, 'posthandle');
         return combineLatest(middlewares$.reverse());
       }),
-      // NOTE: because of muatability, they're all the same message
+      // NOTE: because of mutability, they're all the same message
       map((messages: Message[]): Message => messages[0]),
       // turn any error into a message
       catchError((error: any): Observable<Message> => {
@@ -70,7 +70,7 @@ export abstract class App {
         const middlewares$ = this.makeMiddlewares$(request.route, message, 'postcatch');
         return combineLatest(middlewares$.reverse());
       }),
-      // NOTE: because of muatability, they're all the same message
+      // NOTE: because of mutability, they're all the same message
       map((messages: Message[]): Message => messages[0]),
     );
   }
