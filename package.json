@@ -19,6 +19,8 @@
     "toc": "markdown-toc -i README.md"
   },
   "dependencies": {
+    "@types/aws-lambda": "8",
+    "@types/express": "4",
     "chalk": "2",
     "file-type": "10",
     "injection-js": "2",
@@ -30,8 +32,6 @@
     "table": "5"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8",
-    "@types/express": "4",
     "@types/jest": "23",
     "@types/node": "10",
     "axios": "^0.18.0",
