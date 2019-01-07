@@ -10,6 +10,8 @@
 
 Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://rxjs.dev), built with [TypeScript](https://www.typescriptlang.org/) and optimized for serverless deployments. Heavily inspired by [Marble.js](https://github.com/marblejs/marble) and [NestJS](https://nestjs.com/).
 
+> See [ServeRX-serverless](https://github.com/mflorence99/serverx-serverless) for a sample app operating in a serverless environment.
+
 <!-- toc -->
 
 - [Rationale](#rationale)
@@ -161,6 +163,19 @@ export async function handler(req, res) {
   await gcfApp.handle(req, res);
 }
 ```
+
+> Be sure to include the following options in `tsconfig.json` when you build ServeRX-ts applications:
+
+```json
+{
+  "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+  }
+}
+```
+
+> See [ServeRX-serverless](https://github.com/mflorence99/serverx-serverless) for a sample app operating in a serverless environment.
 
 ## Primer
 
