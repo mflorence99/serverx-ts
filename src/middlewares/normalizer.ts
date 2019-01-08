@@ -28,6 +28,10 @@ import { tap } from 'rxjs/operators';
           map(({ request, response } ) => ({ body: response.body, headers: response.headers, path: request.path, statusCode: response.statusCode })),
           map(({ body, headers, path, statusCode }) => ({ body, headers, path, statusCode: statusCode || 200 })),
           tap(({ body, headers, path }) => {
+            if (!headers['Cache-Control']) 
+              headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+          }),
+          tap(({ body, headers, path }) => {
             if (!headers['Content-Type']) {
               const fromBuffer = (body instanceof Buffer) && fileType(body);
               const contentType = fromBuffer? fromBuffer.mime : mime.getType(path);

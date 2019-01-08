@@ -71,4 +71,30 @@ describe('Normalizer unit tests', () => {
       });
   });
 
+  test('sets default Cache-Control', done => {
+    const normalizer = new Normalizer();
+    const message: Message = {
+      request: { path: '/foo/bar', method: 'GET' },
+      response: { body: 'xyz', headers: { } }
+    };
+    normalizer.posthandle(of(message))
+      .subscribe(({ response }) => {
+        expect(response.headers['Cache-Control']).toEqual('no-cache, no-store, must-revalidate');
+        done();
+      });
+  });
+
+  test('leaves Cache-Control alone if already set', done => {
+    const normalizer = new Normalizer();
+    const message: Message = {
+      request: { path: '/foo/bar', method: 'GET' },
+      response: { body: 'xyz', headers: { 'Cache-Control': 'public' } }
+    };
+    normalizer.posthandle(of(message))
+      .subscribe(({ response }) => {
+        expect(response.headers['Cache-Control']).toEqual('public');
+        done();
+      });
+  });
+
 });

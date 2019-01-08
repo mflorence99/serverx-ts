@@ -4,6 +4,7 @@ import { Attr } from '../metadata';
 import { Compressor } from '../middlewares/compressor';
 import { COMPRESSOR_OPTS } from '../middlewares/compressor';
 import { CORS } from '../middlewares/cors';
+import { FileServer } from '../handlers/file-server';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
 import { Injectable } from 'injection-js';
@@ -121,6 +122,11 @@ const routes: Route[] = [
 
       {
         path: '/isalive'
+      },
+
+      {
+        path: '/public',
+        handler: FileServer
       },
 
       {

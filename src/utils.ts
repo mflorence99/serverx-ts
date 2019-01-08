@@ -34,10 +34,14 @@ export function caseInsensitiveObject(obj: any): any {
 
 export function fromReadableStream(stream: Readable): Observable<any> {
   stream.pause();
+  const buffer = [];
   return new Observable(observer => {
-    const next = chunk => observer.next(chunk);
+    const next = chunk => buffer.push(chunk);
     const error = err => observer.error(err);
-    const complete = () => observer.complete();
+    const complete = () => {
+      observer.next(Buffer.concat(buffer));
+      observer.complete();
+    };
     stream
       .on('data', next)
       .on('error', error)

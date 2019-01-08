@@ -38,7 +38,7 @@ export class Router {
     }];
   }
 
-  /** Flatten all handles routes */
+  /** Flatten all handled routes */
   flatten(): Route[] {
     const flattened: Route[] = [];
     this.flattenImpl(flattened, this.routes);
@@ -54,6 +54,20 @@ export class Router {
     request.params = params;
     request.route = route;
     return message;
+  }
+
+  /** Find the tail of a path, relative to its route */
+  tailOf(path: string,
+         route: Route): string {
+    const rpaths = [];
+    while (route) {
+      if (route.path)
+        rpaths.push(this.normalize(route.path));
+      // now look at parent
+      route = route.parent;
+    }
+    const rpath = '/' + rpaths.reverse().join('/');
+    return path.substring(rpath.length);
   }
 
   // private methods
@@ -186,9 +200,14 @@ export class Router {
     return route;
   }
 
-  private split(path: string): string[] {
+  private normalize(path: string): string {
     // NOTE: trim out any leading or trailing /
-    return (path && (path !== '/'))? path.replace(/^\/|\/$/g, '').split('/') : [];
+    return (path && (path !== '/'))? path.replace(/^\/|\/$/g, '') : '';
+  }
+
+  private split(path: string): string[] {
+    const normalized = this.normalize(path);
+    return normalized? normalized.split('/') : [];
   }
 
 }

@@ -63,6 +63,12 @@ const routes: Route[] = [
             children: [
 
               {
+                path: '/public',
+                handler: Handler1,
+                data: '/foo/bar/public'
+              },
+
+              {
                 path: '/this/{id}/{user}',
                 services: [Service1],
                 handler: Handler1,
@@ -139,8 +145,8 @@ describe('Router unit tests', () => {
 
   test('routes can be flattened', () => {
     const flattened = router.flatten();
-    expect(flattened.length).toEqual(5);
-    expect(flattened[0].path).toEqual('/foo/bar/that/{partner}');
+    expect(flattened.length).toEqual(6);
+    expect(flattened[0].path).toEqual('/foo/bar/public');
   });
 
   test('GET /foo no match', () => {
@@ -213,6 +219,13 @@ describe('Router unit tests', () => {
   test('POST /foo/fizz/baz/buzz matches', () => {
     const message: Message = { request: { method: 'POST', path: '/foo/fizz/baz/buzz' } };
     expect(router.route(message).request.route.data).toEqual('/foo/fizz/baz/buzz');
+  });
+
+  test('GET /foo/bar/public honors tailOf API', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo/bar/public/x/y/z.html' } };
+    const request = router.route(message).request;
+    expect(request.route.data).toEqual('/foo/bar/public');
+    expect(router.tailOf(request.path, request.route)).toEqual('/x/y/z.html');
   });
 
 });

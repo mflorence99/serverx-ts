@@ -24,9 +24,6 @@ const MIDDLEWARES = [Normalizer];
 
 export class GCFApp extends App {
 
-  private req: express.Request;
-  private res: express.Response;
-
   /** ctor */
   constructor(routes: Route[],
               info: InfoObject = null) {
@@ -36,11 +33,9 @@ export class GCFApp extends App {
   /** AWS Lambda handler method */
   handle(req: express.Request,
          res: express.Response): Promise<Response> {
-    this.req = req;
-    this.res = res;
     // synthesize Message from GCF Express-simulated req and res
     // NOTE: req is augmented IncomingMessage
-    const parsed = url.parse(this.req.url);
+    const parsed = url.parse(req.url);
     const message: Message = {
       context: {
         info: this.info,
@@ -48,14 +43,14 @@ export class GCFApp extends App {
       },
       request: {
         // NOTE: body is pre-parsed by Google Cloud
-        body: this.req.body,
-        headers: caseInsensitiveObject(this.req.headers || { }),
-        httpVersion: this.req.httpVersion,
-        method: <Method>this.req.method,
+        body: req.body,
+        headers: caseInsensitiveObject(req.headers || { }),
+        httpVersion: req.httpVersion,
+        method: <Method>req.method,
         params: { },
         path: parsed.pathname,
         query: new URLSearchParams(parsed.search),
-        remoteAddr: this.req.connection? this.req.connection.remoteAddress : null,
+        remoteAddr: req.connection? req.connection.remoteAddress : null,
         route: null,
         stream$: null,
         timestamp: Date.now()
@@ -72,9 +67,9 @@ export class GCFApp extends App {
       .pipe(
         map((message: Message): Response => message.response),
         tap((response: Response) => {
-          if (this.res.send) {
-            Object.entries(response.headers).forEach(([k, v]) => this.res.set(k, <any>v));
-            this.res.status(response.statusCode).send(response.body);
+          if (res.send) {
+            Object.entries(response.headers).forEach(([k, v]) => res.set(k, <any>v));
+            res.status(response.statusCode).send(response.body);
           }
         })
       ).toPromise();

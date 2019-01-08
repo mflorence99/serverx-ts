@@ -22,10 +22,6 @@ const MIDDLEWARES = [Normalizer];
 
 export class AWSLambdaApp extends App {
 
-  private event: APIGatewayProxyEvent;
-  // @ts-ignore TODO: temporary
-  private context: Context;
-
   /** ctor */
   constructor(routes: Route[],
               info: InfoObject = null) {
@@ -35,8 +31,6 @@ export class AWSLambdaApp extends App {
   /** AWS Lambda handler method */
   handle(event: APIGatewayProxyEvent,
          context: Context): Promise<Response> {
-    this.event = event;
-    this.context = context;
     // synthesize Message from Lambda event and context
     const message: Message = {
       context: {
@@ -45,13 +39,13 @@ export class AWSLambdaApp extends App {
       },
       request: {
         // @see https://stackoverflow.com/questions/41648467
-        body: (this.event.body != null)? JSON.parse(this.event.body) : { },
-        headers: caseInsensitiveObject(this.event.headers || { }),
+        body: (event.body != null)? JSON.parse(event.body) : { },
+        headers: caseInsensitiveObject(event.headers || { }),
         httpVersion: '1.1',
-        method: <Method>this.event.httpMethod,
+        method: <Method>event.httpMethod,
         params: { },
-        path: this.event.path,
-        query: this.makeSearchParamsFromEvent(this.event),
+        path: event.path,
+        query: this.makeSearchParamsFromEvent(event),
         remoteAddr: null,
         route: null,
         stream$: null,

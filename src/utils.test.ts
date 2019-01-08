@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { caseInsensitiveObject } from './utils';
 import { fromReadableStream } from './utils';
 import { map } from 'rxjs/operators';
@@ -55,5 +58,15 @@ describe('fromReadableStream unit tests', () => {
       });
   });
 
-});
+  test('this file can be read as an observable stream', done => {
+    const test = path.join(__dirname, 'utils.test.ts');
+    const stream$ = fromReadableStream(fs.createReadStream(test));
+    stream$.pipe(map((result: Buffer): string => result.toString()))
+      .subscribe((result: string) => {
+        expect(result).toMatch(/^import /);
+        expect(result).toMatch(/ \}\);\n\n\}\);\n$/);
+        done();
+      });
+  });
 
+});

@@ -36,9 +36,6 @@ export class HttpApp extends App {
   private response$ = new Subject<Response>();
   private subToMessages: Subscription;
 
-  private req: IncomingMessage;
-  private res: ServerResponse;
-
   /** ctor */
   constructor(routes: Route[],
               info: InfoObject = null) {
@@ -50,26 +47,25 @@ export class HttpApp extends App {
     this.startListening();
     return (req: IncomingMessage, 
             res: OutgoingMessage): void => {
-      this.req = req;
-      this.res = res as ServerResponse;
       // synthesize Message from Http req/res
-      const parsed = url.parse(this.req.url); 
+      const parsed = url.parse(req.url); 
       const message: Message = {
         context: {
+          _internal: { res },
           info: this.info,
           router: this.router,
         },
         request: {
           body: { },
-          headers: caseInsensitiveObject(this.req.headers || { }),
-          httpVersion: this.req.httpVersion,
-          method: <Method>this.req.method,
+          headers: caseInsensitiveObject(req.headers || { }),
+          httpVersion: req.httpVersion,
+          method: <Method>req.method,
           params: { },
           path: parsed.pathname,
           query: new URLSearchParams(parsed.search),
-          remoteAddr: this.req.connection? this.req.connection.remoteAddress : null,
+          remoteAddr: req.connection? req.connection.remoteAddress : null,
           route: null,
-          stream$: this.req.on? fromReadableStream(this.req) : null,
+          stream$: req.on? fromReadableStream(req) : null,
           timestamp: Date.now()
         },
         response: {
@@ -99,17 +95,20 @@ export class HttpApp extends App {
       switchMap((message: Message): Observable<Message> => {
         return of(message)
           .pipe(this.makePipeline(message))
-          .pipe(tap((message: Message) => this.handleResponse(message.response)));
+          .pipe(
+            tap(({ context, response }) => this.handleResponse(context._internal.res, response))
+          );
       })
     ).subscribe();
   }
 
   // private methods
 
-  private handleResponse(response: Response): void {
-    if (this.res.end) {
-      this.res.writeHead(response.statusCode, response.headers);
-      this.res.end(response.body);
+  private handleResponse(res: ServerResponse,
+                         response: Response): void {
+    if (res.end) {
+      res.writeHead(response.statusCode, response.headers);
+      res.end(response.body);
     }
     // NOTE: back-door for tests
     else this.response$.next(response);

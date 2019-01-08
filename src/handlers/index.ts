@@ -1,3 +1,4 @@
+export * from './file-server';
 export * from './not-found';
 export * from './open-api';
 export * from './redirect-to';

@@ -31,6 +31,7 @@ export interface ContentMetadata {
  */
 
 export interface Context {
+  _internal?: any;
   info: InfoObject;
   router: Router;
 }
