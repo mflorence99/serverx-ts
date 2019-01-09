@@ -34,6 +34,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
     + [Path Parameters](#path-parameters)
     + [Redirect](#redirect)
     + [Route Data](#route-data)
+  * [File Server](#file-server)
   * [OpenAPI](#openapi)
     + [Informational Annotations](#informational-annotations)
     + [Metadata Annotations](#metadata-annotations)
