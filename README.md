@@ -68,7 +68,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 ### Design Non-Objectives
 
-* *Deployment of static resources* which can be commoditized via, for example, a CDN
+* *Deployment of static resources* which can be commoditized via, for example, a CDN. However, ServeRX-ts offers a simple but effective [FileServer](https://github.com/mflorence99/serverx-ts/blob/master/src/handlers/file-server.ts) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs).
 
 * *FRP religion* ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
 
@@ -403,6 +403,31 @@ An arbitrary `data` object can be attached to a route:
 ```
 
 > Route `data` can be accessed by both `middleware` and a `handler` via `message.request.route.data`.
+
+### File Server
+
+ServeRX-ts offers a simple but effective [FileServer](https://github.com/mflorence99/serverx-ts/blob/master/src/handlers/file-server.ts) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs). It can be used in any route, for example:
+
+```ts
+const routes: Route[] = [
+  {
+    path: '',
+    children: [
+      {
+        methods: ['GET'],
+        path: '/public',
+        handler: FileServer,
+        provide: [{ provide: FILE_SERVER_OPTS, useValue: { maxAge: 999, root: '/tmp' } }]
+      },
+      // other routes
+    ]
+  }
+];
+```
+
+By default, it serves files starting from the current directory, although that can be customized as shown above. So in that example, `GET /public/x/y/z.js` would attempt to server `/tmp/x/y/z.js`.
+
+ServeRX-ts forces `must-revalidate` caching and sets `max-age` as customized or one year by default. The file's modification timestamp is used as an `Etag` to control caching via `If-None-Match`.
 
 ### OpenAPI
 
