@@ -69,7 +69,7 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 ### Design Non-Objectives
 
-* *Deployment of static resources* which can be commoditized via, for example, a CDN. However, ServeRX-ts offers a simple but effective [FileServer](#file-server) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs).
+* *Deployment of static resources* which can be commoditized via, for example, a CDN. However, ServeRX-ts supplies a simple but effective [FileServer](#file-server) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs).
 
 * *FRP religion* ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
 
@@ -407,7 +407,7 @@ An arbitrary `data` object can be attached to a route:
 
 ### File Server
 
-ServeRX-ts offers a simple but effective [FileServer](https://github.com/mflorence99/serverx-ts/blob/master/src/handlers/file-server.ts) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs). It can be used in any route, for example:
+ServeRX-ts supplies a simple but effective [FileServer](https://github.com/mflorence99/serverx-ts/blob/master/src/handlers/file-server.ts) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs). It can be used in any route, for example:
 
 ```ts
 const routes: Route[] = [
