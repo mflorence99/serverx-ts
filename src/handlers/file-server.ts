@@ -12,7 +12,6 @@ import { Optional } from 'injection-js';
 
 import { bindNodeCallback } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { defaultIfEmpty } from 'rxjs/operators';
 import { fromReadableStream } from '../utils';
 import { mapTo } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -25,12 +24,15 @@ import { throwError } from 'rxjs';
  */
 
 export interface FileServerOpts {
+  maxAge?: number;
   root?: string;
 }
 
 export const FILE_SERVER_OPTS = new InjectionToken<FileServerOpts>('FILE_SERVER_OPTS');
 
 export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
+  // NOTE: one year
+  maxAge: 31557600,
   root: __dirname
 };
 
@@ -51,16 +53,36 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
         const { context, request, response } = message;
-        const fpath = path.join(this.opts.root, context.router.tailOf(request.path, request.route));
+        const router = context.router;
+        // NOTE: we never allow dot files and router.validate takes care of that
+        const fpath = path.join(this.opts.root, router.tailOf(router.validate(request.path), request.route));
+        // Etag is the mod time
+        const etag = Number(request.headers['If-None-Match']);
         return of(message).pipe(
-          switchMap(() => bindNodeCallback(fs.stat)(fpath)),
-          switchMap(() => fromReadableStream(fs.createReadStream(fpath))),
-          tap(buffer => response.body = buffer),
-          mapTo(message),
-          catchError(() => throwError(new Exception({ statusCode: 404 }))),
-          defaultIfEmpty(message)
+          // NOTE: exception thrown if not found
+          switchMap((message: Message): Observable<fs.Stats> => bindNodeCallback(fs.stat)(fpath)),
+          // set the response headers
+          tap((stat: fs.Stats) => response.headers['Cache-Control'] = `must-revalidate, max-age=${this.opts.maxAge}`),
+          tap((stat: fs.Stats) => response.headers['Etag'] = stat.mtime.getTime()),
+          // flip to cached/not cached pipes
+          switchMap((stat: fs.Stats): Observable<Message> => {
+            const cached = (etag === stat.mtime.getTime());
+            // cached pipe
+            const cached$ = of(stat).pipe(
+              tap((stat: fs.Stats) => response.statusCode = 304),
+              mapTo(message)
+            );
+            // not cached pipe
+            const notCached$ = of(stat).pipe(
+              switchMap((stat: fs.Stats): Observable<Buffer> => fromReadableStream(fs.createReadStream(fpath))),
+              tap((buffer: Buffer) => response.body = buffer),
+              mapTo(message)
+            );
+            return cached? cached$ : notCached$;
+          })
         );
-      })
+      }),
+      catchError(() => throwError(new Exception({ statusCode: 404 })))
     );
   }
 
