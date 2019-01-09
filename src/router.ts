@@ -70,6 +70,15 @@ export class Router {
     return path.substring(rpath.length);
   }
 
+  /** Validate a path */
+  validate(path: string): string {
+    path.split('/').forEach(part => {
+      if (part[0] === '.')
+        throw new Error('TODO: dot files not allowed');
+    });
+    return path;
+  }
+
   // private methods
 
   private flattenImpl(flattened: Route[],
