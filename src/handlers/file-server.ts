@@ -66,9 +66,7 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
           tap((stat: fs.Stats) => response.headers['Etag'] = stat.mtime.getTime()),
           // flip to cached/not cached pipes
           switchMap((stat: fs.Stats): Observable<Message> => {
-            // NOTE: slight hack here to assist unit tests -- justified because
-            // we have established the semantics of Etag
-            const cached = (etag >= stat.mtime.getTime());
+            const cached = (etag === stat.mtime.getTime());
             // cached pipe
             const cached$ = of(stat).pipe(
               tap((stat: fs.Stats) => response.statusCode = 304),
