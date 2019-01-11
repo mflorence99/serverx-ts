@@ -12,6 +12,7 @@
     "build": "npm run lint && npm run test && rimraf dist && tsc",
     "clean": "rm -rf node_modules && rm package-lock.json && npm install",
     "compile": "npm run lint && rimraf dist && tsc",
+    "file-server": "rimraf dist && tsc && node dist/examples/file-server.js",
     "http-server": "rimraf dist && tsc && node dist/examples/http-server.js",
     "lib": "npm run build && npm version patch && npm publish",
     "lint": "tslint --project .",

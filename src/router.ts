@@ -61,8 +61,9 @@ export class Router {
          route: Route): string {
     const rpaths = [];
     while (route) {
-      if (route.path)
-        rpaths.push(this.normalize(route.path));
+      const normalized = this.normalize(route.path);
+      if (normalized)
+        rpaths.push(normalized);
       // now look at parent
       route = route.parent;
     }
