@@ -24,7 +24,7 @@ export function caseInsensitiveObject(obj: any): any {
   return new Proxy(proxy, {
     deleteProperty: (tgt: any, k: string) => delete tgt[normalize(k)],
     get: (tgt: any, k: string) => tgt[normalize(k)],
-    set: (tgt: any, k: string, v: any) => tgt[normalize(k)] = v,
+    set: (tgt: any, k: string, v: any) => { tgt[normalize(k)] = v; return true; },
   });
 }
 

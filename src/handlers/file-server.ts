@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 
 import { Exception } from '../interfaces';
@@ -33,7 +34,7 @@ export const FILE_SERVER_OPTS = new InjectionToken<FileServerOpts>('FILE_SERVER_
 export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
   // NOTE: one year
   maxAge: 31557600,
-  root: __dirname
+  root: os.homedir()
 };
 
 /**
@@ -55,7 +56,8 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
         const { context, request, response } = message;
         const router = context.router;
         // NOTE: we never allow dot files and router.validate takes care of that
-        const fpath = path.join(this.opts.root, router.tailOf(router.validate(request.path), request.route));
+        const tail = router.tailOf(router.validate(request.path), request.route);
+        const fpath = path.join(this.opts.root, tail || 'index.html');
         // Etag is the mod time
         const etag = Number(request.headers['If-None-Match']);
         return of(message).pipe(

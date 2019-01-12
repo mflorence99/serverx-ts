@@ -19,7 +19,7 @@ const routes: Route[] = [
 
 const info = { title: 'dummy', version: 'dummy' };
 const router = new Router(routes);
-const fileServer = new FileServer({ });
+const fileServer = new FileServer({ root: __dirname });
 
 describe('FileServer unit tests', () => {
 
