@@ -53,11 +53,8 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
-        const { context, request, response } = message;
-        const router = context.router;
-        // NOTE: we never allow dot files and router.validate takes care of that
-        const tail = router.tailOf(router.validate(request.path), request.route);
-        const fpath = path.join(this.opts.root, tail.includes('.')? tail : 'index.html');
+        const { request, response } = message;
+        const fpath = this.makeFPath(message);
         // Etag is the mod time
         const etag = Number(request.headers['If-None-Match']);
         return of(message).pipe(
@@ -87,6 +84,21 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
       }),
       catchError(() => throwError(new Exception({ statusCode: 404 })))
     );
+  }
+
+  // private methods
+
+  private makeFPath(message: Message): string {
+    const { context, request, response } = message;
+    const router = context.router;
+    // NOTE: we never allow dot files and router.validate takes care of that
+    let tail = router.tailOf(router.validate(request.path), request.route);
+    // TODO: hack if this is a client-side route and not a path, deploy default
+    if (!tail.includes('.')) {
+      tail = 'index.html';
+      response.headers['Content-Type'] = 'text/html';
+    }
+    return path.join(this.opts.root, tail);
   }
 
 }
