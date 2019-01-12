@@ -75,6 +75,10 @@ export abstract class App {
     );
   }
 
+  protected normalizePath(path: string): string {
+    return (!path || (path === '/'))? '/index.html' : path;
+  }
+
   // private methods
 
   private catchError$(error: any,

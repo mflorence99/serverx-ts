@@ -57,7 +57,7 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
         const router = context.router;
         // NOTE: we never allow dot files and router.validate takes care of that
         const tail = router.tailOf(router.validate(request.path), request.route);
-        const fpath = path.join(this.opts.root, tail || 'index.html');
+        const fpath = path.join(this.opts.root, tail);
         // Etag is the mod time
         const etag = Number(request.headers['If-None-Match']);
         return of(message).pipe(

@@ -61,7 +61,7 @@ export class HttpApp extends App {
           httpVersion: req.httpVersion,
           method: <Method>req.method,
           params: { },
-          path: parsed.pathname,
+          path: this.normalizePath(parsed.pathname),
           query: new URLSearchParams(parsed.search),
           remoteAddr: req.connection? req.connection.remoteAddress : null,
           route: null,

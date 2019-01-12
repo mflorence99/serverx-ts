@@ -44,7 +44,7 @@ export class AWSLambdaApp extends App {
         httpVersion: '1.1',
         method: <Method>event.httpMethod,
         params: { },
-        path: event.path,
+        path: this.normalizePath(event.path),
         query: this.makeSearchParamsFromEvent(event),
         remoteAddr: null,
         route: null,
