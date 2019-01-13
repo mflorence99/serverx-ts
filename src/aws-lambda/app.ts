@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { App } from '../app';
+import { BinaryTyper } from '../middlewares/binary-typer';
 import { Context } from 'aws-lambda';
 import { InfoObject } from 'openapi3-ts';
 import { Message } from '../interfaces';
@@ -14,7 +15,7 @@ import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 // NOTE: this middleware is required
-const MIDDLEWARES = [Normalizer];
+const MIDDLEWARES = [BinaryTyper, Normalizer];
 
 /**
  * AWS Lambda application
@@ -67,8 +68,8 @@ export class AWSLambdaApp extends App {
         map((response: Response): Response => {
           // @see https://stackoverflow.com/questions/21858138
           if (response.body instanceof Buffer) {
-            response.body = (<Buffer>response.body).toString('base64');
-            response.isBase64Encoded = true;
+            const encoding = response.isBase64Encoded? 'base64' : 'utf8';
+            response.body = (<Buffer>response.body).toString(encoding);
           }
           return response;
         })

@@ -190,6 +190,16 @@ export async function handler(req, res) {
 
 ServeRX-ts attempts to minimize overhead by injecting serverless calls right into its application code. This approach led a number of design decisions, notably `messages`, discussed next.
 
+ServeRX-ts recommends using the excellent [serverless](https://serverless.com/framework/docs/) framework to deploy to serverless environments.
+
+#### AWS Lambda Considerations
+
+> TODO: discuss how to control binary types and recommended `serverless.yml`.
+
+#### Google Cloud Functions Considerations
+
+> TODO: ??? and recommended `serverless.yml`.
+
 ### Messages
 
 ServeRX-ts creates `messages` from inbound requests (either HTTP or serverless) and represents the request and response as simple inner objects.
@@ -426,7 +436,7 @@ const routes: Route[] = [
 ];
 ```
 
-By default, it serves files starting from the current directory, although that can be customized as shown above. So in that example, `GET /public/x/y/z.js` would attempt to serve `/tmp/x/y/z.js`.
+By default, it serves files starting from the user's home directory, although that can be customized as shown above. So in that example, `GET /public/x/y/z.js` would attempt to serve `/tmp/x/y/z.js`.
 
 ServeRX-ts forces `must-revalidate` caching and sets `max-age` as customized or one year by default. The file's modification timestamp is used as an `Etag` to control caching via `If-None-Match`.
 
