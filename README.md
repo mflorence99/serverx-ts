@@ -22,6 +22,8 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 - [Sample Application](#sample-application)
 - [Primer](#primer)
   * [Serverless Support](#serverless-support)
+    + [AWS Lambda Considerations](#aws-lambda-considerations)
+    + [Google Cloud Functions Considerations](#google-cloud-functions-considerations)
   * [Messages](#messages)
   * [Handlers](#handlers)
   * [Middleware](#middleware)
