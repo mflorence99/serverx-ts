@@ -19,8 +19,8 @@ import { URLSearchParams } from 'url';
 import { caseInsensitiveObject } from '../utils';
 import { fromReadableStream } from '../utils';
 import { map } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
 // NOTE: this middleware is required
@@ -90,9 +90,7 @@ export class HttpApp extends App {
     this.subToMessages = this.message$.pipe(
       // route the message
       map((message: Message): Message => this.router.route(message)),
-      // switch map so we can keep going on error
-      // @see https://iamturns.com/continue-rxjs-streams-when-errors-occur/
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         return of(message)
           .pipe(this.makePipeline(message))
           .pipe(

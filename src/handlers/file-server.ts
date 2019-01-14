@@ -15,8 +15,8 @@ import { bindNodeCallback } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { fromReadableStream } from '../utils';
 import { mapTo } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
@@ -52,19 +52,19 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
 
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         const { request, response } = message;
         const fpath = this.makeFPath(message);
         // Etag is the mod time
         const etag = Number(request.headers['If-None-Match']);
         return of(message).pipe(
           // NOTE: exception thrown if not found
-          switchMap((message: Message): Observable<fs.Stats> => bindNodeCallback(fs.stat)(fpath)),
+          mergeMap((message: Message): Observable<fs.Stats> => bindNodeCallback(fs.stat)(fpath)),
           // set the response headers
           tap((stat: fs.Stats) => response.headers['Cache-Control'] = `must-revalidate, max-age=${this.opts.maxAge}`),
           tap((stat: fs.Stats) => response.headers['Etag'] = stat.mtime.getTime()),
           // flip to cached/not cached pipes
-          switchMap((stat: fs.Stats): Observable<Message> => {
+          mergeMap((stat: fs.Stats): Observable<Message> => {
             const cached = (etag === stat.mtime.getTime());
             // cached pipe
             const cached$ = of(stat).pipe(
@@ -73,7 +73,7 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
             );
             // not cached pipe
             const notCached$ = of(stat).pipe(
-              switchMap((stat: fs.Stats): Observable<Buffer> => fromReadableStream(fs.createReadStream(fpath))),
+              mergeMap((stat: fs.Stats): Observable<Buffer> => fromReadableStream(fs.createReadStream(fpath))),
               tap((buffer: Buffer) => response.body = buffer),
               tap((buffer: Buffer) => response.statusCode = 200),
               mapTo(message)

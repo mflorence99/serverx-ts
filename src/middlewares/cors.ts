@@ -10,8 +10,8 @@ import { Optional } from 'injection-js';
 
 import { cors } from '../ported/cors';
 import { iif } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
@@ -59,7 +59,7 @@ export const CORS_DEFAULT_OPTS: CORSOpts = {
     const next = () => { };
     return message$.pipe(
       tap(({ request, response }) => cors(this.opts, request, response, next)),
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         const { request, response } = message;
         return iif(() => (!this.opts.preflightContinue && (request.method === 'OPTIONS')), 
           throwError(new Exception(response)),

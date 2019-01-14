@@ -9,8 +9,8 @@ import { Optional } from 'injection-js';
 
 import { defaultIfEmpty } from 'rxjs/operators';
 import { filter } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
 import chalk from 'chalk';
@@ -50,7 +50,7 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
 
   postcatch(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         return of(message).pipe(
           filter((message: Message) => !this.opts.silent),
           tap(({ response }) => {

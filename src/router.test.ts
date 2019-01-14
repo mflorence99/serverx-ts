@@ -9,7 +9,7 @@ import { Route } from './interfaces';
 import { Router } from './router';
 import { StatusCode200 } from './handlers/statuscode-200';
 
-import { switchMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
 @Injectable() class Service2 { }
@@ -27,7 +27,7 @@ import { throwError } from 'rxjs';
 @Injectable() class NoMatch extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap(() =>
+      mergeMap(() =>
         throwError(new Exception({ statusCode: 404 } ))
       )
     );

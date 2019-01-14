@@ -13,8 +13,8 @@ import { defaultIfEmpty } from 'rxjs/operators';
 import { filter } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { mapTo } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { toArray } from 'rxjs/operators';
@@ -50,11 +50,11 @@ export const BODY_PARSER_DEFAULT_OPTS: BodyParserOpts = {
 
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         return of(message).pipe(
           filter(({ request }) => !!request.stream$ && (!this.opts.methods || this.opts.methods.includes(request.method))),
           // read the stream into a string, then into encoded form
-          switchMap(({ request }): Observable<any> => {
+          mergeMap(({ request }): Observable<any> => {
             return request.stream$.pipe(
               toArray(),
               map((chunks: any[]): Buffer => Buffer.concat(chunks)),

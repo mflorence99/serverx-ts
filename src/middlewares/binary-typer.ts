@@ -9,8 +9,8 @@ import { Response } from '../interfaces';
 
 import { defaultIfEmpty } from 'rxjs/operators';
 import { filter } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
 /**
@@ -40,7 +40,7 @@ export const BINARY_TYPES_DEFAULT: string[] = [
 
   posthandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         return of(message).pipe(
           filter(({ response }) => !!response.body),
           tap(({ response }) => response.body = Buffer.from(response.body)),

@@ -9,8 +9,8 @@ import { Observable } from 'rxjs';
 
 import { map } from 'rxjs/operators';
 import { mapTo } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 
 /**
@@ -23,10 +23,10 @@ import { tap } from 'rxjs/operators';
 
   posthandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         return of(message).pipe(
           map(({ request, response } ) => ({ body: response.body, headers: response.headers, path: request.path, statusCode: response.statusCode })),
-          map(({ body, headers, path, statusCode }) => ({ body, headers, path, statusCode: statusCode || 200 })),
+          map(({ body, headers, path, statusCode }) => ({ body, headers, path, statusCode: statusCode || (body? 200 : 204) })),
           tap(({ body, headers, path }) => {
             if (!headers['Cache-Control']) 
               headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';

@@ -16,8 +16,8 @@ import { defaultIfEmpty } from 'rxjs/operators';
 import { filter } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { mapTo } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { vary } from '../ported/vary';
@@ -75,7 +75,7 @@ export const COMPRESSOR_DEFAULT_OPTS: CompressorOpts = {
 
   posthandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         const { request, response } = message;
         return of(message).pipe(
           tap(({ response }) => vary(response, 'Accept-Encoding')),

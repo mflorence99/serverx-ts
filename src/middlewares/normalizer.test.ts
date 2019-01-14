@@ -5,17 +5,30 @@ import { of } from 'rxjs';
 
 describe('Normalizer unit tests', () => {
 
-  test('sets statusCode', done => {
+  test('sets statusCode 200', done => {
     const normalizer = new Normalizer();
     const message: Message = {
       request: { path: '/foo/bar', method: 'GET' },
-      response: { headers: { } }
+      response: { body: 'hello', headers: { } }
     };
     normalizer.posthandle(of(message))
     .subscribe(({ response }) => {
       expect(response.statusCode).toEqual(200);
       done();
     });
+  });
+
+  test('sets statusCode 204', done => {
+    const normalizer = new Normalizer();
+    const message: Message = {
+      request: { path: '/foo/bar', method: 'GET' },
+      response: { headers: {} }
+    };
+    normalizer.posthandle(of(message))
+      .subscribe(({ response }) => {
+        expect(response.statusCode).toEqual(204);
+        done();
+      });
   });
 
   test('leaves statusCode alone', done => {
