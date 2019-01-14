@@ -70,7 +70,20 @@ describe('BinaryTyper unit tests', () => {
       });
   });
 
-  test('response body not-a-Buffer is never binary', done => {
+  test('empty binary types is never binary', done => {
+    const binaryTyper = new BinaryTyper([]);
+    const message: Message = {
+      request: { path: '/', method: 'GET' },
+      response: { body: Buffer.from('a'), headers: { 'Content-Type': 'text/that' } }
+    };
+    binaryTyper.posthandle(of(message))
+      .subscribe(({ response }) => {
+        expect(response.isBase64Encoded).toBeFalsy();
+        done();
+      });
+  });
+
+  test('response body not-a-Buffer is analyzed as if a buffer', done => {
     const binaryTyper = new BinaryTyper(null);
     const message: Message = {
       request: { path: '/', method: 'GET' },
@@ -78,7 +91,8 @@ describe('BinaryTyper unit tests', () => {
     };
     binaryTyper.posthandle(of(message))
       .subscribe(({ response }) => {
-        expect(response.isBase64Encoded).toBeFalsy();
+        expect(response.body instanceof Buffer).toBeTruthy();
+        expect(response.isBase64Encoded).toBeTruthy();
         done();
       });
   });

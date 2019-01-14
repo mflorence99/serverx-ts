@@ -42,6 +42,8 @@ export const BINARY_TYPES_DEFAULT: string[] = [
     return message$.pipe(
       switchMap((message: Message): Observable<Message> => {
         return of(message).pipe(
+          filter(({ response }) => !!response.body),
+          tap(({ response }) => response.body = Buffer.from(response.body)),
           filter(({ response }) => this.isBinaryType(response)),
           tap(({ response }) => response.isBase64Encoded = true),
           defaultIfEmpty(message)
@@ -53,22 +55,20 @@ export const BINARY_TYPES_DEFAULT: string[] = [
   // private methods
 
   private isBinaryType(response: Response): boolean {
-    if (response.body instanceof Buffer) {
-      if (response.headers['Content-Encoding'])
-        return true;
-      else if (response.headers['Content-Type']) {
-        const contentType = <string>response.headers['Content-Type'];
-        const parts = contentType.split('/');
-        return this.binaryTypes.some(binaryType => {
-          const matches = binaryType.split('/');
-          return ((parts.length === matches.length)
-              && (parts.length === 2)
-              && (parts[0] === matches[0] || matches[0] === '*')
-              && (parts[1] === matches[1] || matches[1] === '*'));
-        });
-      }
+    if (response.headers['Content-Encoding'])
+      return true;
+    else if (response.headers['Content-Type']) {
+      const contentType = <string>response.headers['Content-Type'];
+      const parts = contentType.split('/');
+      return this.binaryTypes.some(binaryType => {
+        const matches = binaryType.split('/');
+        return ((parts.length === matches.length)
+            && (parts.length === 2)
+            && (parts[0] === matches[0] || matches[0] === '*')
+            && (parts[1] === matches[1] || matches[1] === '*'));
+      });
     }
-    return false;
+    else return false;
   }
 
 }

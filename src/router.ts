@@ -24,6 +24,15 @@ export class Router {
   /** ctor */
   constructor(routes: Route[],
               middlewares: Class[] = []) { 
+    // extract all the user-supplied top-level services
+    const services = routes
+      .filter(route => !!route.services)
+      .reduce((acc, route) => {
+        acc.push(...route.services);
+        route.services = null;
+        return acc;
+      }, []);
+    // wrap user-supplied routes, pushing top-level services to new top
     this.routes = [{
       children: routes,
       middlewares: middlewares,
@@ -34,7 +43,7 @@ export class Router {
           'application/json': Response500
         }
       },
-      services: [LogProvider]
+      services: [LogProvider, ...services]
     }];
   }
 

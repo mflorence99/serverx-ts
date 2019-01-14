@@ -3,6 +3,7 @@ import * as path from 'path';
 
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { AWSLambdaApp } from './app';
+import { BINARY_TYPES } from '../middlewares/binary-typer';
 import { Context } from 'aws-lambda';
 import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
@@ -92,6 +93,7 @@ const routes: Route[] = [
 
   {
     path: '',
+    services: [{ provide: BINARY_TYPES, useValue: [] }],
     children: [
 
       {
