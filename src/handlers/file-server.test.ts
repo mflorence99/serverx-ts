@@ -66,7 +66,7 @@ describe('FileServer unit tests', () => {
     fileServer.handle(of(message))
       .subscribe({
         error: ({ exception }) => {
-          expect(exception.statusCode).toEqual(404);
+          expect(exception.statusCode).toEqual(200);
           done();
         }
       });
