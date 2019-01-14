@@ -69,7 +69,7 @@ export class GCFApp extends App {
         tap((response: Response) => {
           if (res.send) {
             Object.entries(response.headers).forEach(([k, v]) => res.set(k, <any>v));
-            res.status(response.statusCode).send(response.body);
+            res.status(response.statusCode).send(response.body).end();
           }
         })
       ).toPromise();

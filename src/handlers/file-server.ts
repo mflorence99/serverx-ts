@@ -79,10 +79,10 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
               mapTo(message)
             );
             return cached? cached$ : notCached$;
-          })
+          }),
+          catchError(() => throwError(new Exception({ body: fpath, statusCode: 200 })))
         );
       }),
-      catchError(() => throwError(new Exception({ statusCode: 404 })))
     );
   }
 
