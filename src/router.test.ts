@@ -51,7 +51,10 @@ const routes: Route[] = [
   {
     path: '',
     middlewares: [Middleware1, Middleware2],
-    services: [Service2],
+    services: [
+      Service2,
+      { provide: FILE_SERVER_OPTS, useValue: { root: '/tmp' } }
+    ],
     children: [
 
       {
@@ -67,9 +70,6 @@ const routes: Route[] = [
               {
                 path: '/public',
                 handler: FileServer,
-                services: [
-                  { provide: FILE_SERVER_OPTS, useValue: { root: '/srv' } }
-                ],
                 data: '/foo/bar/public'
               },
 
@@ -239,7 +239,7 @@ describe('Router unit tests', () => {
     expect(request.route.data).toEqual('/foo/bar/public');
     const handler = Handler.makeInstance<FileServer>(request.route);
     expect(handler instanceof FileServer).toBeTruthy();
-    expect(handler['opts']['root']).toEqual('/srv');
+    expect(handler['opts']['root']).toEqual('/tmp');
   });
 
 });

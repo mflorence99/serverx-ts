@@ -10,7 +10,7 @@ export type MiddlewareMethod = 'prehandle' | 'posthandle' | 'postcatch';
 
 export class Middleware {
 
-  /** Instantiate a set of Middlewares from a Route or Class[] */
+  /** Instantiate a set of Middlewares from a Route  */
   static makeInstances(route: Route): Middleware[] {
     return (route.middlewares || [])
       .map(middleware => <Middleware>route.injector.get(middleware));
