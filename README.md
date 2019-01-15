@@ -268,7 +268,7 @@ import { Exception } from 'serverx-ts';
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       // more pipeline functions
-      switchMap((message: Message): Observable<Message> => {
+      mergeMap((message: Message): Observable<Message> => {
         return iif(() => !isAuthenticated, 
           // NOTE: the format of an Exception is the same as a Response
           throwError(new Exception({ statusCode: 401 })),
