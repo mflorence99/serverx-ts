@@ -57,19 +57,19 @@ describe('FileServer unit tests', () => {
       });
   });
 
-  // test('sets statusCode if not found', done => {
-  //   const message: Message = {
-  //     context: { info, router },
-  //     request: { path: '/public/x/y/z.html', method: 'GET', headers: { }, route: routes[0] },
-  //     response: { headers: { } }
-  //   };
-  //   fileServer.handle(of(message))
-  //     .subscribe({
-  //       error: ({ exception }) => {
-  //         expect(exception.statusCode).toEqual(404);
-  //         done();
-  //       }
-  //     });
-  // });
+  test('sets statusCode if not found', done => {
+    const message: Message = {
+      context: { info, router },
+      request: { path: '/public/x/y/z.html', method: 'GET', headers: { }, route: routes[0] },
+      response: { headers: { } }
+    };
+    fileServer.handle(of(message))
+      .subscribe({
+        error: ({ exception }) => {
+          expect(exception.statusCode).toEqual(404);
+          done();
+        }
+      });
+  });
 
 });
