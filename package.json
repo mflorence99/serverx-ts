@@ -1,6 +1,6 @@
 {
   "name": "serverx-ts",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "main": "./dist/index.js",
   "description": "Experimental Node.js HTTP framework using RxJS, built with TypeScript and optimized for serverless deployments",
   "author": "Mark Florence",
