@@ -163,7 +163,7 @@ export function handler(event, context) {
 // Google Cloud HTTP Function
 const gcfApp = new GCFApp(routes);
 export function handler(req, res) {
-  return gcfApp.handle(req, res);
+  gcfApp.handle(req, res);
 }
 ```
 
