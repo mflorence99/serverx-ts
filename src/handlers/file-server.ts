@@ -80,9 +80,7 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
             );
             return cached? cached$ : notCached$;
           }),
-          catchError(() => {
-            return throwError(new Exception({ body: JSON.stringify(fs.readdirSync(path.dirname(fpath))), statusCode: 200 }));
-          })
+          catchError(() => throwError(new Exception({ body: fpath, statusCode: 200 })))
         );
       }),
     );
