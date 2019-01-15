@@ -47,7 +47,7 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
 
   constructor( @Optional() @Inject(FILE_SERVER_OPTS) opts: FileServerOpts) {
     super();
-    this.opts = opts ? { ...FILE_SERVER_DEFAULT_OPTS, ...opts } : FILE_SERVER_DEFAULT_OPTS;
+    this.opts = opts? { ...FILE_SERVER_DEFAULT_OPTS, ...opts } : FILE_SERVER_DEFAULT_OPTS;
   }
 
   handle(message$: Observable<Message>): Observable<Message> {
@@ -80,7 +80,7 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
             );
             return cached? cached$ : notCached$;
           }),
-          catchError(() => throwError(new Exception({ body: fpath, statusCode: 200 })))
+          catchError(() => throwError(new Exception({ body: `${fpath} - ${this.opts.root}`, statusCode: 200 })))
         );
       }),
     );
