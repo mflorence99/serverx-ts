@@ -1,4 +1,6 @@
 import { Exception } from './interfaces';
+import { FILE_SERVER_OPTS } from './handlers/file-server';
+import { FileServer } from './handlers/file-server';
 import { Handler } from './handler';
 import { Injectable } from 'injection-js';
 import { Message } from './interfaces';
@@ -64,7 +66,10 @@ const routes: Route[] = [
 
               {
                 path: '/public',
-                handler: Handler1,
+                handler: FileServer,
+                services: [
+                  { provide: FILE_SERVER_OPTS, useValue: { root: '/srv' } }
+                ],
                 data: '/foo/bar/public'
               },
 
@@ -226,6 +231,15 @@ describe('Router unit tests', () => {
     const request = router.route(message).request;
     expect(request.route.data).toEqual('/foo/bar/public');
     expect(router.tailOf(request.path, request.route)).toEqual('/x/y/z.html');
+  });
+
+  test('GET /foo/bar/public resolves to root dir from DI', () => {
+    const message: Message = { request: { method: 'GET', path: '/foo/bar/public/x/y/z.html' } };
+    const request = router.route(message).request;
+    expect(request.route.data).toEqual('/foo/bar/public');
+    const handler = Handler.makeInstance<FileServer>(request.route);
+    expect(handler instanceof FileServer).toBeTruthy();
+    expect(handler['opts']['root']).toEqual('/srv');
   });
 
 });

@@ -80,7 +80,7 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
             );
             return cached? cached$ : notCached$;
           }),
-          catchError(() => throwError(new Exception({ body: `${fpath} - ${this.opts.root}`, statusCode: 200 })))
+          catchError(() => throwError(new Exception({ body: `${fpath} - ${this.opts.root} - ${os.homedir()}`, statusCode: 200 })))
         );
       }),
     );
