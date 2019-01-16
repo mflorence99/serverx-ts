@@ -38,7 +38,7 @@ export const BINARY_TYPES_DEFAULT: string[] = [
     this.binaryTypes = binaryTypes || BINARY_TYPES_DEFAULT;
   }
 
-  posthandle(message$: Observable<Message>): Observable<Message> {
+  postcatch(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       mergeMap((message: Message): Observable<Message> => {
         return of(message).pipe(

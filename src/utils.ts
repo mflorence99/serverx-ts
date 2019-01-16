@@ -7,17 +7,6 @@ import { Readable } from 'stream';
  * NOTE: biased to HTTP headers
  */
 
-function normalize(k: string): string {
-  if (k.split) {
-    const words = k.split('-')
-      // @see https://en.wikipedia.org/wiki/HTTP_referer
-      .map(word => (word.toLowerCase() === 'referer')? 'referrer' : word)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-    return words.join('-');
-  }
-  else return k;
-}
-
 export function caseInsensitiveObject(obj: any): any {
   const proxy = { };
   Object.entries(obj).forEach(([k, v]) => proxy[normalize(k)] = v);
@@ -26,6 +15,27 @@ export function caseInsensitiveObject(obj: any): any {
     get: (tgt: any, k: string) => tgt[normalize(k)],
     set: (tgt: any, k: string, v: any) => { tgt[normalize(k)] = v; return true; },
   });
+}
+
+function normalize(k: string): string {
+  if (k.split) {
+    const words = k.split('-')
+      // @see https://en.wikipedia.org/wiki/HTTP_referer
+      .map(word => (word.toLowerCase() === 'referer') ? 'referrer' : word)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    return words.join('-');
+  }
+  else return k;
+}
+
+/**
+ * Deep-copy an object
+ * 
+ * TODO: we can do better than this!
+ */
+
+export function deepCopy<T>(obj: T): T {
+  return <T>JSON.parse(JSON.stringify(obj));
 }
 
 /**

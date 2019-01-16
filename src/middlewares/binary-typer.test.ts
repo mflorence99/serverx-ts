@@ -11,7 +11,7 @@ describe('BinaryTyper unit tests', () => {
       request: { path: '/', method: 'GET' },
       response: { body: Buffer.from('a'), headers: { 'Content-Encoding': 'gzip' } }
     };
-    binaryTyper.posthandle(of(message))
+    binaryTyper.postcatch(of(message))
       .subscribe(({ response }) => {
         expect(response.isBase64Encoded).toBeTruthy();
         done();
@@ -24,7 +24,7 @@ describe('BinaryTyper unit tests', () => {
       request: { path: '/', method: 'GET' },
       response: { body: Buffer.from('a'), headers: { 'Content-Type': 'text/html' } }
     };
-    binaryTyper.posthandle(of(message))
+    binaryTyper.postcatch(of(message))
       .subscribe(({ response }) => {
         expect(response.isBase64Encoded).toBeTruthy();
         done();
@@ -37,7 +37,7 @@ describe('BinaryTyper unit tests', () => {
       request: { path: '/', method: 'GET' },
       response: { body: Buffer.from('a'), headers: { 'Content-Type': 'text/binary' } }
     };
-    binaryTyper.posthandle(of(message))
+    binaryTyper.postcatch(of(message))
       .subscribe(({ response }) => {
         expect(response.isBase64Encoded).toBeTruthy();
         done();
@@ -50,7 +50,7 @@ describe('BinaryTyper unit tests', () => {
       request: { path: '/', method: 'GET' },
       response: { body: Buffer.from('a'), headers: { 'Content-Type': 'this/that' } }
     };
-    binaryTyper.posthandle(of(message))
+    binaryTyper.postcatch(of(message))
       .subscribe(({ response }) => {
         expect(response.isBase64Encoded).toBeTruthy();
         done();
@@ -63,7 +63,7 @@ describe('BinaryTyper unit tests', () => {
       request: { path: '/', method: 'GET' },
       response: { body: Buffer.from('a'), headers: { 'Content-Type': 'text/that' } }
     };
-    binaryTyper.posthandle(of(message))
+    binaryTyper.postcatch(of(message))
       .subscribe(({ response }) => {
         expect(response.isBase64Encoded).toBeFalsy();
         done();
@@ -76,7 +76,7 @@ describe('BinaryTyper unit tests', () => {
       request: { path: '/', method: 'GET' },
       response: { body: Buffer.from('a'), headers: { 'Content-Type': 'text/that' } }
     };
-    binaryTyper.posthandle(of(message))
+    binaryTyper.postcatch(of(message))
       .subscribe(({ response }) => {
         expect(response.isBase64Encoded).toBeFalsy();
         done();
@@ -89,7 +89,7 @@ describe('BinaryTyper unit tests', () => {
       request: { path: '/', method: 'GET' },
       response: { body: 'a', headers: { 'Content-Encoding': 'gzip' } }
     };
-    binaryTyper.posthandle(of(message))
+    binaryTyper.postcatch(of(message))
       .subscribe(({ response }) => {
         expect(response.body instanceof Buffer).toBeTruthy();
         expect(response.isBase64Encoded).toBeTruthy();

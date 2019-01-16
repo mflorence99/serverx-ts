@@ -1,6 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { App } from '../app';
-import { BinaryTyper } from '../middlewares/binary-typer';
 import { Context } from 'aws-lambda';
 import { InfoObject } from 'openapi3-ts';
 import { Message } from '../interfaces';
@@ -15,7 +14,7 @@ import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 // NOTE: this middleware is required
-const MIDDLEWARES = [BinaryTyper, Normalizer];
+const MIDDLEWARES = [Normalizer];
 
 /**
  * AWS Lambda application

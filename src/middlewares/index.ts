@@ -1,3 +1,4 @@
+export * from './binary-typer';
 export * from './body-parser';
 export * from './compressor';
 export * from './cors';

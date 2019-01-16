@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { caseInsensitiveObject } from './utils';
+import { deepCopy } from './utils';
 import { fromReadableStream } from './utils';
 import { map } from 'rxjs/operators';
 
@@ -42,6 +43,16 @@ describe('caseInsensitiveObject unit tests', () => {
     delete headers['PQR-stu'];
     expect(Object.keys(headers)).toEqual(['Abc-Def']);
     expect(headers['Abc-Def']).toEqual('q');
+  });
+
+});
+
+describe('deepCopy unit tests', () => {
+
+  test('an object can be copied', () => {
+    const a = { p: { q: { r: [1, 2, 3] } } };
+    const b = deepCopy(a);
+    expect(b.p.q.r).toEqual([1, 2, 3]);
   });
 
 });
