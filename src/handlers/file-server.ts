@@ -61,8 +61,13 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
           // NOTE: exception thrown if not found
           mergeMap((message: Message): Observable<fs.Stats> => bindNodeCallback(fs.stat)(fpath)),
           // set the response headers
-          tap((stat: fs.Stats) => response.headers['Cache-Control'] = `must-revalidate, max-age=${this.opts.maxAge}`),
-          tap((stat: fs.Stats) => response.headers['Etag'] = stat.mtime.getTime()),
+          // NOTE: being biased toward a webapp, we never cache index.html
+          tap((stat: fs.Stats) => {
+            response.headers['Cache-Control'] = fpath.endsWith('index.html')?
+              'no-cache, no-store, must-revalidate' :
+              `must-revalidate, max-age=${this.opts.maxAge}`;
+            response.headers['Etag'] = stat.mtime.getTime();
+          }),
           // flip to cached/not cached pipes
           mergeMap((stat: fs.Stats): Observable<Message> => {
             const cached = (etag === stat.mtime.getTime());
@@ -74,8 +79,10 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
             // not cached pipe
             const notCached$ = of(stat).pipe(
               mergeMap((stat: fs.Stats): Observable<Buffer> => fromReadableStream(fs.createReadStream(fpath))),
-              tap((buffer: Buffer) => response.body = buffer),
-              tap((buffer: Buffer) => response.statusCode = 200),
+              tap((buffer: Buffer) => {
+                response.body = buffer;
+                response.statusCode = 200;
+              }),
               mapTo(message)
             );
             return cached? cached$ : notCached$;
