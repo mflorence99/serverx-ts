@@ -10,8 +10,6 @@
 
 Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://rxjs.dev), built with [TypeScript](https://www.typescriptlang.org/) and optimized for serverless deployments. Heavily inspired by [Marble.js](https://github.com/marblejs/marble) and [NestJS](https://nestjs.com/).
 
-> See [ServeRX-serverless](https://github.com/mflorence99/serverx-serverless) for a sample app operating in a serverless environment.
-
 <!-- toc -->
 
 - [Rationale](#rationale)
@@ -42,6 +40,10 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
     + [Metadata Annotations](#metadata-annotations)
 
 <!-- tocstop -->
+
+> See [ServeRX-serverless](https://github.com/mflorence99/serverx-serverless) for a sample app operating in a serverless environment.
+
+> See [ServeRX-angular](https://github.com/mflorence99/serverx-angular) to see ServeRX-ts put to the test of deploying and hosting any Angular app without change and with no dependencies..
 
 ## Rationale
 
