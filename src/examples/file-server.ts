@@ -6,8 +6,6 @@ import { REQUEST_LOGGER_OPTS } from '../middlewares/request-logger';
 import { RequestLogger } from '../middlewares/request-logger';
 import { Route } from '../interfaces';
 
-import 'reflect-metadata';
-
 import * as os from 'os';
 
 import { createServer } from 'http';

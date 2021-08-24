@@ -2,6 +2,8 @@ import { Class } from './interfaces';
 import { Metadata } from './interfaces';
 import { MetadataOpts } from './interfaces';
 
+import 'reflect-metadata';
+
 /**
  * Decorators for OpenAPI annotation
  *
