@@ -61,7 +61,7 @@ export class Normalizer extends Middleware {
                   body = JSON.stringify(body);
                   break;
                 case 'text/yaml':
-                  body = yaml.safeDump(body);
+                  body = yaml.dump(body);
                   break;
               }
             }
