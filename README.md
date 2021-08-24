@@ -1,10 +1,6 @@
 # ServeRX-ts
 
-[![Build Status](https://travis-ci.org/mflorence99/serverx-ts.svg?branch=master)](https://travis-ci.org/mflorence99/serverx-ts) 
-[![Jest Coverage](./coverage.svg)]()
-[![npm](https://img.shields.io/npm/v/serverx-ts.svg)]()
-[![node](https://img.shields.io/badge/node-8.10-blue.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/mflorence99/serverx-ts.svg?branch=master)](https://travis-ci.org/mflorence99/serverx-ts) [![Jest Coverage](./coverage.svg)]() [![npm](https://img.shields.io/npm/v/serverx-ts.svg)]() [![node](https://img.shields.io/badge/node-8.10-blue.svg)]() [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [![NPM](https://nodei.co/npm/serverx-ts.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/serverx-ts/)
 
@@ -13,31 +9,31 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 <!-- toc -->
 
 - [Rationale](#rationale)
-  * [Design Objectives](#design-objectives)
-  * [Design Non-Objectives](#design-non-objectives)
-  * [Some Bookmarks for Future Work](#some-bookmarks-for-future-work)
+  - [Design Objectives](#design-objectives)
+  - [Design Non-Objectives](#design-non-objectives)
+  - [Some Bookmarks for Future Work](#some-bookmarks-for-future-work)
 - [Key Concepts](#key-concepts)
 - [Sample Application](#sample-application)
 - [Primer](#primer)
-  * [Serverless Support](#serverless-support)
-    + [AWS Lambda Considerations](#aws-lambda-considerations)
-    + [Google Cloud Functions Considerations](#google-cloud-functions-considerations)
-  * [Messages](#messages)
-  * [Handlers](#handlers)
-  * [Middleware](#middleware)
-    + [Immediate Response](#immediate-response)
-    + [Built-in Middleware](#built-in-middleware)
-    + [Available Middleware](#available-middleware)
-  * [Services](#services)
-  * [Routing](#routing)
-    + [Inheritance](#inheritance)
-    + [Path Parameters](#path-parameters)
-    + [Redirect](#redirect)
-    + [Route Data](#route-data)
-  * [File Server](#file-server)
-  * [OpenAPI](#openapi)
-    + [Informational Annotations](#informational-annotations)
-    + [Metadata Annotations](#metadata-annotations)
+  - [Serverless Support](#serverless-support)
+    - [AWS Lambda Considerations](#aws-lambda-considerations)
+    - [Google Cloud Functions Considerations](#google-cloud-functions-considerations)
+  - [Messages](#messages)
+  - [Handlers](#handlers)
+  - [Middleware](#middleware)
+    - [Immediate Response](#immediate-response)
+    - [Built-in Middleware](#built-in-middleware)
+    - [Available Middleware](#available-middleware)
+  - [Services](#services)
+  - [Routing](#routing)
+    - [Inheritance](#inheritance)
+    - [Path Parameters](#path-parameters)
+    - [Redirect](#redirect)
+    - [Route Data](#route-data)
+  - [File Server](#file-server)
+  - [OpenAPI](#openapi)
+    - [Informational Annotations](#informational-annotations)
+    - [Metadata Annotations](#metadata-annotations)
 
 <!-- tocstop -->
 
@@ -51,41 +47,41 @@ Experimental [Node.js](https://nodejs.org) HTTP framework using [RxJS](https://r
 
 ### Design Objectives
 
-* *Declarative routes* like [Angular](https://angular.io/guide/router)
+- _Declarative routes_ like [Angular](https://angular.io/guide/router)
 
-* *Functional reactive programming* using [RxJS](https://rxjs.dev) like [Marble.js](https://github.com/marblejs/marble) 
+- _Functional reactive programming_ using [RxJS](https://rxjs.dev) like [Marble.js](https://github.com/marblejs/marble)
 
-* *Dependency injection* like [Angular](https://v4.angular.io/guide/dependency-injection) and [NestJS](https://nestjs.com/)
+- _Dependency injection_ like [Angular](https://v4.angular.io/guide/dependency-injection) and [NestJS](https://nestjs.com/)
 
-* *Serverless support* out-of-the-box for [AWS Lambda](https://aws.amazon.com/lambda/) with functionality similar to [AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) but without the overhead
+- _Serverless support_ out-of-the-box for [AWS Lambda](https://aws.amazon.com/lambda/) with functionality similar to [AWS Serverless Express](https://github.com/awslabs/aws-serverless-express) but without the overhead
 
-* *Serverless support* out-of-the-box for [Google Cloud HTTP Functions](https://cloud.google.com/functions/docs/writing/http)
+- _Serverless support_ out-of-the-box for [Google Cloud HTTP Functions](https://cloud.google.com/functions/docs/writing/http)
 
-* *Low cold-start latency* as needed in serverless deployments, where in theory every request can trigger a cold start
+- _Low cold-start latency_ as needed in serverless deployments, where in theory every request can trigger a cold start
 
-* *Optimized for microservices* in particular those that send `application/json` responses and typically deployed in serverless environments
+- _Optimized for microservices_ in particular those that send `application/json` responses and typically deployed in serverless environments
 
-* *OpenAPI support* out-of-the-box to support the automated discovery and activation of the microservices for which ServeRX-ts is intended via the standard [OpenAPI](https://swagger.io/docs/specification/about/) specification
+- _OpenAPI support_ out-of-the-box to support the automated discovery and activation of the microservices for which ServeRX-ts is intended via the standard [OpenAPI](https://swagger.io/docs/specification/about/) specification
 
-* *Full type safety* by using [TypeScript](https://www.typescriptlang.org/) exclusively
+- _Full type safety_ by using [TypeScript](https://www.typescriptlang.org/) exclusively
 
-* *Maximal test coverage* using [Jest](https://jestjs.io/)
+- _Maximal test coverage_ using [Jest](https://jestjs.io/)
 
 ### Design Non-Objectives
 
-* *Deployment of static resources* which can be commoditized via, for example, a CDN. However, ServeRX-ts supplies a simple but effective [FileServer](#file-server) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs).
+- _Deployment of static resources_ which can be commoditized via, for example, a CDN. However, ServeRX-ts supplies a simple but effective [FileServer](#file-server) handler that has just enough capability to deploy (say) an [Angular app](https://angular.io/docs).
 
-* *FRP religion* ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
+- _FRP religion_ ServeRX-ts believes in using functions where appropriate and classes and class inheritance where they are appropriate
 
 ### Some Bookmarks for Future Work
 
-* *Emulator for Express middleware* (but that's hard and definitely back-burner!)
+- _Emulator for Express middleware_ (but that's hard and definitely back-burner!)
 
 ## Key Concepts
 
 Like [Marble.js](https://github.com/marblejs/marble), linear request/response logic is not used to process HTTP traffic. Instead, application code operates on an observable stream. ServeRX-ts does not provide any abstractions for server creation. Either standard [Node.js](https://nodejs.org) APIs are used or appropriate serverless functions.
 
-ServeRX-ts *does* however abstract requests and responses (whatever their source or destination) and bundles them into a stream of `messages`. 
+ServeRX-ts _does_ however abstract requests and responses (whatever their source or destination) and bundles them into a stream of `messages`.
 
 A `Handler` is application code that observes this stream, mapping requests into responses.
 
@@ -119,7 +115,8 @@ import { Route } from 'serverx-ts';
 import { createServer } from 'http';
 import { tap } from 'rxjs/operators';
 
-@Injectable() class HelloWorld extends Handler {
+@Injectable()
+class HelloWorld extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -175,7 +172,7 @@ export function handler(req, res) {
 {
   "compilerOptions": {
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": true
   }
 }
 ```
@@ -208,18 +205,18 @@ ServeRX-ts recommends using the excellent [serverless](https://serverless.com/fr
 
 ServeRX-ts creates `messages` from inbound requests (either HTTP or serverless) and represents the request and response as simple inner objects.
 
-`message.context` | `message.request` | `message.response`
----|---|---
-`info: InfoObject` | `body: any` | `body: any`
-`router: Router` | `headers: any` | `headers: any`
-&nbsp; | `httpVersion: string` | `statusCode: number`
-&nbsp; | `method: string` | 
-&nbsp; | `params: any` | 
-&nbsp; | `path: string` | 
-&nbsp; | `query: URLSearchParams` | 
-&nbsp; | `remoteAddr: string` | 
-&nbsp; | `route: Route` | 
-&nbsp; | `timestamp: number` | 
+| `message.context`  | `message.request`        | `message.response`   |
+| ------------------ | ------------------------ | -------------------- |
+| `info: InfoObject` | `body: any`              | `body: any`          |
+| `router: Router`   | `headers: any`           | `headers: any`       |
+| &nbsp;             | `httpVersion: string`    | `statusCode: number` |
+| &nbsp;             | `method: string`         |
+| &nbsp;             | `params: any`            |
+| &nbsp;             | `path: string`           |
+| &nbsp;             | `query: URLSearchParams` |
+| &nbsp;             | `remoteAddr: string`     |
+| &nbsp;             | `route: Route`           |
+| &nbsp;             | `timestamp: number`      |
 
 `messages` are strictly mutable, meaning that application code cannot create new ones. Similarly, inner `request` and `response` should be mutated. A common mutation, for example, is to add or remove `request` or `response` `headers`.
 
@@ -253,7 +250,7 @@ All ServeRX-ts `middleware` must implement either a `prehandle` or a `posthandle
 }
 ```
 
-A third entrypoint exists: the `postcatch` method is invoked after all `posthandle` methods and even after an error has been thrown. The built-in [RequestLogger](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.ts) `middleware` uses this entrypoint to make sure that *all* requests are logged, even those that end in a failure.
+A third entrypoint exists: the `postcatch` method is invoked after all `posthandle` methods and even after an error has been thrown. The built-in [RequestLogger](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.ts) `middleware` uses this entrypoint to make sure that _all_ requests are logged, even those that end in a failure.
 
 > The `postcatch` method cannot itself cause or throw an error.
 
@@ -266,15 +263,18 @@ A third entrypoint exists: the `postcatch` method is invoked after all `posthand
 ```ts
 import { Exception } from 'serverx-ts';
 // more imports
-@Injectable() class Authenticator extends Middleware {
+@Injectable()
+class Authenticator extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       // more pipeline functions
       mergeMap((message: Message): Observable<Message> => {
-        return iif(() => !isAuthenticated, 
+        return iif(
+          () => !isAuthenticated,
           // NOTE: the format of an Exception is the same as a Response
           throwError(new Exception({ statusCode: 401 })),
-          of(message)); 
+          of(message)
+        );
       })
     );
   }
@@ -283,19 +283,19 @@ import { Exception } from 'serverx-ts';
 
 #### Built-in Middleware
 
-* The [Normalizer](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/normalizer.ts) `middleware` is automatically provided for all routes and is guaranteed to run after all other `posthandler`s. It makes sure that `response.headers['Content-Length']`, `response.headers['Content-Type']` and `response.statusCode` are set correctly.
+- The [Normalizer](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/normalizer.ts) `middleware` is automatically provided for all routes and is guaranteed to run after all other `posthandler`s. It makes sure that `response.headers['Content-Length']`, `response.headers['Content-Type']` and `response.statusCode` are set correctly.
 
-* The [BodyParser](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/body-parser.ts) `middleware` is automatically provided, except in serverless environments, where body parsing is automatically performed. 
+- The [BodyParser](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/body-parser.ts) `middleware` is automatically provided, except in serverless environments, where body parsing is automatically performed.
 
 #### Available Middleware
 
-* The [Compressor](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/compressor.ts) `middleware` performs `request.body` `gzip` or `deflate` compression, if accepted by the client. See the [compressor tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/compressor.test.ts) for an illustration of how it is used and configured.
+- The [Compressor](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/compressor.ts) `middleware` performs `request.body` `gzip` or `deflate` compression, if accepted by the client. See the [compressor tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/compressor.test.ts) for an illustration of how it is used and configured.
 
-* The [CORS](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/cors.ts) `middleware` is a wrapper around the robust [Express CORS middleware](https://expressjs.com/en/resources/middleware/cors.html). See the [CORS tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/cors.test.ts) for an illustration of how it is used and configured.
+- The [CORS](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/cors.ts) `middleware` is a wrapper around the robust [Express CORS middleware](https://expressjs.com/en/resources/middleware/cors.html). See the [CORS tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/cors.test.ts) for an illustration of how it is used and configured.
 
-* The [RequestLogger](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.ts) `middleware` is a gross simplification of the [Express Morgan middleware](https://github.com/expressjs/morgan). See the [request logger tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.test.ts) for an illustration of how it is used and configured.
+- The [RequestLogger](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.ts) `middleware` is a gross simplification of the [Express Morgan middleware](https://github.com/expressjs/morgan). See the [request logger tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/request-logger.test.ts) for an illustration of how it is used and configured.
 
-* The [Timer](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/timer.ts) `middleware` injects timing information into `response.header`. See the [timer tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/timer.test.ts) for an illustration of how it is used.
+- The [Timer](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/timer.ts) `middleware` injects timing information into `response.header`. See the [timer tests](https://github.com/mflorence99/serverx-ts/blob/master/src/middlewares/timer.test.ts) for an illustration of how it is used.
 
 ### Services
 
@@ -432,8 +432,10 @@ const routes: Route[] = [
         methods: ['GET'],
         path: '/public',
         handler: FileServer,
-        provide: [{ provide: FILE_SERVER_OPTS, useValue: { maxAge: 999, root: '/tmp' } }]
-      },
+        provide: [
+          { provide: FILE_SERVER_OPTS, useValue: { maxAge: 999, root: '/tmp' } }
+        ]
+      }
       // other routes
     ]
   }
@@ -456,7 +458,7 @@ const routes: Route[] = [
       {
         path: 'openapi.yml',
         handler: OpenAPI
-      },
+      }
       // other routes
     ]
   }
@@ -516,14 +518,14 @@ class FooBodyInner {
   @Attr() a: number;
   @Attr() b: string;
   @Attr() c: boolean;
-}   
+}
 
 class FooBody {
   @Attr() p: string;
   @Attr() q: boolean;
   @Attr() r: number;
   // NOTE: _class is only necessary because TypeScript's design:type tells us
-  // that a field is an array, but not of what type -- when it can we'll deprecate 
+  // that a field is an array, but not of what type -- when it can we'll deprecate
   @Attr({ _class: FooBodyInner }) t[]: FooBodyInner;
 }
 
@@ -551,7 +553,7 @@ const routes: Route[] = [
         path: '/foo',
         request: {
           path: FooPath,
-          query: FooQuery,
+          query: FooQuery
         }
       },
       {
@@ -571,7 +573,7 @@ const routes: Route[] = [
           '200': {
             'application/json': BarBody
           }
-        },
+        }
       }
     ]
   }
@@ -588,7 +590,7 @@ When ServeRX-ts wraps supplied routes, it automatically adds metadata about the 
     middlewares: [BodyParser /* HTTP only */, Normalizer],
     services: [LogProvider],
     responses: {
-      '500': { 
+      '500': {
         'application/json': Response500
       }
     },

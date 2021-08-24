@@ -1,19 +1,22 @@
+import { AWSLambdaApp } from './app';
+import { Handler } from '../handler';
+import { Message } from '../interfaces';
+import { Middleware } from '../middleware';
+import { Response } from '../interfaces';
+import { Route } from '../interfaces';
+
 import * as lambdaLocal from 'lambda-local';
 import * as path from 'path';
 
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { AWSLambdaApp } from './app';
 import { Context } from 'aws-lambda';
-import { Handler } from '../handler';
 import { Injectable } from 'injection-js';
-import { Message } from '../interfaces';
-import { Middleware } from '../middleware';
 import { Observable } from 'rxjs';
-import { Route } from '../interfaces';
 
 import { tap } from 'rxjs/operators';
 
-@Injectable() class Hello extends Handler {
+@Injectable()
+class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ request, response }) => {
@@ -23,7 +26,8 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Goodbye extends Handler {
+@Injectable()
+class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ request, response }) => {
@@ -33,7 +37,8 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Explode extends Handler {
+@Injectable()
+class Explode extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -43,7 +48,8 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Middleware1 extends Middleware {
+@Injectable()
+class Middleware1 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -53,21 +59,24 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Middleware2 extends Middleware {
+@Injectable()
+class Middleware2 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ request, response }) => {
         response.headers['X-that'] = 'this';
-        Object.keys(request.body).forEach(k => response.headers[k] = request.body[k]);
+        Object.keys(request.body).forEach(
+          (k) => (response.headers[k] = request.body[k])
+        );
       })
     );
   }
 }
 
 const event = <APIGatewayProxyEvent>{
-  body: JSON.stringify({a: 'b', c: 'd'}),
+  body: JSON.stringify({ a: 'b', c: 'd' }),
   headers: {
-    'this': 'that'
+    this: 'that'
   },
   httpMethod: 'GET',
   isBase64Encoded: false,
@@ -76,12 +85,12 @@ const event = <APIGatewayProxyEvent>{
   path: '/foo/bar',
   pathParameters: null,
   queryStringParameters: {
-    'bizz': 'bazz',
-    'buzz': 'bozz'
+    bizz: 'bazz',
+    buzz: 'bozz'
   },
   requestContext: null,
   resource: null,
-  stageVariables: null,
+  stageVariables: null
 };
 
 const context = <Context>{
@@ -89,11 +98,9 @@ const context = <Context>{
 };
 
 const routes: Route[] = [
-
   {
     path: '',
     children: [
-
       {
         methods: ['GET'],
         path: '/foo/bar',
@@ -119,83 +126,95 @@ const routes: Route[] = [
         path: '/not-here',
         redirectTo: 'http://over-there.com'
       }
-
     ]
-
   }
 ];
 
 const app = new AWSLambdaApp(routes);
 
 describe('AWSLambdaApp unit tests', () => {
-
-  test('smoke test #1', async done => {
-    const response = await app.handle({ ...event, httpMethod: 'GET' }, context);
-    expect(response.body).toEqual('"Hello, bazz"');
-    expect(response.headers['X-this']).toEqual('that');
-    expect(response.headers['X-that']).toEqual('this');
-    expect(response.headers['a']).toEqual('b');
-    expect(response.headers['c']).toEqual('d');
-    expect(response.statusCode).toEqual(200);
-    done();
+  test('smoke test #1', () => {
+    return app
+      .handle({ ...event, httpMethod: 'GET' }, context)
+      .then((response: Response) => {
+        expect(response.body).toEqual('"Hello, bazz"');
+        expect(response.headers['X-this']).toEqual('that');
+        expect(response.headers['X-that']).toEqual('this');
+        expect(response.headers['a']).toEqual('b');
+        expect(response.headers['c']).toEqual('d');
+        expect(response.statusCode).toEqual(200);
+      });
   });
 
-  test('smoke test #2', async done => {
-    const response = await app.handle({ ...event, httpMethod: 'PUT' }, context);
-    expect(response.body).toEqual('"Goodbye, bozz"');
-    expect(response.headers['X-this']).toEqual('that');
-    expect(response.headers['X-that']).toBeUndefined();
-    expect(response.statusCode).toEqual(200);
-    done();
+  test('smoke test #2', () => {
+    return app
+      .handle({ ...event, httpMethod: 'PUT' }, context)
+      .then((response: Response) => {
+        expect(response.body).toEqual('"Goodbye, bozz"');
+        expect(response.headers['X-this']).toEqual('that');
+        expect(response.headers['X-that']).toBeUndefined();
+        expect(response.statusCode).toEqual(200);
+      });
   });
 
-  test('smoke test #3', async done => {
-    const response = await app.handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context);
-    expect(response.statusCode).toEqual(404);
-    done();
+  test('smoke test #3', () => {
+    return app
+      .handle({ ...event, httpMethod: 'PUT', path: '/xxx' }, context)
+      .then((response: Response) => {
+        expect(response.statusCode).toEqual(404);
+      });
   });
 
-  test('smoke test #4', async done => {
-    const response = await app.handle({ ...event, httpMethod: 'GET', path: '/not-here' }, context);
-    expect(response.headers['Location']).toEqual('http://over-there.com');
-    expect(response.statusCode).toEqual(301);
-    done();
+  test('smoke test #4', () => {
+    return app
+      .handle({ ...event, httpMethod: 'GET', path: '/not-here' }, context)
+      .then((response: Response) => {
+        expect(response.headers['Location']).toEqual('http://over-there.com');
+        expect(response.statusCode).toEqual(301);
+      });
   });
 
-  test('error 500', async done => {
-    const response = await app.handle({ ...event, httpMethod: 'GET', path: '/explode' }, context);
-    expect(response.body).toContain(`TypeError: Cannot set property 'y' of undefined`);
-    expect(response.statusCode).toEqual(500);
-    done();
+  test('error 500', () => {
+    return app
+      .handle({ ...event, httpMethod: 'GET', path: '/explode' }, context)
+      .then((response: Response) => {
+        expect(response.body).toContain(
+          `TypeError: Cannot set property 'y' of undefined`
+        );
+        expect(response.statusCode).toEqual(500);
+      });
   });
 
-  test('lambda local 200', async done => {
+  test('lambda local 200', () => {
     const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
-    const response = await lambdaLocal.execute({
-      event: { ...apiGatewayEvent, path: '/foo/bar' },
-      lambdaFunc: { handler: (event, context) => app.handle(event, context) },
-      lambdaHandler: 'handler',
-      profilePath: path.join(__dirname, 'credentials'),
-      profileName: 'default',
-      verboseLevel: 0
-    });
-    expect(response.body).toEqual('"Hello, null"');
-    expect(response.statusCode).toEqual(200);
-    done();
+    return lambdaLocal
+      .execute({
+        event: { ...apiGatewayEvent, path: '/foo/bar' },
+        lambdaFunc: { handler: (event, context) => app.handle(event, context) },
+        lambdaHandler: 'handler',
+        profilePath: path.join(__dirname, 'credentials'),
+        profileName: 'default',
+        verboseLevel: 0
+      })
+      .then((response: Response) => {
+        expect(response.body).toEqual('"Hello, null"');
+        expect(response.statusCode).toEqual(200);
+      });
   });
 
-  test('lambda local 404', async done => {
+  test('lambda local 404', () => {
     const apiGatewayEvent = require('lambda-local/examples/event_apigateway');
-    const response = await lambdaLocal.execute({
-      event: { ...apiGatewayEvent, path: '/xxx' },
-      lambdaFunc: { handler: (event, context) => app.handle(event, context) },
-      lambdaHandler: 'handler',
-      profilePath: path.join(__dirname, 'credentials'),
-      profileName: 'default',
-      verboseLevel: 0
-    });
-    expect(response.statusCode).toEqual(404);
-    done();
+    return lambdaLocal
+      .execute({
+        event: { ...apiGatewayEvent, path: '/xxx' },
+        lambdaFunc: { handler: (event, context) => app.handle(event, context) },
+        lambdaHandler: 'handler',
+        profilePath: path.join(__dirname, 'credentials'),
+        profileName: 'default',
+        verboseLevel: 0
+      })
+      .then((response: Response) => {
+        expect(response.statusCode).toEqual(404);
+      });
   });
-
 });

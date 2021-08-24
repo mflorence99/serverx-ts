@@ -5,13 +5,12 @@ import { getMetadata } from './metadata';
 import { resolveMetadata } from './metadata';
 
 describe('Decorator unit tests', () => {
-
   test('primitive types', () => {
     class Y {
       @Attr() a: number;
       @Attr() b: string;
       @Attr() c: boolean;
-    }   
+    }
     const metadata: Metadata[] = getMetadata(Y);
     expect(metadata.length).toEqual(3);
     expect(metadata[0].name).toEqual('a');
@@ -49,5 +48,4 @@ describe('Decorator unit tests', () => {
     expect(metadata[0].name).toEqual('t');
     expect(metadata[0].type).toEqual('Number');
   });
-
 });

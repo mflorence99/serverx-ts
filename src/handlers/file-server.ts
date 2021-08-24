@@ -1,19 +1,21 @@
+import { Exception } from '../interfaces';
+import { Handler } from '../handler';
+import { Message } from '../interfaces';
+
+import { fromReadableStream } from '../utils';
+
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Exception } from '../interfaces';
-import { Handler } from '../handler';
 import { Inject } from 'injection-js';
 import { Injectable } from 'injection-js';
 import { InjectionToken } from 'injection-js';
-import { Message } from '../interfaces';
 import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
 
 import { bindNodeCallback } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { fromReadableStream } from '../utils';
 import { mapTo } from 'rxjs/operators';
 import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -29,7 +31,9 @@ export interface FileServerOpts {
   root?: string;
 }
 
-export const FILE_SERVER_OPTS = new InjectionToken<FileServerOpts>('FILE_SERVER_OPTS');
+export const FILE_SERVER_OPTS = new InjectionToken<FileServerOpts>(
+  'FILE_SERVER_OPTS'
+);
 
 export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
   // NOTE: one year
@@ -41,13 +45,15 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
  * File server
  */
 
-@Injectable() export class FileServer extends Handler {
-
+@Injectable()
+export class FileServer extends Handler {
   private opts: FileServerOpts;
 
-  constructor( @Optional() @Inject(FILE_SERVER_OPTS) opts: FileServerOpts) {
+  constructor(@Optional() @Inject(FILE_SERVER_OPTS) opts: FileServerOpts) {
     super();
-    this.opts = opts? { ...FILE_SERVER_DEFAULT_OPTS, ...opts } : FILE_SERVER_DEFAULT_OPTS;
+    this.opts = opts
+      ? { ...FILE_SERVER_DEFAULT_OPTS, ...opts }
+      : FILE_SERVER_DEFAULT_OPTS;
   }
 
   handle(message$: Observable<Message>): Observable<Message> {
@@ -59,37 +65,43 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
         const etag = Number(request.headers['If-None-Match']);
         return of(message).pipe(
           // NOTE: exception thrown if not found
-          mergeMap((message: Message): Observable<fs.Stats> => bindNodeCallback(fs.stat)(fpath)),
+          mergeMap(
+            (_message: Message): Observable<fs.Stats> =>
+              bindNodeCallback(fs.stat, null)(fpath)
+          ),
           // set the response headers
           // NOTE: being biased toward a webapp, we never cache index.html
           tap((stat: fs.Stats) => {
-            response.headers['Cache-Control'] = fpath.endsWith('index.html')?
-              'no-cache, no-store, must-revalidate' :
-              `must-revalidate, max-age=${this.opts.maxAge}`;
+            response.headers['Cache-Control'] = fpath.endsWith('index.html')
+              ? 'no-cache, no-store, must-revalidate'
+              : `must-revalidate, max-age=${this.opts.maxAge}`;
             response.headers['Etag'] = stat.mtime.getTime();
           }),
           // flip to cached/not cached pipes
           mergeMap((stat: fs.Stats): Observable<Message> => {
-            const cached = (etag === stat.mtime.getTime());
+            const cached = etag === stat.mtime.getTime();
             // cached pipe
             const cached$ = of(stat).pipe(
-              tap((stat: fs.Stats) => response.statusCode = 304),
+              tap((_stat: fs.Stats) => (response.statusCode = 304)),
               mapTo(message)
             );
             // not cached pipe
             const notCached$ = of(stat).pipe(
-              mergeMap((stat: fs.Stats): Observable<Buffer> => fromReadableStream(fs.createReadStream(fpath))),
+              mergeMap(
+                (_stat: fs.Stats): Observable<Buffer> =>
+                  fromReadableStream(fs.createReadStream(fpath))
+              ),
               tap((buffer: Buffer) => {
                 response.body = buffer;
                 response.statusCode = 200;
               }),
               mapTo(message)
             );
-            return cached? cached$ : notCached$;
+            return cached ? cached$ : notCached$;
           }),
           catchError(() => throwError(new Exception({ statusCode: 404 })))
         );
-      }),
+      })
     );
   }
 
@@ -107,5 +119,4 @@ export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
     }
     return path.join(this.opts.root, tail);
   }
-
 }

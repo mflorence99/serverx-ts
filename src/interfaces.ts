@@ -1,13 +1,14 @@
 import { Attr } from './metadata';
 import { Handler } from './handler';
+import { Middleware } from './middleware';
+import { Router } from './router';
+
 import { IncomingHttpHeaders } from 'http';
 import { InfoObject } from 'openapi3-ts';
-import { Middleware } from './middleware';
 import { Observable } from 'rxjs';
 import { OutgoingHttpHeaders } from 'http';
 import { Provider } from 'injection-js';
 import { ReflectiveInjector } from 'injection-js';
-import { Router } from './router';
 import { URLSearchParams } from 'url';
 
 /**
@@ -15,7 +16,7 @@ import { URLSearchParams } from 'url';
  */
 
 export interface Class<T = any> {
-  new(...args: any[]): T;
+  new (...args: any[]): T;
 }
 
 /**
@@ -31,6 +32,7 @@ export interface ContentMetadata {
  */
 
 export interface Context {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   _internal?: any;
   info: InfoObject;
   router: Router;
@@ -41,7 +43,7 @@ export interface Context {
  */
 
 export class Exception<T = Response> {
-  constructor(public exception: T) { }
+  constructor(public exception: T) {}
 }
 
 /**
@@ -56,8 +58,7 @@ export interface Map<T> {
  * Unified message definition
  */
 
-export interface Message<TRequest = Request,
-                         TResponse = Response> {
+export interface Message<TRequest = Request, TResponse = Response> {
   context?: Context;
   request?: TRequest;
   response?: TResponse;
@@ -68,6 +69,7 @@ export interface Message<TRequest = Request,
  */
 
 export interface Metadata {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   _class: Class;
   isArray: boolean;
   metadata: Metadata[];
@@ -78,10 +80,11 @@ export interface Metadata {
 
 export interface MetadataOpts {
   // NOTE: _class is only necessary because TypeScript's design:type tells us
-  // that a field is an array, but not of what type -- when it can we'll deprecate 
+  // that a field is an array, but not of what type -- when it can we'll deprecate
   // @see https://github.com/Microsoft/TypeScript/issues/7169
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   _class?: Class;
-  // NOTE: float: false (the default) indicates that a Number is really an integer 
+  // NOTE: float: false (the default) indicates that a Number is really an integer
   float?: boolean;
   required?: boolean;
 }
@@ -90,18 +93,39 @@ export interface MetadataOpts {
  * Method definition
  */
 
-export type Method = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT' | 'TRACE';
+export type Method =
+  | 'CONNECT'
+  | 'DELETE'
+  | 'GET'
+  | 'HEAD'
+  | 'OPTIONS'
+  | 'PATCH'
+  | 'POST'
+  | 'PUT'
+  | 'TRACE';
 
-export const ALL_METHODS: Method[] = ['CONNECT', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE'];
+export const ALL_METHODS: Method[] = [
+  'CONNECT',
+  'DELETE',
+  'GET',
+  'HEAD',
+  'OPTIONS',
+  'PATCH',
+  'POST',
+  'PUT',
+  'TRACE'
+];
 
 /**
  * Request definition
  */
 
-export interface Request<TBody = any,
-                         THeaders = IncomingHttpHeaders,
-                         TParams = Map<string>,
-                         TQuery = URLSearchParams> {
+export interface Request<
+  TBody = any,
+  THeaders = IncomingHttpHeaders,
+  TParams = Map<string>,
+  TQuery = URLSearchParams
+> {
   body?: TBody;
   headers?: THeaders;
   httpVersion?: string;
@@ -130,8 +154,7 @@ export interface RequestMetadata {
  * Response definition
  */
 
-export interface Response<TBody = any,
-                          THeaders = OutgoingHttpHeaders> {
+export interface Response<TBody = any, THeaders = OutgoingHttpHeaders> {
   body?: TBody;
   headers?: THeaders;
   isBase64Encoded?: boolean;

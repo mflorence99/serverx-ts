@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { Attr } from '../metadata';
 import { Compressor } from '../middlewares/compressor';
 import { COMPRESSOR_OPTS } from '../middlewares/compressor';
@@ -7,13 +5,16 @@ import { CORS } from '../middlewares/cors';
 import { FileServer } from '../handlers/file-server';
 import { Handler } from '../handler';
 import { HttpApp } from '../http/app';
-import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
-import { Observable } from 'rxjs';
 import { OpenAPI } from '../handlers/open-api';
 import { REQUEST_LOGGER_OPTS } from '../middlewares/request-logger';
 import { RequestLogger } from '../middlewares/request-logger';
 import { Route } from '../interfaces';
+
+import 'reflect-metadata';
+
+import { Injectable } from 'injection-js';
+import { Observable } from 'rxjs';
 
 import { createServer } from 'http';
 import { table } from 'table';
@@ -21,7 +22,8 @@ import { tap } from 'rxjs/operators';
 
 import chalk from 'chalk';
 
-@Injectable() class Explode extends Handler {
+@Injectable()
+class Explode extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -31,7 +33,8 @@ import chalk from 'chalk';
   }
 }
 
-@Injectable() class Hello extends Handler {
+@Injectable()
+class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -41,7 +44,8 @@ import chalk from 'chalk';
   }
 }
 
-@Injectable() class Goodbye extends Handler {
+@Injectable()
+class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -61,6 +65,7 @@ class FooBody {
   @Attr() p: string;
   @Attr() q: boolean;
   @Attr() r: number;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   @Attr({ _class: FooBodyInner }) t: FooBodyInner[];
 }
 
@@ -69,18 +74,16 @@ class FooBarParams {
 }
 
 const routes: Route[] = [
-
   {
     path: '',
     methods: ['GET'],
     middlewares: [RequestLogger, Compressor, CORS],
     services: [
       { provide: REQUEST_LOGGER_OPTS, useValue: { colorize: true } },
-      { provide: COMPRESSOR_OPTS, useValue: { threshold: 0 } } 
+      { provide: COMPRESSOR_OPTS, useValue: { threshold: 0 } }
     ],
     summary: 'A family of test endpoints',
     children: [
-
       {
         description: 'Develop OpenAPI representation of this server',
         path: 'openapi.yml',
@@ -91,7 +94,6 @@ const routes: Route[] = [
         description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`,
         path: '/foo',
         children: [
-
           {
             path: '/bar/{id}',
             request: {
@@ -106,7 +108,6 @@ const routes: Route[] = [
           {
             path: '/baz'
           }
-          
         ]
       },
 
@@ -141,22 +142,20 @@ const routes: Route[] = [
         path: '/not-here',
         redirectTo: 'http://over-there.com'
       }
-
     ]
   }
-
 ];
 
 const app = new HttpApp(routes, { title: 'http-server', version: '1.0' });
 
-const flattened = app.router.flatten()
-  .map((route: Route) => [route.methods.join(','), route.path, route.summary ]);
+const flattened = app.router
+  .flatten()
+  .map((route: Route) => [route.methods.join(','), route.path, route.summary]);
 console.log(table(flattened));
 
 const listener = app.listen();
-const server = createServer(listener)
-  .on('listening', () => {
-    console.log(chalk.cyanBright('Examples: http-server listening on port 4200'));
-  });
-  
+const server = createServer(listener).on('listening', () => {
+  console.log(chalk.cyanBright('Examples: http-server listening on port 4200'));
+});
+
 server.listen(4200);

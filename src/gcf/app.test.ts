@@ -1,15 +1,16 @@
-
 import { GCFApp } from './app';
 import { Handler } from '../handler';
-import { Injectable } from 'injection-js';
 import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
-import { Observable } from 'rxjs';
 import { Route } from '../interfaces';
+
+import { Injectable } from 'injection-js';
+import { Observable } from 'rxjs';
 
 import { tap } from 'rxjs/operators';
 
-@Injectable() class Hello extends Handler {
+@Injectable()
+class Hello extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ request, response }) => {
@@ -19,7 +20,8 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Goodbye extends Handler {
+@Injectable()
+class Goodbye extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ request, response }) => {
@@ -29,7 +31,8 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Explode extends Handler {
+@Injectable()
+class Explode extends Handler {
   handle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -39,7 +42,8 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Middleware1 extends Middleware {
+@Injectable()
+class Middleware1 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ response }) => {
@@ -49,12 +53,15 @@ import { tap } from 'rxjs/operators';
   }
 }
 
-@Injectable() class Middleware2 extends Middleware {
+@Injectable()
+class Middleware2 extends Middleware {
   prehandle(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       tap(({ request, response }) => {
         response.headers['X-that'] = 'this';
-        Object.keys(request.body).forEach(k => response.headers[k] = request.body[k]);
+        Object.keys(request.body).forEach(
+          (k) => (response.headers[k] = request.body[k])
+        );
       })
     );
   }
@@ -62,20 +69,18 @@ import { tap } from 'rxjs/operators';
 const req: any = {
   body: { a: 'b', c: 'd' },
   headers: {
-    'this': 'that'
+    this: 'that'
   },
   method: 'GET',
   url: '/foo/bar?bizz=bazz&buzz=bozz'
 };
 
-const res: any = { };
+const res: any = {};
 
 const routes: Route[] = [
-
   {
     path: '',
     children: [
-
       {
         methods: ['GET'],
         path: '/foo/bar',
@@ -101,17 +106,14 @@ const routes: Route[] = [
         path: '/not-here',
         redirectTo: 'http://over-there.com'
       }
-
     ]
-
   }
 ];
 
 const app = new GCFApp(routes);
 
 describe('GCFApp unit tests', () => {
-
-  test('smoke test #1', async done => {
+  test('smoke test #1', async () => {
     const response = await app.handle({ ...req, method: 'GET' }, res);
     expect(response.body).toEqual('"Hello, bazz"');
     expect(response.headers['X-this']).toEqual('that');
@@ -119,36 +121,41 @@ describe('GCFApp unit tests', () => {
     expect(response.headers['a']).toEqual('b');
     expect(response.headers['c']).toEqual('d');
     expect(response.statusCode).toEqual(200);
-    done();
   });
 
-  test('smoke test #2', async done => {
+  test('smoke test #2', async () => {
     const response = await app.handle({ ...req, method: 'PUT' }, res);
     expect(response.body).toEqual('"Goodbye, bozz"');
     expect(response.headers['X-this']).toEqual('that');
     expect(response.headers['X-that']).toBeUndefined();
     expect(response.statusCode).toEqual(200);
-    done();
   });
 
-  test('smoke test #3', async done => {
-    const response = await app.handle({ ...req, method: 'PUT', url: '/xxx' }, res);
+  test('smoke test #3', async () => {
+    const response = await app.handle(
+      { ...req, method: 'PUT', url: '/xxx' },
+      res
+    );
     expect(response.statusCode).toEqual(404);
-    done();
   });
 
-  test('smoke test #4', async done => {
-    const response = await app.handle({ ...req, method: 'GET', url: '/not-here' }, res);
+  test('smoke test #4', async () => {
+    const response = await app.handle(
+      { ...req, method: 'GET', url: '/not-here' },
+      res
+    );
     expect(response.headers['Location']).toEqual('http://over-there.com');
     expect(response.statusCode).toEqual(301);
-    done();
   });
 
-  test('error 500', async done => {
-    const response = await app.handle({ ...req, method: 'GET', url: '/explode' }, res);
-    expect(response.body).toContain(`TypeError: Cannot set property 'y' of undefined`);
+  test('error 500', async () => {
+    const response = await app.handle(
+      { ...req, method: 'GET', url: '/explode' },
+      res
+    );
+    expect(response.body).toContain(
+      `TypeError: Cannot set property 'y' of undefined`
+    );
     expect(response.statusCode).toEqual(500);
-    done();
   });
-
 });

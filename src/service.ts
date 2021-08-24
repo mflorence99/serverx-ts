@@ -2,6 +2,4 @@
  * Service definition
  */
 
-export abstract class Service {
-
-}
+export abstract class Service {}

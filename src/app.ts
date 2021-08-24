@@ -1,17 +1,19 @@
 import { Class } from './interfaces';
 import { Exception } from './interfaces';
 import { Handler } from './handler';
-import { InfoObject } from 'openapi3-ts';
 import { Message } from './interfaces';
 import { Middleware } from './middleware';
 import { MiddlewareMethod } from './middleware';
-import { Observable } from 'rxjs';
 import { Response } from './interfaces';
 import { Response500 } from './interfaces';
 import { Route } from './interfaces';
 import { Router } from './router';
 
 import { caseInsensitiveObject } from './utils';
+
+import { InfoObject } from 'openapi3-ts';
+import { Observable } from 'rxjs';
+
 import { catchError } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -24,26 +26,31 @@ import { pipe } from 'rxjs';
  */
 
 export abstract class App {
-
   info: InfoObject;
   router: Router;
 
   /** ctor */
-  constructor(routes: Route[],
-              required: Class[] = [],
-              info: InfoObject = null) {
+  constructor(
+    routes: Route[],
+    required: Class[] = [],
+    info: InfoObject = null
+  ) {
     this.router = new Router(routes, required);
     this.info = info || { title: this.constructor.name, version: '0.0.0' };
   }
 
   // protected methods
 
-  protected makePipeline(message: Message) {
+  protected makePipeline(message: Message): any {
     const { request } = message;
     return pipe(
       // run pre-handle middleware
       mergeMap((message: Message): Observable<Message[]> => {
-        const middlewares$ = this.makeMiddlewares$(request.route, message, 'prehandle');
+        const middlewares$ = this.makeMiddlewares$(
+          request.route,
+          message,
+          'prehandle'
+        );
         return combineLatest(middlewares$);
       }),
       // NOTE: because of mutability, they're all the same message
@@ -55,7 +62,11 @@ export abstract class App {
       // run post-handle middleware
       // NOTE: in reverse order
       mergeMap((message: Message): Observable<Message[]> => {
-        const middlewares$ = this.makeMiddlewares$(request.route, message, 'posthandle');
+        const middlewares$ = this.makeMiddlewares$(
+          request.route,
+          message,
+          'posthandle'
+        );
         return combineLatest(middlewares$.reverse());
       }),
       // NOTE: because of mutability, they're all the same message
@@ -67,37 +78,39 @@ export abstract class App {
       // run post-catch middleware
       // NOTE: in reverse order
       mergeMap((message: Message): Observable<Message[]> => {
-        const middlewares$ = this.makeMiddlewares$(request.route, message, 'postcatch');
+        const middlewares$ = this.makeMiddlewares$(
+          request.route,
+          message,
+          'postcatch'
+        );
         return combineLatest(middlewares$.reverse());
       }),
       // NOTE: because of mutability, they're all the same message
-      map((messages: Message[]): Message => messages[0]),
+      map((messages: Message[]): Message => messages[0])
     );
   }
 
   protected normalizePath(path: string): string {
-    return (!path || (path === '/'))? '/index.html' : path;
+    return !path || path === '/' ? '/index.html' : path;
   }
 
   // private methods
 
-  private catchError$(error: any,
-                      message: Message): Observable<Message> {
+  private catchError$(error: any, message: Message): Observable<Message> {
     const { context, request } = message;
     if (error instanceof Exception) {
       // NOTE: make sure there are at least empty headers
       const response = error.exception;
-      if (!response.headers)
-        response.headers = caseInsensitiveObject({ });
+      if (!response.headers) response.headers = caseInsensitiveObject({});
       return of({ context, request, response });
-    }
-    else {
+    } else {
       const response: Response = {
         // NOTE: we have to stringify manually because we are now past the Normalizer
         body: JSON.stringify({
           error: error.toString(),
           stack: error.stack
         } as Response500),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         headers: caseInsensitiveObject({ 'Content-Type': 'application/json' }),
         statusCode: 500
       };
@@ -105,23 +118,24 @@ export abstract class App {
     }
   }
 
-  private makeHandler$(route: Route,
-                       message: Message): Observable<Message> {
+  private makeHandler$(route: Route, message: Message): Observable<Message> {
     const handler = Handler.makeInstance(route);
-    return handler? handler.handle(of(message)) : of(message);
+    return handler ? handler.handle(of(message)) : of(message);
   }
 
-  private makeMiddlewares$(route: Route,
-                           message: Message,
-                           method: MiddlewareMethod): Observable<Message>[] {
+  private makeMiddlewares$(
+    route: Route,
+    message: Message,
+    method: MiddlewareMethod
+  ): Observable<Message>[] {
     const middlewares = [];
     // we find all the middlewares up the route tree
     while (route) {
       middlewares.push(...Middleware.makeInstances(route));
       route = route.parent;
     }
-    return (middlewares.length === 0)? [of(message)] :
-      middlewares.map(middleware => middleware[method](of(message)));
+    return middlewares.length === 0
+      ? [of(message)]
+      : middlewares.map((middleware) => middleware[method](of(message)));
   }
-
 }

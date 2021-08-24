@@ -1,9 +1,10 @@
-import { Inject } from 'injection-js';
-import { Injectable } from 'injection-js';
-import { InjectionToken } from 'injection-js';
 import { LogProvider } from '../services/log-provider';
 import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
+
+import { Inject } from 'injection-js';
+import { Injectable } from 'injection-js';
+import { InjectionToken } from 'injection-js';
 import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
 
@@ -26,7 +27,9 @@ export interface RequestLoggerOpts {
   silent?: boolean;
 }
 
-export const REQUEST_LOGGER_OPTS = new InjectionToken<RequestLoggerOpts>('REQUEST_LOGGER_OPTS');
+export const REQUEST_LOGGER_OPTS = new InjectionToken<RequestLoggerOpts>(
+  'REQUEST_LOGGER_OPTS'
+);
 
 export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
   colorize: true,
@@ -38,24 +41,27 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
  * Request logger
  */
 
-@Injectable() export class RequestLogger extends Middleware {
-
+@Injectable()
+export class RequestLogger extends Middleware {
   private opts: RequestLoggerOpts;
 
-  constructor(private log: LogProvider,
-              @Optional() @Inject(REQUEST_LOGGER_OPTS) opts: RequestLoggerOpts) {
+  constructor(
+    private log: LogProvider,
+    @Optional() @Inject(REQUEST_LOGGER_OPTS) opts: RequestLoggerOpts
+  ) {
     super();
-    this.opts = opts? { ...REQUEST_LOGGER_DEFAULT_OPTS, ...opts } : REQUEST_LOGGER_DEFAULT_OPTS;
+    this.opts = opts
+      ? { ...REQUEST_LOGGER_DEFAULT_OPTS, ...opts }
+      : REQUEST_LOGGER_DEFAULT_OPTS;
   }
 
   postcatch(message$: Observable<Message>): Observable<Message> {
     return message$.pipe(
       mergeMap((message: Message): Observable<Message> => {
         return of(message).pipe(
-          filter((message: Message) => !this.opts.silent),
+          filter((_message: Message) => !this.opts.silent),
           tap(({ response }) => {
-            if (response.statusCode === 500)
-              this.logError(message);
+            if (response.statusCode === 500) this.logError(message);
             this.logMessage(message);
           }),
           defaultIfEmpty(message)
@@ -66,10 +72,11 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
 
   // private methods
 
-  private get(str: any,
-              color: string = null): string {
-    str = str? String(str) : '-';
-    return (this.log.canColorize() && this.opts.colorize && color)? chalk[color](str) : str;
+  private get(str: any, color: string = null): string {
+    str = str ? String(str) : '-';
+    return this.log.canColorize() && this.opts.colorize && color
+      ? chalk[color](str)
+      : str;
   }
 
   private logError(message: Message): void {
@@ -78,8 +85,7 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
       const body = JSON.parse(message.response.body);
       this.log.error(this.get(body.error, 'redBright'));
       this.log.error(body.stack);
-    }
-    catch (ignored) { }
+    } catch (ignored) {}
   }
 
   private logMessage(message: Message): void {
@@ -88,12 +94,9 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
     const ms = `${Date.now() - request.timestamp}ms`;
     // status code color
     let color = null;
-    if (response.statusCode >= 500)
-      color = 'redBright';
-    else if (response.statusCode >= 400)
-      color = 'yellowBright';
-    else if (response.statusCode >= 300)
-      color = 'cyanBright';
+    if (response.statusCode >= 500) color = 'redBright';
+    else if (response.statusCode >= 400) color = 'yellowBright';
+    else if (response.statusCode >= 300) color = 'cyanBright';
     // develop parts of message
     let parts = [];
     switch (this.opts.format) {
@@ -149,8 +152,6 @@ export const REQUEST_LOGGER_DEFAULT_OPTS: RequestLoggerOpts = {
         break;
     }
     // now all we have to do is print it!
-    this.log.info(parts.join((' ')));
+    this.log.info(parts.join(' '));
   }
-
 }
-
