@@ -1,7 +1,6 @@
 import { Message } from '../interfaces';
 import { Middleware } from '../middleware';
 
-import * as fileType from 'file-type';
 import * as mime from 'mime';
 import * as yaml from 'js-yaml';
 
@@ -13,6 +12,8 @@ import { mapTo } from 'rxjs/operators';
 import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { tap } from 'rxjs/operators';
+
+import fileType from 'file-type';
 
 /**
  * Response normalizer
@@ -42,11 +43,9 @@ export class Normalizer extends Middleware {
             if (!headers['Cache-Control'])
               headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
           }),
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          tap(async ({ body, headers, path }) => {
+          tap(({ body, headers, path }) => {
             if (!headers['Content-Type']) {
-              const fromBuffer =
-                body instanceof Buffer && (await fileType.fromBuffer(body));
+              const fromBuffer = body instanceof Buffer && fileType(body);
               const contentType = fromBuffer
                 ? fromBuffer.mime
                 : mime.getType(path);

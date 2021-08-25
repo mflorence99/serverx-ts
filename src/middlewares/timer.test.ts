@@ -28,7 +28,9 @@ describe('Timer unit tests', () => {
       expect(Number(response.headers['X-Request-Timeout'])).toBeGreaterThan(
         now
       );
-      expect(Number(response.headers['X-Response-Time'])).toBeGreaterThan(0);
+      expect(
+        Number(response.headers['X-Response-Time'])
+      ).toBeGreaterThanOrEqual(0);
       expect(response.statusCode).toEqual(200);
       done();
     });
