@@ -46,9 +46,11 @@ export class Normalizer extends Middleware {
           tap(({ body, headers, path }) => {
             if (!headers['Content-Type']) {
               const fromBuffer = body instanceof Buffer && fileType(body);
-              const contentType = fromBuffer
+              let contentType = fromBuffer
                 ? fromBuffer.mime
                 : mime.getType(path);
+              // 👇 fileType incorrectly identifies SVG as XML
+              if (path.endsWith('.svg')) contentType = 'image/svg+xml';
               // NOTE: JSON is the default
               headers['Content-Type'] = contentType || 'application/json';
             }

@@ -41,13 +41,28 @@ describe('Normalizer unit tests', () => {
   });
 
   test('deduces Content-Type from path', (done) => {
+    const html = '<p>Hellow, world!</p>';
     const normalizer = new Normalizer();
     const message: Message = {
       request: { path: '/foo/bar.html', method: 'GET' },
-      response: { headers: {} }
+      response: { body: Buffer.from(html), headers: {} }
     };
     normalizer.posthandle(of(message)).subscribe(({ response }) => {
       expect(response.headers['Content-Type']).toEqual('text/html');
+      done();
+    });
+  });
+
+  test('deduces Content-Type correctly for SVG files', (done) => {
+    const normalizer = new Normalizer();
+    const svg =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><svg width="840" height="430"  xmlns="http://www.w3.org/2000/svg" version="1.1"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:1;stroke:rgb(0,0,0)" /></svg>';
+    const message: Message = {
+      request: { path: '/foo/bar.svg', method: 'GET' },
+      response: { body: Buffer.from(svg), headers: {} }
+    };
+    normalizer.posthandle(of(message)).subscribe(({ response }) => {
+      expect(response.headers['Content-Type']).toEqual('image/svg+xml');
       done();
     });
   });
