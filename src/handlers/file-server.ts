@@ -36,8 +36,7 @@ export const FILE_SERVER_OPTS = new InjectionToken<FileServerOpts>(
 );
 
 export const FILE_SERVER_DEFAULT_OPTS: FileServerOpts = {
-  // NOTE: one year
-  maxAge: 31557600,
+  maxAge: 600,
   root: os.homedir()
 };
 
@@ -70,11 +69,8 @@ export class FileServer extends Handler {
               bindNodeCallback(fs.stat, null)(fpath)
           ),
           // set the response headers
-          // NOTE: being biased toward a webapp, we never cache index.html
           tap((stat: fs.Stats) => {
-            response.headers['Cache-Control'] = fpath.endsWith('index.html')
-              ? 'no-cache, no-store, must-revalidate'
-              : `must-revalidate, max-age=${this.opts.maxAge}`;
+            response.headers['Cache-Control'] = `max-age=${this.opts.maxAge}`;
             response.headers['Etag'] = stat.mtime.getTime();
           }),
           // flip to cached/not cached pipes

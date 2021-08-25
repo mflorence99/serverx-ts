@@ -34,9 +34,7 @@ describe('FileServer unit tests', () => {
     };
     fileServer.handle(of(message)).subscribe(({ response }) => {
       expect(response.body.toString()).toMatch(/^import /);
-      expect(response.headers['Cache-Control']).toEqual(
-        'must-revalidate, max-age=31557600'
-      );
+      expect(response.headers['Cache-Control']).toEqual('max-age=600');
       expect(Number(response.headers['Etag'])).toEqual(stat.mtime.getTime());
       expect(response.statusCode).toEqual(200);
       done();
@@ -58,9 +56,7 @@ describe('FileServer unit tests', () => {
     };
     fileServer.handle(of(message)).subscribe(({ response }) => {
       expect(response.body).toBeUndefined();
-      expect(response.headers['Cache-Control']).toEqual(
-        'must-revalidate, max-age=31557600'
-      );
+      expect(response.headers['Cache-Control']).toEqual('max-age=600');
       expect(Number(response.headers['Etag'])).toEqual(stat.mtime.getTime());
       expect(response.statusCode).toEqual(304);
       done();
