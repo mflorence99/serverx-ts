@@ -24,10 +24,12 @@ describe('Timer unit tests', () => {
     const listener = app.listen();
     const now = Date.now();
     app['response$'].subscribe((response) => {
-      expect(Number(response.headers['X-Request-Timein'])).toBeGreaterThan(now);
-      expect(Number(response.headers['X-Request-Timeout'])).toBeGreaterThan(
-        now
-      );
+      expect(
+        Number(response.headers['X-Request-Timein'])
+      ).toBeGreaterThanOrEqual(now);
+      expect(
+        Number(response.headers['X-Request-Timeout'])
+      ).toBeGreaterThanOrEqual(now);
       expect(
         Number(response.headers['X-Response-Time'])
       ).toBeGreaterThanOrEqual(0);

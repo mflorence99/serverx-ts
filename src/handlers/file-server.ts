@@ -72,6 +72,12 @@ export class FileServer extends Handler {
           tap((stat: fs.Stats) => {
             response.headers['Cache-Control'] = `max-age=${this.opts.maxAge}`;
             response.headers['Etag'] = stat.mtime.getTime();
+            const expires = new Date();
+            expires.setTime(expires.getTime() + this.opts.maxAge * 1000);
+            response.headers['Expires'] = expires.toUTCString();
+            const lastModified = new Date();
+            lastModified.setTime(stat.mtime.getTime());
+            response.headers['Last-Modified'] = lastModified.toUTCString();
           }),
           // flip to cached/not cached pipes
           mergeMap((stat: fs.Stats): Observable<Message> => {
