@@ -35,7 +35,7 @@ describe('FileServer unit tests', () => {
     fileServer.handle(of(message)).subscribe(({ response }) => {
       expect(response.body.toString()).toMatch(/^import /);
       expect(response.headers['Cache-Control']).toEqual('max-age=600');
-      expect(Number(response.headers['Etag'])).toEqual(stat.mtime.getTime());
+      expect(Number(response.headers['Etag'])).toEqual(stat.ctime.getTime());
       expect(response.statusCode).toEqual(200);
       done();
     });
@@ -49,7 +49,7 @@ describe('FileServer unit tests', () => {
         path: '/public/file-server.test.ts',
         method: 'GET',
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        headers: { 'If-None-Match': String(stat.mtime.getTime()) },
+        headers: { 'If-None-Match': String(stat.ctime.getTime()) },
         route: routes[0]
       },
       response: { headers: {} }
@@ -57,7 +57,7 @@ describe('FileServer unit tests', () => {
     fileServer.handle(of(message)).subscribe(({ response }) => {
       expect(response.body).toBeUndefined();
       expect(response.headers['Cache-Control']).toEqual('max-age=600');
-      expect(Number(response.headers['Etag'])).toEqual(stat.mtime.getTime());
+      expect(Number(response.headers['Etag'])).toEqual(stat.ctime.getTime());
       expect(response.statusCode).toEqual(304);
       done();
     });
