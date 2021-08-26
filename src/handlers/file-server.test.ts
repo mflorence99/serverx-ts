@@ -3,10 +3,11 @@ import { Message } from '../interfaces';
 import { Route } from '../interfaces';
 import { Router } from '../router';
 
-import * as fs from 'fs';
 import * as path from 'path';
 
 import { of } from 'rxjs';
+
+import md5File from 'md5-file';
 
 const routes: Route[] = [
   {
@@ -21,7 +22,7 @@ const fileServer = new FileServer({ root: __dirname });
 
 describe('FileServer unit tests', () => {
   test('sets statusCode, body and headers if found', (done) => {
-    const stat = fs.statSync(path.join(__dirname, 'file-server.test.ts'));
+    const hash = md5File.sync(path.join(__dirname, 'file-server.test.ts'));
     const message: Message = {
       context: { info, router },
       request: {
@@ -35,21 +36,21 @@ describe('FileServer unit tests', () => {
     fileServer.handle(of(message)).subscribe(({ response }) => {
       expect(response.body.toString()).toMatch(/^import /);
       expect(response.headers['Cache-Control']).toEqual('max-age=600');
-      expect(Number(response.headers['Etag'])).toEqual(stat.ctime.getTime());
+      expect(response.headers['Etag']).toEqual(hash);
       expect(response.statusCode).toEqual(200);
       done();
     });
   });
 
   test('sets statusCode and headers if found but cached', (done) => {
-    const stat = fs.statSync(path.join(__dirname, 'file-server.test.ts'));
+    const hash = md5File.sync(path.join(__dirname, 'file-server.test.ts'));
     const message: Message = {
       context: { info, router },
       request: {
         path: '/public/file-server.test.ts',
         method: 'GET',
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        headers: { 'If-None-Match': String(stat.ctime.getTime()) },
+        headers: { 'If-None-Match': hash },
         route: routes[0]
       },
       response: { headers: {} }
@@ -57,7 +58,7 @@ describe('FileServer unit tests', () => {
     fileServer.handle(of(message)).subscribe(({ response }) => {
       expect(response.body).toBeUndefined();
       expect(response.headers['Cache-Control']).toEqual('max-age=600');
-      expect(Number(response.headers['Etag'])).toEqual(stat.ctime.getTime());
+      expect(response.headers['Etag']).toEqual(hash);
       expect(response.statusCode).toEqual(304);
       done();
     });

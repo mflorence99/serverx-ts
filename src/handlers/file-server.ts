@@ -14,13 +14,15 @@ import { InjectionToken } from 'injection-js';
 import { Observable } from 'rxjs';
 import { Optional } from 'injection-js';
 
-import { bindNodeCallback } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { from } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+
+import md5File from 'md5-file';
 
 /**
  * File server options
@@ -61,36 +63,29 @@ export class FileServer extends Handler {
         const { request, response } = message;
         const fpath = this.makeFPath(message);
         // Etag is the mod time
-        const etag = Number(request.headers['If-None-Match']);
+        const etag = request.headers['If-None-Match'];
         return of(message).pipe(
           // NOTE: exception thrown if not found
           mergeMap(
-            (_message: Message): Observable<fs.Stats> =>
-              bindNodeCallback(fs.stat, null)(fpath)
+            (_message: Message): Observable<string> => from(md5File(fpath))
           ),
           // set the response headers
-          tap((stat: fs.Stats) => {
+          tap((hash: string) => {
             response.headers['Cache-Control'] = `max-age=${this.opts.maxAge}`;
-            response.headers['Etag'] = stat.ctime.getTime();
-            const expires = new Date();
-            expires.setTime(expires.getTime() + this.opts.maxAge * 1000);
-            response.headers['Expires'] = expires.toUTCString();
-            const lastModified = new Date();
-            lastModified.setTime(stat.ctime.getTime());
-            response.headers['Last-Modified'] = lastModified.toUTCString();
+            response.headers['Etag'] = hash;
           }),
           // flip to cached/not cached pipes
-          mergeMap((stat: fs.Stats): Observable<Message> => {
-            const cached = etag === stat.ctime.getTime();
+          mergeMap((hash: string): Observable<Message> => {
+            const cached = etag === hash;
             // cached pipe
-            const cached$ = of(stat).pipe(
-              tap((_stat: fs.Stats) => (response.statusCode = 304)),
+            const cached$ = of(hash).pipe(
+              tap(() => (response.statusCode = 304)),
               mapTo(message)
             );
             // not cached pipe
-            const notCached$ = of(stat).pipe(
+            const notCached$ = of(hash).pipe(
               mergeMap(
-                (_stat: fs.Stats): Observable<Buffer> =>
+                (): Observable<Buffer> =>
                   fromReadableStream(fs.createReadStream(fpath))
               ),
               tap((buffer: Buffer) => {
