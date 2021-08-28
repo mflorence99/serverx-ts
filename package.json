@@ -14,7 +14,7 @@
     "compile": "npm run lint && rimraf dist && tsc",
     "file-server": "rimraf dist && tsc && node dist/examples/file-server.js",
     "http-server": "rimraf dist && tsc && node dist/examples/http-server.js",
-    "lib": "npm run build && npm version patch && npm publish",
+    "lib": "rimraf dist && tsc && npm version patch && npm publish",
     "lint": "eslint ./src/**/*.ts",
     "postinstall": "rimraf node_modules/@types/mime",
     "prettier": "prettier --write .",
