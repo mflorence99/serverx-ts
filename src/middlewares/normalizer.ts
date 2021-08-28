@@ -40,6 +40,8 @@ export class Normalizer extends Middleware {
             statusCode: statusCode || (body ? 200 : 204)
           })),
           tap(({ headers }) => {
+            // TODO: temporary
+            headers['Service-Worker-Allowed'] = '/';
             if (!headers['Cache-Control'])
               headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
           }),
