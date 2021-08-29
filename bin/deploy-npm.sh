@@ -10,6 +10,6 @@ git commit -m "$message"
 
 npm version $version
 
-git push origin main
+git push origin master
 
 npm publish
