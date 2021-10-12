@@ -21,6 +21,8 @@ import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { pipe } from 'rxjs';
 
+import querystring from 'querystring';
+
 /**
  * Base app class
  */
@@ -91,7 +93,7 @@ export abstract class App {
   }
 
   protected normalizePath(path: string): string {
-    return !path || path === '/' ? '/index.html' : path;
+    return !path || path === '/' ? '/index.html' : querystring.unescape(path);
   }
 
   // private methods
