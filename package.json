@@ -1,6 +1,6 @@
 {
   "name": "serverx-ts",
-  "version": "0.0.38",
+  "version": "0.0.39",
   "description": "Experimental Node.js HTTP framework using RxJS, built with TypeScript and optimized for serverless deployments",
   "license": "MIT",
   "author": "Mark Florence",
