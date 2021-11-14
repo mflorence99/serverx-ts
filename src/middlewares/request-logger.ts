@@ -83,7 +83,7 @@ export class RequestLogger extends Middleware {
     try {
       // NOTE: we have to reparse because the error got generated after the Normalizer
       const body = JSON.parse(message.response.body);
-      this.log.error(this.get(body.error, 'redBright'));
+      this.log.error(this.get(body.error, 'red'));
       this.log.error(body.stack);
     } catch (ignored) {}
   }
@@ -93,10 +93,10 @@ export class RequestLogger extends Middleware {
     // response time
     const ms = `${Date.now() - request.timestamp}ms`;
     // status code color
-    let color = null;
-    if (response.statusCode >= 500) color = 'redBright';
-    else if (response.statusCode >= 400) color = 'yellowBright';
-    else if (response.statusCode >= 300) color = 'cyanBright';
+    let color = 'green';
+    if (response.statusCode >= 500) color = 'red';
+    else if (response.statusCode >= 400) color = 'yellow';
+    else if (response.statusCode >= 300) color = 'cyan';
     // develop parts of message
     let parts = [];
     switch (this.opts.format) {
