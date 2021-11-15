@@ -62,7 +62,7 @@ export class FileServer extends Handler {
       mergeMap((message: Message): Observable<Message> => {
         const { request, response } = message;
         const fpath = this.makeFPath(message);
-        // Etag is the mod time
+        // Etag is the fie hash
         const etag = request.headers['If-None-Match'];
         return of(message).pipe(
           // NOTE: exception thrown if not found
