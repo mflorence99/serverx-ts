@@ -179,7 +179,7 @@ describe('AWSLambdaApp unit tests', () => {
       .handle({ ...event, httpMethod: 'GET', path: '/explode' }, context)
       .then((response: Response) => {
         expect(response.body).toContain(
-          `TypeError: Cannot set property 'y' of undefined`
+          `TypeError: Cannot set properties of undefined`
         );
         expect(response.statusCode).toEqual(500);
       });

@@ -154,7 +154,7 @@ describe('GCFApp unit tests', () => {
       res
     );
     expect(response.body).toContain(
-      `TypeError: Cannot set property 'y' of undefined`
+      `TypeError: Cannot set properties of undefined`
     );
     expect(response.statusCode).toEqual(500);
   });
